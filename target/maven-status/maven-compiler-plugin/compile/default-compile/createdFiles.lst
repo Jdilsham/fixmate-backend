@@ -1,0 +1,14 @@
+com/fixmate/backend/config/SecurityConfig.class
+com/fixmate/backend/repository/UserRepository.class
+com/fixmate/backend/config/JwtFilter.class
+com/fixmate/backend/BackendApplication.class
+com/fixmate/backend/service/AuthService.class
+com/fixmate/backend/controller/AuthController.class
+com/fixmate/backend/dto/AuthResponse.class
+com/fixmate/backend/service/CustomUserDetailsService.class
+com/fixmate/backend/controller/UserController.class
+com/fixmate/backend/exception/GlobalExceptionHandler.class
+com/fixmate/backend/dto/LoginRequest.class
+com/fixmate/backend/dto/SignupRequest.class
+com/fixmate/backend/config/JwtUtil.class
+com/fixmate/backend/entity/User.class
