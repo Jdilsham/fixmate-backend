@@ -16,6 +16,7 @@ spec:
       containers:
         - name: fixmate-backend
           image: janithad/fixmate-backend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8081
 
