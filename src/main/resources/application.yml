@@ -22,8 +22,9 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-server:
-  port: 8081
+#server:
+#  port: 8081
+
 
 jwt:
   secret: "a2Fqc2RmaGtqYXNoZGZqa2Foc2RmaGpkaGFqa2RmaGo="
