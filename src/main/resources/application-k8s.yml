@@ -41,3 +41,5 @@ management:
   health:
     probes:
       enabled: true
+    db:
+      enabled: false
