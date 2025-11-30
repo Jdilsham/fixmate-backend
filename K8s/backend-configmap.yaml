@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: fixmate
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres.fixmate.svc.cluster.local:5432/fixmatedb"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
+  SPRING_JPA_HIBERNATE_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
+  SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+  SPRING_JPA_SHOW_SQL: "true"
+
+  FLYWAY_LOCATIONS: "classpath:db/migration"
+  FLYWAY_BASELINE_ON_MIGRATE: "true"
+
+  SERVER_PORT: "8081"
+
