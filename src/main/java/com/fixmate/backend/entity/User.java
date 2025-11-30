@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -40,6 +41,9 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Address> addresses = new HashSet<>();
+
     public User(String firstname, String lastname, String email, String phone, String password,  String role) {
         this.firstName = firstname;
         this.lastName = lastname;
@@ -50,5 +54,4 @@ public class User {
         this.createdAt = Instant.now();
         this.banned = false;
     }
-
 }
