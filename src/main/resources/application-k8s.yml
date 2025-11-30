@@ -1,4 +1,9 @@
 spring:
+  config:
+    activate:
+      on-profile: k8s
+    import: "optional:application.yml"
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
