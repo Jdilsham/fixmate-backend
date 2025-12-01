@@ -90,7 +90,7 @@ pipeline{
 
 					FixMate backend is now live.
 					""",
-				to: "janithadilsham@gmail.com"
+				to: "janitha1717@gmail.com"
 			)
 		}
 
@@ -104,7 +104,7 @@ pipeline{
 
 					Check Jenkins console logs for detailed error.
 					""",
-				to: "janithadilsham@gmail.com"
+				to: "janitha1717@gmail.com"
 			)
 		}
 	}
