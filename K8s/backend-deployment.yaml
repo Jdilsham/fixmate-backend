@@ -22,10 +22,10 @@ spec:
 
           resources:
             requests:
-              cpu: "50m"
+              cpu: "200m"
               memory: "256Mi"
             limits:
-              cpu: "200m"
+              cpu: "400m"
               memory: "512Mi"
 
           env:
@@ -105,7 +105,7 @@ spec:
             httpGet:
               path: /healthz/ready
               port: 8081
-            initialDelaySeconds: 90
+            initialDelaySeconds: 150
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
@@ -114,7 +114,7 @@ spec:
             httpGet:
               path: /healthz/live
               port: 8081
-            initialDelaySeconds: 120
+            initialDelaySeconds: 200
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 6
