@@ -31,15 +31,16 @@ jwt:
   expirationMs: ${JWT_EXPIRATION_MS:86400000}
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+  health:
+    db:
+      enabled: false
+    defaults:
+      enabled: false
   endpoint:
     health:
       show-details: always
-  health:
-    probes:
-      enabled: true
-    db:
-      enabled: false
+      group:
+        readiness:
+          include: readinessState
+        liveness:
+          include: livenessState
