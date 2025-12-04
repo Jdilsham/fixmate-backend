@@ -4,7 +4,7 @@ metadata:
   name: fixmate-backend
   namespace: fixmate
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: fixmate-backend
   ports:
