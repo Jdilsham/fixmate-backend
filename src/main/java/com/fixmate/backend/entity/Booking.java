@@ -53,7 +53,7 @@ public class Booking {
     @OneToOne(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Review review;
 
-    @OneToMany(mappedBy = "booking")
+    @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Address> addresses =  new HashSet<>();
 
 
