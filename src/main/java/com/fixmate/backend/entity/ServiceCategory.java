@@ -17,7 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class ServiceCategory {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
 
     private String name;
