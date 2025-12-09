@@ -31,6 +31,7 @@ public class Payment {
     @Column(name = "transaction_ref")
     private String transactionRef;
 
+    @Column(name = "status")
     private String status;
 
     @Column(name = "paid_at")

@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "booking")
@@ -19,6 +21,7 @@ public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "booking_id")
     private Long bookingId;
 
     @Column(name = "total_price")
@@ -40,10 +43,6 @@ public class Booking {
     private Payment payment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id")
-    private Address address;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_provider_id")
     private ServiceProvider serviceProvider;
 
@@ -51,8 +50,11 @@ public class Booking {
     @JoinColumn(name = "service_id")
     private Service service;
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Review review;
+
+    @OneToMany(mappedBy = "booking")
+    private Set<Address> addresses =  new HashSet<>();
 
 
 }

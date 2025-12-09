@@ -16,26 +16,32 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ReviewId;
 
     private BigDecimal rating;
+
+    @Column(name = "comment")
+
     private String comment;
 
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
-
-    @OneToOne
-    @JoinColumn(name = "booking_id")
-    private Booking booking;
-
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_provider_id")
     private ServiceProvider serviceProvider;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
+
 
 }
