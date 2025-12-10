@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fixmate-backend
+  namespace: fixmate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fixmate-backend
+  template:
+    metadata:
+      labels:
+        app: fixmate-backend
+    spec:
+      containers:
+        - name: fixmate-backend
+          image: janithad/fixmate-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "400m"
+              memory: "512Mi"
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+
+            # Database
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: DB_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: DB_PASSWORD
+
+            # JPA Settings
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: SPRING_JPA_HIBERNATE_DDL_AUTO
+
+            - name: SPRING_JPA_SHOW_SQL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: SPRING_JPA_SHOW_SQL
+
+            - name: SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL
+
+            - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: SPRING_JPA_HIBERNATE_DIALECT
+
+            # Flyway
+            - name: SPRING_FLYWAY_LOCATIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: FLYWAY_LOCATIONS
+
+            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: FLYWAY_BASELINE_ON_MIGRATE
+
+            # JWT
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: JWT_SECRET
+
+            # Server port
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: SERVER_PORT
+
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: 8081
+            initialDelaySeconds: 150
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: 8081
+            initialDelaySeconds: 200
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+

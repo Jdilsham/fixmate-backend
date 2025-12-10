@@ -27,8 +27,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/api/auth/");
-
+        return path.startsWith("/actuator")
+                || path.startsWith("/healthz");
     }
 
 
@@ -38,6 +38,16 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletResponse res,
             FilterChain chain
     ) throws ServletException, IOException {
+
+        res.setHeader("Access-Control-Allow-Origin", "http://35.200.239.169");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "*");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+
+        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+            res.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
 
         String header = req.getHeader("Authorization");
 

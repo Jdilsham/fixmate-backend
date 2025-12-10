@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fixmate-backend
+  namespace: fixmate
+spec:
+  type: LoadBalancer
+  selector:
+    app: fixmate-backend
+  ports:
+    - port: 80
+      targetPort: 8081
+      protocol: TCP
