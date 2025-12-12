@@ -81,4 +81,8 @@ jobs:
 
       - name: Notify Jenkins after Docker push
         run: |
-          curl -X POST http://136.111.0.19:8080/github-webhook/
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: push" \
+            -d '{"ref":"refs/heads/main"}' \
+            http://136.111.0.19:8080/github-webhook/
