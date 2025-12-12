@@ -35,5 +35,5 @@ jobs:
           curl -X POST \
             -H "Content-Type: application/json" \
             -H "X-GitHub-Event: push" \
-            -d '{"ref":"refs/heads/main"}' \
+            -d '{"ref":"refs/heads/main", "repository":{"full_name":"Jdilsham/fixmate-backend"}}' \
             http://136.111.0.19:8080/github-webhook/
