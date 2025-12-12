@@ -78,3 +78,7 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/fixmate-backend:latest
             ${{ secrets.DOCKER_USERNAME }}/fixmate-backend:${{ steps.vars.outputs.TAG }}
+
+      - name: Notify Jenkins after Docker push
+        run: |
+          curl -X POST http://136.111.0.19:8080/github-webhook/
