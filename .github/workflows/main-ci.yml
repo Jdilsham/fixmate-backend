@@ -81,8 +81,13 @@ jobs:
 
       - name: Notify Jenkins after Docker push
         run: |
+          echo '{"ref": "refs/heads/main", "repository": {"full_name": "Jdilsham/fixmate-backend"}}' > payload.json
+
           curl -X POST \
             -H "Content-Type: application/json" \
             -H "X-GitHub-Event: push" \
-            -d '{"ref":"refs/heads/main"}' \
+            --data @payload.json \
             http://136.111.0.19:8080/github-webhook/
+
+
+
