@@ -81,6 +81,6 @@ jobs:
 
       - name: Trigger Jenkins CD
         run: |
-          curl -X POST "http://janithadilsham:11fd2c39f9a2cf9b63b578af43186c555e@136.111.0.19:8080/job/fixmate-backend-cd/build"
+          curl -X POST "http://${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}@${{ secrets.JENKINS_URL }}:8080/job/fixmate-backend-cd/build"
 
 
