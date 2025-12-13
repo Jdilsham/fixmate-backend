@@ -79,15 +79,8 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/fixmate-backend:latest
             ${{ secrets.DOCKER_USERNAME }}/fixmate-backend:${{ steps.vars.outputs.TAG }}
 
-      - name: Notify Jenkins after Docker push
+      - name: Trigger Jenkins CD
         run: |
-          echo '{"ref": "refs/heads/main", "repository": {"full_name": "Jdilsham/fixmate-backend"}}' > payload.json
-
-          curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "X-GitHub-Event: push" \
-            --data @payload.json \
-            http://136.111.0.19:8080/github-webhook/
-
+          curl -X POST "http://janithadilsham:11fd2c39f9a2cf9b63b578af43186c555e@136.111.0.19:8080/job/fixmate-backend-cd/build"
 
 
