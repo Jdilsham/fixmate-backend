@@ -7,6 +7,14 @@ pipeline{
 		buildDiscarder(logRotator(numToKeepStr: '20'))
 	}
 
+	parameters {
+        string(
+            name: 'IMAGE_TAG',
+            description: 'Docker image tag to deploy (from GitHub Actions)'
+        )
+    }
+
+
 	environment{
 		DOCKERHUB_USER	=	credentials('dockerhub-username')
 		IMAGE_NAME		=	credentials('dockerhub-image-name')
@@ -15,7 +23,7 @@ pipeline{
 		GKE_ZONE		=	credentials('gke-zone')
 		K8S_NAMESPACE	=	credentials('k8s-namespace')
 
-		NEW_IMAGE		=	"${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
+		NEW_IMAGE		=	"${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
 	}
 
 	stages{
