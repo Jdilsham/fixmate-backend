@@ -81,6 +81,6 @@ jobs:
 
       - name: Trigger Jenkins CD
         run: |
-          curl -X POST "http://${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}@${{ secrets.JENKINS_URL }}:8080/job/fixmate-backend/build"
+          curl -X POST "http://${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}@${{ secrets.JENKINS_URL }}:8080/job/fixmate-backend/buildWithParameters?IMAGE_TAG=${{ steps.vars.outputs.TAG }}"
 
 
