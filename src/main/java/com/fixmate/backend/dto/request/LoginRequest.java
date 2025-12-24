@@ -1,4 +1,4 @@
-package com.fixmate.backend.dto;
+package com.fixmate.backend.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
