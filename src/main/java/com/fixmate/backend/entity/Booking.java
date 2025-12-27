@@ -1,5 +1,6 @@
 package com.fixmate.backend.entity;
 
+import com.fixmate.backend.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,7 +34,7 @@ public class Booking {
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
-    private String status;
+    private BookingStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
