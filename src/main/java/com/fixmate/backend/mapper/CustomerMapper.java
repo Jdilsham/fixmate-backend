@@ -1,4 +1,10 @@
 package com.fixmate.backend.mapper;
 
-public class CustomerMapper {
+import com.fixmate.backend.dto.response.CustomerProfileResponse;
+import com.fixmate.backend.entity.User;
+import org.mapstruct.Mapper;
+
+@Mapper(componentModel = "spring")
+public interface CustomerMapper {
+    CustomerProfileResponse toProfileResponse(User user);
 }
