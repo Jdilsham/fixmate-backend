@@ -1,6 +1,6 @@
 package com.fixmate.backend.dto.request;
 
-import com.fixmate.backend.entity.Role;
+import com.fixmate.backend.enums.Role;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

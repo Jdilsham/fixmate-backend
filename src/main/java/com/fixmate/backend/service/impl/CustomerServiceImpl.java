@@ -2,13 +2,11 @@ package com.fixmate.backend.service.impl;
 
 import com.fixmate.backend.dto.request.CustomerUpdateReq;
 import com.fixmate.backend.dto.response.CustomerProfileResponse;
-import com.fixmate.backend.entity.Role;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.mapper.CustomerMapper;
 import com.fixmate.backend.repository.UserRepository;
 import com.fixmate.backend.service.CustomerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;

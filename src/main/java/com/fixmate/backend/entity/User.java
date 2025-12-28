@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-import com.fixmate.backend.entity.Role;
+import com.fixmate.backend.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
