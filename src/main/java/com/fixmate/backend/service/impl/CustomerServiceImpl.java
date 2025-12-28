@@ -1,5 +1,6 @@
 package com.fixmate.backend.service.impl;
 
+import com.fixmate.backend.dto.request.CustomerUpdateReq;
 import com.fixmate.backend.dto.response.CustomerProfileResponse;
 import com.fixmate.backend.entity.Role;
 import com.fixmate.backend.entity.User;
@@ -27,8 +28,15 @@ public class CustomerServiceImpl  implements CustomerService {
        return mapper.toProfileResponse(user);
     }
 
+    @Override
+    public CustomerProfileResponse updateProfile(String email, CustomerUpdateReq req){
+        User user = getUserByEmail(email);
+        mapper.updateCustomerFromReq(req,user);
+        return mapper.toProfileResponse(userRepository.save(user));
+    }
 
-    //Ensure user exists and is a Customer
+
+    //Ensure user exists
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,"User not found"));
