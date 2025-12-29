@@ -35,6 +35,7 @@ public class Booking {
     private Instant createdAt = Instant.now();
 
     @Enumerated(EnumType.STRING)
+   // @Column(columnDefinition = "booking_status_enum")
     private BookingStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
