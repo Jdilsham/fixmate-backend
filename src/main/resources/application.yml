@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/fixmatedb
+    url: jdbc:postgresql://localhost:5432/fixmatedb?stringtype=unspecified
     username: fixmate
     password: fixmate
 
