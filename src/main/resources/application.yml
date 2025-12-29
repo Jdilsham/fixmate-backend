@@ -25,6 +25,11 @@ spring:
 server:
   port: 8081
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
 
 jwt:
   secret: "a2Fqc2RmaGtqYXNoZGZqa2Foc2RmaGpkaGFqa2RmaGo="
