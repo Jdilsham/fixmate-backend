@@ -1,8 +1,8 @@
 package com.fixmate.backend.controller;
 
-import com.fixmate.backend.dto.AuthResponse;
-import com.fixmate.backend.dto.LoginRequest;
-import com.fixmate.backend.dto.SignupRequest;
+import com.fixmate.backend.dto.response.AuthResponse;
+import com.fixmate.backend.dto.request.LoginRequest;
+import com.fixmate.backend.dto.request.SignupRequest;
 import com.fixmate.backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

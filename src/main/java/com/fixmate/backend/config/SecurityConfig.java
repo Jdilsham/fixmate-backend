@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.security.Security;
 import java.util.List;
 
+@EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
@@ -47,15 +49,22 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))   // ✅ ADD THIS LINE
                 .authorizeHttpRequests(auth -> auth
+
+                        // ✅ Public endpoints
                         .requestMatchers("/healthz/**").permitAll()
-                        .requestMatchers(
-                                "/actuator/health",
-                                "/actuator/health/**",
-                                "/actuator/info",
-                                "/actuator",
-                                "/actuator/**"
-                        ).permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // 🔴 ADMIN only
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 🟢 CUSTOMER only
+                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+
+                        // 🔵 SERVICE PROVIDER only
+                        .requestMatchers("/api/provider/**").hasRole("SERVICE_PROVIDER")
+
+                        // 🔐 Any other request needs login
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

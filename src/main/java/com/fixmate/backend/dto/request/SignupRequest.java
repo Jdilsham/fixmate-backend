@@ -1,5 +1,7 @@
-package com.fixmate.backend.dto;
+package com.fixmate.backend.dto.request;
 
+import com.fixmate.backend.enums.Role;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +21,7 @@ public class SignupRequest {
     private String phone;
     @NotBlank(message = "Password is required")
     private String password;
-    @NotBlank(message = "Role is required")
-    private String role;
+    @NotNull(message = "Role is required")
+    private Role role;
+
 }
