@@ -1,6 +1,5 @@
-package com.fixmate.backend.dto;
+package com.fixmate.backend.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

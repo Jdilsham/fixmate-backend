@@ -1,9 +1,9 @@
 package com.fixmate.backend.service;
 
 import com.fixmate.backend.config.JwtUtil;
-import com.fixmate.backend.dto.LoginRequest;
-import com.fixmate.backend.dto.SignupRequest;
-import com.fixmate.backend.entity.Role;
+import com.fixmate.backend.dto.request.LoginRequest;
+import com.fixmate.backend.dto.request.SignupRequest;
+import com.fixmate.backend.enums.Role;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.repository.ServiceProviderRepository;
