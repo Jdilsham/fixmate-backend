@@ -3,11 +3,14 @@ kind: Service
 metadata:
   name: fixmate-backend
   namespace: fixmate
+  labels:
+    app: fixmate-backend
 spec:
   type: LoadBalancer
   selector:
     app: fixmate-backend
   ports:
-    - port: 80
+    - name: http
+      port: 80
       targetPort: 8081
       protocol: TCP
