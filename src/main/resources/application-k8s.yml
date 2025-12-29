@@ -38,10 +38,13 @@ management:
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
 
   metrics:
     tags:
       application: fixmate-backend
+
 
 
 
