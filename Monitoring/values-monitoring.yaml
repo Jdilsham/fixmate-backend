@@ -3,8 +3,8 @@ grafana:
   adminPassword: admin123
 
   service:
-    type: NodePort
-    nodePort: 32000
+    type: LoadBalancer
+    port: 80
 
   persistence:
     enabled: true
@@ -19,55 +19,58 @@ grafana:
       cpu: 100m
       memory: 256Mi
 
-
 prometheus:
   prometheusSpec:
     retention: 7d
+
+    podAntiAffinity: ""
 
     storageSpec:
       volumeClaimTemplate:
         spec:
           storageClassName: standard-rwo
-          accessModes: ["ReadWriteOnce"]
+          accessModes:
+            - ReadWriteOnce
           resources:
             requests:
               storage: 10Gi
 
     resources:
       requests:
-        cpu: 150m
-        memory: 512Mi
+        cpu: 100m
+        memory: 256Mi
       limits:
-        cpu: 300m
-        memory: 1Gi
-
+        cpu: 200m
+        memory: 512Mi
 
 alertmanager:
   enabled: true
 
   alertmanagerSpec:
     replicas: 1
-
     resources:
       requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
         cpu: 50m
         memory: 128Mi
-      limits:
-        cpu: 100m
-        memory: 256Mi
 
 
-nodeExporter:
+prometheus-node-exporter:
   enabled: true
 
-  resources:
-    requests:
-      cpu: 30m
-      memory: 64Mi
-    limits:
-      cpu: 60m
-      memory: 128Mi
+kubeProxy:
+  enabled: false
 
+kubeScheduler:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
 
 kubeStateMetrics:
   enabled: true
