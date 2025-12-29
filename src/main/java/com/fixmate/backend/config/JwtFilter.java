@@ -45,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
         res.setHeader("Access-Control-Allow-Credentials", "true");
 
         if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
-            res.setStatus(HttpServletResponse.SC_OK);
+            chain.doFilter(req, res);   // ✅ allow request to continue
             return;
         }
 
