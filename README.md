@@ -66,3 +66,6 @@ src/main/java/com/fixmate/backend/
 └── controller/
     ├── AuthController.java
     └── UserController.java
+
+
+SELECT setval('public.users_id_seq', (SELECT MAX(id) FROM users));
