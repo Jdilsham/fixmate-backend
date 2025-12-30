@@ -40,5 +40,7 @@ management:
       show-details: always
 
   metrics:
+    enable:
+      tomcat: true
     tags:
       application: fixmate-backend
