@@ -42,6 +42,3 @@ management:
   metrics:
     tags:
       application: fixmate-backend
-
-
-
