@@ -14,6 +14,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+
 
 @Service
 public class AuthService {
@@ -22,19 +24,22 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authManager;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final GoogleAuthService googleAuthService;
 
     public AuthService(
             UserRepository repo,
             PasswordEncoder encoder,
             JwtUtil jwt,
             AuthenticationManager am,
-            ServiceProviderRepository serviceProviderRepository
+            ServiceProviderRepository serviceProviderRepository,
+            GoogleAuthService googleAuthService
     ) {
         this.repo = repo;
         this.encoder = encoder;
         this.jwtUtil = jwt;
         this.authManager = am;
         this.serviceProviderRepository = serviceProviderRepository;
+        this.googleAuthService = googleAuthService;
     }
 
 
@@ -96,4 +101,39 @@ public class AuthService {
         );
 
     }
+
+    public String googleLogin(String idToken) {
+
+        var payload = googleAuthService.verifyToken(idToken);
+
+        String email = payload.getEmail();
+        String firstName = (String) payload.get("given_name");
+        String lastName = (String) payload.get("family_name");
+
+        User user = repo.findByEmail(email)
+                .orElseGet(() -> {
+                    User u = new User();
+                    u.setEmail(email);
+                    u.setFirstName(firstName);
+                    u.setLastName(lastName);
+                    u.setPassword("GOOGLE_AUTH");
+                    u.setRole(Role.CUSTOMER);   // ✅ FIXED
+                    u.setBanned(false);
+                    return repo.save(u);
+                });
+
+        if (user.isBanned()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Your account has been banned."
+            );
+        }
+
+        return jwtUtil.generateToken(
+                user.getEmail(),
+                user.getRole().name()
+        );
+    }
+
+
 }
