@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -28,9 +26,9 @@ public class JwtFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return path.startsWith("/actuator")
-                || path.startsWith("/healthz");
+                || path.startsWith("/healthz")
+                || path.startsWith("/api/auth"); // allow auth endpoints
     }
-
 
     @Override
     protected void doFilterInternal(
@@ -39,41 +37,37 @@ public class JwtFilter extends OncePerRequestFilter {
             FilterChain chain
     ) throws ServletException, IOException {
 
-        res.setHeader("Access-Control-Allow-Origin", "http://35.200.239.169");
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "*");
-        res.setHeader("Access-Control-Allow-Credentials", "true");
-
-        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
-            chain.doFilter(req, res);   // ✅ allow request to continue
-            return;
-        }
-
         String header = req.getHeader("Authorization");
 
-        String token = null;
-        String email = null;
-
         if (header != null && header.startsWith("Bearer ")) {
-            token = header.substring(7);
+            String token = header.substring(7);
 
-            if(jwtUtil.validateToken(token)){
-                email = jwtUtil.extractUsername(token);
+            if (jwtUtil.validateToken(token)) {
+                String email = jwtUtil.extractUsername(token);
+
+                if (email != null &&
+                        SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                    var userDetails =
+                            userDetailsService.loadUserByUsername(email);
+
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+                    auth.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(req)
+                    );
+
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(auth);
+                }
             }
         }
 
-        if(email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            var userDetails = userDetailsService.loadUserByUsername(email);
-
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
-            );
-
-            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-
-            SecurityContextHolder.getContext().setAuthentication(auth);
-        }
         chain.doFilter(req, res);
     }
 }
