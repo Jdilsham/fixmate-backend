@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/healthz/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/google").permitAll()
 
                         // 🔴 ADMIN only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
