@@ -77,7 +77,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://35.200.239.169")); // FRONTEND IP
+        config.setAllowedOrigins(List.of(
+                "http://34.47.217.188", // FRONTEND IP
+                "http://localhost:5173" )); // local dev
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
