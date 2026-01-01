@@ -24,7 +24,7 @@ public class ServiceCategory {
     private String description;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private Set<Service> services = new HashSet<>();
+    private Set<Services> services = new HashSet<>();
 
 
 }
