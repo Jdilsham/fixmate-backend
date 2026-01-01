@@ -43,8 +43,9 @@ management:
       show-details: always
 
   metrics:
-    enable:
-      tomcat: true
+    binders:
+      tomcat:
+        enabled: true
     tags:
       application: fixmate-backend
     distribution:
