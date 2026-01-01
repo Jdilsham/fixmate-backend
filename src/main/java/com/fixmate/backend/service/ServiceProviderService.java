@@ -1,35 +1,25 @@
 package com.fixmate.backend.service;
 
+import com.fixmate.backend.dto.request.ProviderOnboardingRequest;
+import com.fixmate.backend.dto.request.ProviderUpdateReq;
+import com.fixmate.backend.dto.response.ProviderDashboardResponse;
+import com.fixmate.backend.dto.response.ProviderProfileResponse;
 import com.fixmate.backend.entity.ServiceProvider;
-import com.fixmate.backend.repository.ServiceProviderRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-@Service
-public class ServiceProviderService {
+import java.util.List;
 
-    private final ServiceProviderRepository serviceProviderRepository;
+public interface ServiceProviderService {
 
-    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository) {
-        this.serviceProviderRepository = serviceProviderRepository;
-    }
+    void onboardProvider(String email, ProviderOnboardingRequest request);
 
-    // 🔐 COMMON CHECK METHOD
-    public ServiceProvider getVerifiedProviderByUserId(Long userId) {
+    void updateAvailability(String email, boolean status);
 
-        ServiceProvider provider = serviceProviderRepository.findByUserId(userId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Service provider profile not found")
-                );
+    ProviderProfileResponse getMyProfile(String email);
 
-        if (!provider.getIsVerified()) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Your service provider account is not approved yet"
-            );
-        }
+    ProviderDashboardResponse getMyDashboardStats(String email);
 
-        return provider;
-    }
+    List<ProviderProfileResponse> getProvidersByService(Long serviceId);
+
+    ServiceProvider getVerifiedProviderByUserId(Long userId);
 }
+
