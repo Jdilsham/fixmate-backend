@@ -44,3 +44,8 @@ management:
       tomcat: true
     tags:
       application: fixmate-backend
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
