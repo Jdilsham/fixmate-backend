@@ -10,5 +10,18 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: fixmate-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@fixmate.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+
 volumes:
   pgdata:

@@ -72,7 +72,7 @@ pipeline{
 					try{
 						sh """
 							echo Verifying rollout...
-							kubectl rollout status deployment/fixmate-backend -n ${K8S_NAMESPACE} --timeout=200s
+							kubectl rollout status deployment/fixmate-backend -n ${K8S_NAMESPACE} --timeout=500s
 						"""
 					}catch(err){
 						echo "Rollout failed — initiating rollback..."
