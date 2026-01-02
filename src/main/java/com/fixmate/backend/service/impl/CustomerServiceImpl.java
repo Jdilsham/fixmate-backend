@@ -70,16 +70,16 @@ public class CustomerServiceImpl  implements CustomerService {
         }
 
         // SERVICE
-       /* Services service = serviceRepository.findById(dto.getServiceId())
+        Services service = serviceRepository.findById(dto.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
-*/
+
         //  BOOKING
         Booking booking = new Booking();
         booking.setUser(customer);
         booking.setServiceProvider(provider);
-       // booking.setService(service);
+        booking.setService(service);
         booking.setScheduledAt(dto.getScheduledAt());
-       // booking.setTotalPrice(service.getBasePrice());
+        booking.setTotalPrice(service.getBasePrice());
         booking.setStatus(BookingStatus.PENDING);
 
         // ADDRESS
