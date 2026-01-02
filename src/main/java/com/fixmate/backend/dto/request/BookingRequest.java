@@ -10,6 +10,10 @@ import java.time.LocalDateTime;
 public class BookingRequest {
 
     @NotNull
+    private Long customerId;
+
+
+    @NotNull
     private Long serviceId;
 
     @NotNull
@@ -22,6 +26,11 @@ public class BookingRequest {
     @NotNull
     private LocalDateTime scheduledTime;
 
+    @NotNull
+    private String address;
+
+    @NotNull
+    private String city;
 
 
 }
