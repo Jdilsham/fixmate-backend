@@ -1,5 +1,6 @@
 package com.fixmate.backend.controller;
 
+import com.fixmate.backend.dto.request.GoogleLoginRequest;
 import com.fixmate.backend.dto.response.AuthResponse;
 import com.fixmate.backend.dto.request.LoginRequest;
 import com.fixmate.backend.dto.request.SignupRequest;
@@ -7,6 +8,8 @@ import com.fixmate.backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,6 +33,16 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest r) {
         String token = auth.login(r);
         return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(
+            @RequestBody GoogleLoginRequest request
+    ) {
+        String token = auth.googleLogin(request.getIdToken());
+        return ResponseEntity.ok(
+                Map.of("token", token)
+        );
     }
 
 }

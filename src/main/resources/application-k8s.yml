@@ -24,6 +24,9 @@ spring:
 
 server:
   port: ${SERVER_PORT:8081}
+  tomcat:
+    mbeanregistry:
+      enabled: true
 
 jwt:
   secret: ${JWT_SECRET}
@@ -33,8 +36,21 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info,prometheus
 
+  endpoint:
+    health:
+      show-details: always
 
-
+  metrics:
+    binders:
+      tomcat:
+        enabled: true
+    tags:
+      application: fixmate-backend
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
 

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/fixmatedb
+    url: jdbc:postgresql://localhost:5432/fixmatedb?stringtype=unspecified
     username: fixmate
     password: fixmate
 
@@ -25,7 +25,17 @@ spring:
 server:
   port: 8081
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
 
 jwt:
   secret: "a2Fqc2RmaGtqYXNoZGZqa2Foc2RmaGpkaGFqa2RmaGo="
   expirationMs: 86400000  # 1 day in ms
+
+#need to save an env
+google:
+  #client-id: ${GOOGLE_CLIENT_ID} like this
+  client-id: 734171544044-2imsllssiq2ibnm2m055uql6n699ejks.apps.googleusercontent.com

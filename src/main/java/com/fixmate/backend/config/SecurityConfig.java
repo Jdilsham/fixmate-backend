@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/healthz/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/google").permitAll()
 
                         // 🔴 ADMIN only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -77,7 +78,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://35.200.239.169")); // FRONTEND IP
+        config.setAllowedOrigins(List.of(
+                "http://34.47.217.188", // FRONTEND IP
+                "http://localhost:5173" )); // local dev
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
