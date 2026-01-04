@@ -1,6 +1,7 @@
 package com.fixmate.backend.service;
 
 import com.fixmate.backend.dto.request.BookingRequest;
+import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.request.CustomerUpdateReq;
 import com.fixmate.backend.dto.request.ProviderSearchRequest;
 import com.fixmate.backend.dto.response.BookingResponse;
@@ -16,7 +17,7 @@ public interface CustomerService {
 
     BookingResponse createBooking(String email,BookingRequest dto);
 
-
+    void changePassword(Long userId, ChangePasswordRequest request);
 
 
 }
