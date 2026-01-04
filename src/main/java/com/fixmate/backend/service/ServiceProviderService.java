@@ -14,7 +14,7 @@ public interface ServiceProviderService {
 
     void requestVerification(Long userId);
 
-    List<BookingDetailResponse> getBookings(Long userId);
+    List<BookingResponse> getBookings(Long userId);
 
     EarningSummaryDTO getEarnings(Long userId);
 
