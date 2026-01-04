@@ -93,7 +93,12 @@ public class CustomerServiceImpl  implements CustomerService {
 
         Booking saved = bookingRepository.save(booking);
 
-        return new BookingResponse(saved.getBookingId(), saved.getStatus());
+        BookingResponse response = new BookingResponse();
+        response.setBookingId(saved.getBookingId());
+        response.setStatus(saved.getStatus());
+
+        return response;
+
     }
 
 
