@@ -1,7 +1,7 @@
 package com.fixmate.backend.service.impl;
 
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
-import com.fixmate.backend.dto.response.BookingDetailResponse;
+import com.fixmate.backend.dto.response.BookingResponse;
 import com.fixmate.backend.dto.response.EarningSummaryDTO;
 import com.fixmate.backend.dto.response.ProviderProfileDTO;
 import com.fixmate.backend.entity.Booking;
@@ -104,7 +104,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     }
 
     @Override
-    public List<BookingDetailResponse> getBookings(Long userId) {
+    public List<BookingResponse> getBookings(Long userId) {
 
 
         ServiceProvider provider = getVerifiedProviderByUserId(userId);
@@ -134,9 +134,9 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     }
 
 
-    private BookingDetailResponse mapToBookingDetail(Booking booking) {
+    private BookingResponse mapToBookingDetail(Booking booking) {
 
-        BookingDetailResponse dto = new BookingDetailResponse();
+        BookingResponse dto = new BookingResponse();
 
         dto.setBookingId(booking.getBookingId());
         dto.setCustomerName(booking.getUser().getFirstName());
