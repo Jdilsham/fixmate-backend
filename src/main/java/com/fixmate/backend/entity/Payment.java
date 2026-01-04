@@ -1,5 +1,7 @@
 package com.fixmate.backend.entity;
 
+import com.fixmate.backend.enums.PaymentMethod;
+import com.fixmate.backend.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,32 +22,44 @@ public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "payment_id")
-    private Long payementId;
+    private Long paymentId;
 
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "payment_method",nullable = false)
-    private String paymentMethod;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
 
     @Column(name = "transaction_ref")
     private String transactionRef;
 
-    @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PaymentStatus status;
+
+    @Column(name = "worked_time")
+    private String workedTime;
 
     @Column(name = "paid_at")
     private Instant paidAt;
 
-
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
 
-
+    // 🔗 Booking
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
+    // 🔗 Provider
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id", nullable = false)
+    private ServiceProvider provider;
 
-
+    // 🔗 Customer
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private User customer;
 }
+
