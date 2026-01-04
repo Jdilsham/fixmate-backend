@@ -1,8 +1,8 @@
 package com.fixmate.backend.controller;
 
+import com.fixmate.backend.dto.response.UserMeResponse;
+import com.fixmate.backend.entity.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -10,7 +10,14 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     @GetMapping("/me")
-    public String me(@AuthenticationPrincipal UserDetails user) {
-        return "Logged in as: " + user.getUsername();
+    public UserMeResponse me(@AuthenticationPrincipal User user) {
+
+        return new UserMeResponse(
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole().name()
+        );
     }
 }
+
