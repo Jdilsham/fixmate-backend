@@ -37,7 +37,7 @@ public class ProviderController {
     }
 
     @GetMapping("/bookings")
-    public List<BookingDetailResponse> bookings(Authentication auth) {
+    public List<BookingResponse> bookings(Authentication auth) {
         return providerService.getBookings(getUserId(auth));
     }
 
