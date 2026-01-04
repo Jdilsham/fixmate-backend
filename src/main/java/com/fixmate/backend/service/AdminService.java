@@ -1,5 +1,6 @@
 package com.fixmate.backend.service;
 
+import com.fixmate.backend.dto.response.AdminPendingProvider;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import org.springframework.http.HttpStatus;
@@ -17,12 +18,12 @@ public class AdminService {
         this.serviceProviderRepository = serviceProviderRepository;
     }
 
-    // 1️⃣ View pending providers
-    public List<ServiceProvider> getPendingProviders() {
-        return serviceProviderRepository.findByIsVerifiedFalse();
+    // View pending providers
+    public List<AdminPendingProvider> getPendingProviders() {
+        return serviceProviderRepository.findPendingProvidersForAdmin();
     }
 
-    // 2️⃣ Approve provider
+    // Approve provider
     public void approveProvider(Long providerId) {
         ServiceProvider provider = serviceProviderRepository.findById(providerId)
                 .orElseThrow(() ->
