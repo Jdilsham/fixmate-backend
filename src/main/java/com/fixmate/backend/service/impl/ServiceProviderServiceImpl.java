@@ -83,6 +83,31 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         return providerMapper.toProfileDTO(provider);
     }
 
+
+        @Override
+        public boolean toggleAvailability(String email) {
+
+            ServiceProvider provider = serviceProviderRepository.findByUserEmail(email)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Service provider profile not found"
+                    ));
+
+            if (!Boolean.TRUE.equals(provider.getIsVerified())) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "Your provider account is not verified"
+                );
+            }
+
+            boolean current = Boolean.TRUE.equals(provider.getIsAvailable());
+            provider.setIsAvailable(!current);
+
+            return provider.getIsAvailable();
+        }
+
+
+
     @Override
     public void updateProfile(Long userId, ProfileUpdateReq req) {
 
