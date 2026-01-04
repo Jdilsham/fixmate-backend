@@ -9,11 +9,13 @@ import com.fixmate.backend.dto.response.CustomerProfileResponse;
 import com.fixmate.backend.dto.response.ProviderSearchResponse;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.service.CustomerService;
+import com.fixmate.backend.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -55,7 +57,4 @@ public class CustomerController {
         customerService.changePassword(user.getId(), request);
         return ResponseEntity.ok("Password changed successfully");
     }
-
-
-
 }

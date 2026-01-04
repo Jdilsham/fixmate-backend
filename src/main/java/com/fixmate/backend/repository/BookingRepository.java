@@ -12,12 +12,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // 🔹 Provider booking list
     List<Booking> findByServiceProvider_ServiceProviderId(Long serviceProviderId);
 
-    // 🔹 Provider earnings (PAID payments only)
+    // 🔹 Provider earnings (CONFIRMED payments only)
     @Query("""
         SELECT COALESCE(SUM(p.amount), 0)
         FROM Payment p
-        WHERE p.booking.serviceProvider.serviceProviderId = :providerId
-          AND p.status = 'PAID'
+        WHERE p.provider.serviceProviderId = :providerId
+          AND p.status = com.fixmate.backend.enums.PaymentStatus.CONFIRMED
     """)
-    BigDecimal sumPaidAmounts(Long providerId);
+    BigDecimal sumConfirmedAmounts(Long providerId);
 }
