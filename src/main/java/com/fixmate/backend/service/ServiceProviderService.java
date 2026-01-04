@@ -1,25 +1,22 @@
 package com.fixmate.backend.service;
 
-import com.fixmate.backend.dto.request.ProviderOnboardingRequest;
-import com.fixmate.backend.dto.request.ProviderUpdateReq;
-import com.fixmate.backend.dto.response.ProviderDashboardResponse;
-import com.fixmate.backend.dto.response.ProviderProfileResponse;
+import com.fixmate.backend.dto.request.ProfileUpdateReq;
+import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.ServiceProvider;
 
 import java.util.List;
 
 public interface ServiceProviderService {
 
-    void onboardProvider(String email, ProviderOnboardingRequest request);
+    ProviderProfileDTO getProfile(Long userId);
 
-    void updateAvailability(String email, boolean status);
+    void updateProfile(Long userId, ProfileUpdateReq req);
 
-    ProviderProfileResponse getMyProfile(String email);
+    void requestVerification(Long userId);
 
-    ProviderDashboardResponse getMyDashboardStats(String email);
+    List<BookingResponse> getBookings(Long userId);
 
-    List<ProviderProfileResponse> getProvidersByService(Long serviceId);
+    EarningSummaryDTO getEarnings(Long userId);
 
     ServiceProvider getVerifiedProviderByUserId(Long userId);
 }
-
