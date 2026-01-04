@@ -1,5 +1,6 @@
 package com.fixmate.backend.dto.response;
 
+import com.fixmate.backend.enums.BookingStatus;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 public class BookingDetailResponse {
 
     private Long bookingId;
+    private BookingStatus status;
 
     private String customerName;
     private String customerPhone;
