@@ -124,7 +124,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
 
         ServiceProvider provider = getVerifiedProviderByUserId(userId);
 
-        BigDecimal total = bookingRepository.sumPaidAmounts(
+        BigDecimal total = bookingRepository.sumConfirmedAmounts(
                 provider.getServiceProviderId()
         );
 
@@ -158,7 +158,9 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         );
 
         dto.setPaymentType(
-                payment != null ? payment.getPaymentMethod() : "N/A"
+                payment != null && payment.getPaymentMethod() != null
+                        ? payment.getPaymentMethod().name()
+                        : "N/A"
         );
 
         dto.setAddress(
