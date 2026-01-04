@@ -51,9 +51,8 @@ public class ServiceProvider {
             joinColumns = @JoinColumn(name = "service_provider_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
-    private Set<Service> services = new HashSet<>();
+    private Set<Services> services = new HashSet<>();
 
     @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Review> reviews = new HashSet<>();
-
 }

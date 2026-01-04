@@ -1,16 +1,17 @@
-package com.fixmate.backend.dto.response;
+package com.fixmate.backend.dto.request;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
-@Data
-@Builder
-public class AddressResponse {
-    private Long id;
 
+@Getter
+@Setter
+public class AddressRequest {
     private String address;
     private String city;
     private BigDecimal latitude;
     private BigDecimal longitude;
+
+
 }
