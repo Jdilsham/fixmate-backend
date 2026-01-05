@@ -29,7 +29,7 @@ public class AddressServiceImpl implements AddressService {
         address.setLatitude(request.getLatitude());
         address.setLongitude(request.getLongitude());
 
-        address.setBooking(null);
+       // address.setBooking(null);
         address.setUser(user);
 
         Address saved =  addressRepository.save(address);
