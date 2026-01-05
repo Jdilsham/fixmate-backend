@@ -1,6 +1,9 @@
 package com.fixmate.backend.service;
 
-@FunctionalInterface
+import com.fixmate.backend.entity.ServiceProvider;
+import com.fixmate.backend.entity.User;
+
 public interface NotificationService {
-    void notify(String destination, String message);
+    void notifyCustomer(User customer, String message);
+    void notifyProvider(ServiceProvider provider, String message);
 }
