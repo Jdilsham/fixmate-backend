@@ -1,7 +1,7 @@
 package com.fixmate.backend.service.impl;
 
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
-import com.fixmate.backend.dto.response.BookingResponse;
+import com.fixmate.backend.dto.response.CustomerBookingResponse;
 import com.fixmate.backend.dto.response.EarningSummaryDTO;
 import com.fixmate.backend.dto.response.ProviderProfileDTO;
 import com.fixmate.backend.entity.Booking;
@@ -104,7 +104,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     }
 
     @Override
-    public List<BookingResponse> getBookings(Long userId) {
+    public List<CustomerBookingResponse> getBookings(Long userId) {
 
 
         ServiceProvider provider = getVerifiedProviderByUserId(userId);
@@ -134,9 +134,9 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     }
 
 
-    private BookingResponse mapToBookingDetail(Booking booking) {
+    private CustomerBookingResponse mapToBookingDetail(Booking booking) {
 
-        BookingResponse dto = new BookingResponse();
+        CustomerBookingResponse dto = new CustomerBookingResponse();
 
         dto.setBookingId(booking.getBookingId());
         dto.setCustomerName(booking.getUser().getFirstName());
@@ -163,12 +163,12 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         : "N/A"
         );
 
-        dto.setAddress(
+    /*    dto.setAddress(
                 booking.getAddresses().stream()
                         .findFirst()
                         .map(a -> a.getCity())
                         .orElse("N/A")
-        );
+        );*/
 
         return dto;
     }
