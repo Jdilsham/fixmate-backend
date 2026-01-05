@@ -2,35 +2,32 @@ package com.fixmate.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "address")
-@Getter
-@Setter
+@Table(name = "booking_contact_info")
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Address {
+public class BookingContactInfo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Long addressId;
+    private Long id;
 
     private String address;
     private String city;
-
+    private String phone;
     private BigDecimal latitude;
     private BigDecimal longitude;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id",nullable = false)
-    private User user;
-
-  /*  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id")
-    private Booking booking;*/
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false, unique = true)
+    private Booking booking;
 
 }

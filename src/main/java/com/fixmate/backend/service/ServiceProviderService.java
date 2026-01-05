@@ -14,9 +14,11 @@ public interface ServiceProviderService {
 
     void requestVerification(Long userId);
 
-    List<BookingResponse> getBookings(Long userId);
+    List<ProviderBookingResponse> getBookings(Long userId);
 
     EarningSummaryDTO getEarnings(Long userId);
 
     ServiceProvider getVerifiedProviderByUserId(Long userId);
+
+    boolean toggleAvailability(String email);
 }

@@ -1,2 +1,2 @@
-ALTER TABLE booking
+ALTER TABLE service_provider
     ADD COLUMN description TEXT;

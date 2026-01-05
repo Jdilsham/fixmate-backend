@@ -40,6 +40,8 @@ public class Booking {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "cancel_reason", length = 255)
+    private String cancelReason;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -59,8 +61,14 @@ public class Booking {
     @OneToOne(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Review review;
 
-    @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Address> addresses =  new HashSet<>();
+    // SNAPSHOT RELATION
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BookingContactInfo contactInfo;
 
+
+
+   /* @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Address> addresses =  new HashSet<>();
+*/
 
 }

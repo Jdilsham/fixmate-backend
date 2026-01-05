@@ -14,6 +14,11 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
     Optional<ServiceProvider> findByUserId(Long userId);
 
+
+    Optional<ServiceProvider> findByUserEmail(String email);
+
+    List<ServiceProvider> findByIsAvailableTrueAndIsVerifiedTrue();
+
     @Query("""
         SELECT new com.fixmate.backend.dto.response.AdminPendingProvider(
             sp.serviceProviderId,
@@ -33,5 +38,6 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
         WHERE sp.isVerified = false
     """)
     List<AdminPendingProvider> findPendingProvidersForAdmin();
+
 
 }

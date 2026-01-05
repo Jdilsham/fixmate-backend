@@ -1,7 +1,7 @@
 package com.fixmate.backend.service.impl;
 
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
-import com.fixmate.backend.dto.response.BookingResponse;
+import com.fixmate.backend.dto.response.ProviderBookingResponse;
 import com.fixmate.backend.dto.response.EarningSummaryDTO;
 import com.fixmate.backend.dto.response.ProviderProfileDTO;
 import com.fixmate.backend.entity.Booking;
@@ -83,6 +83,31 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         return providerMapper.toProfileDTO(provider);
     }
 
+
+        @Override
+        public boolean toggleAvailability(String email) {
+
+            ServiceProvider provider = serviceProviderRepository.findByUserEmail(email)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Service provider profile not found"
+                    ));
+
+            if (!Boolean.TRUE.equals(provider.getIsVerified())) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "Your provider account is not verified"
+                );
+            }
+
+            boolean current = Boolean.TRUE.equals(provider.getIsAvailable());
+            provider.setIsAvailable(!current);
+
+            return provider.getIsAvailable();
+        }
+
+
+
     @Override
     public void updateProfile(Long userId, ProfileUpdateReq req) {
 
@@ -104,7 +129,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     }
 
     @Override
-    public List<BookingResponse> getBookings(Long userId) {
+    public List<ProviderBookingResponse> getBookings(Long userId) {
 
 
         ServiceProvider provider = getVerifiedProviderByUserId(userId);
@@ -134,9 +159,9 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     }
 
 
-    private BookingResponse mapToBookingDetail(Booking booking) {
+    private ProviderBookingResponse mapToBookingDetail(Booking booking) {
 
-        BookingResponse dto = new BookingResponse();
+        ProviderBookingResponse dto = new ProviderBookingResponse();
 
         dto.setBookingId(booking.getBookingId());
         dto.setCustomerName(booking.getUser().getFirstName());
@@ -163,12 +188,12 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         : "N/A"
         );
 
-        dto.setAddress(
-                booking.getAddresses().stream()
-                        .findFirst()
-                        .map(a -> a.getCity())
-                        .orElse("N/A")
-        );
+//        dto.setAddress(
+//                booking.getAddresses().stream()
+//                        .findFirst()
+//                        .map(a -> a.getCity())
+//                        .orElse("N/A")
+//        );
 
         return dto;
     }

@@ -28,7 +28,6 @@ public class ServiceProvider {
     @Column(name = "license_number")
     private String licenseNumber;
 
-
     @Column(name = "is_available")
     private Boolean isAvailable = true;
 
@@ -37,6 +36,20 @@ public class ServiceProvider {
 
     @Column(name = "profile_image")
     private String profileImage;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "service_location")
+    private String city;
+
+    @Column(name = "latitude", precision = 10, scale = 7)
+    private BigDecimal latitude;
+
+    @Column(name = "longitude", precision = 10, scale = 7)
+    private BigDecimal longitude;
+
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
