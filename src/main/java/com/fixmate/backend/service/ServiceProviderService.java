@@ -21,5 +21,4 @@ public interface ServiceProviderService {
     ServiceProvider getVerifiedProviderByUserId(Long userId);
 
     boolean toggleAvailability(String email);
-
 }
