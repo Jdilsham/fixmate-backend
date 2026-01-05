@@ -16,17 +16,4 @@ public class BookingResponse {
 
     private Long bookingId;
     private BookingStatus status;
-
-    private String customerName;
-    private String customerPhone;
-
-    private String serviceTitle;
-    private String description;
-
-    private LocalDateTime scheduledAt;
-
-    private BigDecimal paymentAmount;
-    private String paymentType;
-
-    private String address;
 }
