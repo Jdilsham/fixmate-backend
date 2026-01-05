@@ -40,6 +40,9 @@ public class Booking {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "cancel_reason", length = 255)
+    private String cancelReason;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
