@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class BookingRequest {
-   /* @NotNull
+    @NotNull
     private Long serviceId;
-*/
+
     @NotNull
     private Long providerId;
 

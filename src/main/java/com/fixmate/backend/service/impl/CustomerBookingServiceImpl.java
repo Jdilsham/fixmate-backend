@@ -47,9 +47,9 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         }
 
         //SERVICE
-       /* Services service = serviceRepository.findById(dto.getServiceId())
+        Services service = serviceRepository.findById(dto.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
-*/
+
 
         //Resolve address
         String resolvedAddress = dto.getAddress();
@@ -78,9 +78,9 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         Booking booking = new Booking();
         booking.setUser(customer);
         booking.setServiceProvider(provider);
-        //booking.setService(service);
+        booking.setService(service);
         booking.setScheduledAt(dto.getScheduledAt());
-        //booking.setTotalPrice(service.getBasePrice());
+        booking.setTotalPrice(service.getBasePrice());
         booking.setDescription(dto.getDescription());
         booking.setStatus(BookingStatus.PENDING);
 
