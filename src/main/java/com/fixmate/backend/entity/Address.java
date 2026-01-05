@@ -29,8 +29,8 @@ public class Address {
     @JoinColumn(name = "user_id",nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+  /*  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
-    private Booking booking;
+    private Booking booking;*/
 
 }
