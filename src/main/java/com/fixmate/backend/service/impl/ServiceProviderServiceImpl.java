@@ -188,12 +188,12 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         : "N/A"
         );
 
-        dto.setAddress(
-                booking.getAddresses().stream()
-                        .findFirst()
-                        .map(a -> a.getCity())
-                        .orElse("N/A")
-        );
+//        dto.setAddress(
+//                booking.getAddresses().stream()
+//                        .findFirst()
+//                        .map(a -> a.getCity())
+//                        .orElse("N/A")
+//        );
 
         return dto;
     }
