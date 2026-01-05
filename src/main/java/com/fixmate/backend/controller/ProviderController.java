@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/provider")
@@ -30,6 +31,17 @@ public class ProviderController {
     ) {
         providerService.updateProfile(getUserId(auth), req);
     }
+
+    @PatchMapping("/availability")
+    public Map<String, Boolean> toggleAvailability(Authentication authentication) {
+
+        String email = authentication.getName();
+        boolean status = providerService.toggleAvailability(email);
+
+        return Map.of("isAvailable", status);
+    }
+
+
 
     @PostMapping("/verify")
     public void requestVerification(Authentication auth) {

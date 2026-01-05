@@ -19,4 +19,6 @@ public interface ServiceProviderService {
     EarningSummaryDTO getEarnings(Long userId);
 
     ServiceProvider getVerifiedProviderByUserId(Long userId);
+
+    boolean toggleAvailability(String email);
 }

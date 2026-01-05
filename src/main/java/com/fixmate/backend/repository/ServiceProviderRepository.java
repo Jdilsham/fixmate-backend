@@ -12,4 +12,8 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     List<ServiceProvider> findByIsVerifiedFalse();
 
     Optional<ServiceProvider> findByUserId(Long userId);
+
+    Optional<ServiceProvider> findByUserEmail(String email);
+
+    List<ServiceProvider> findByIsAvailableTrueAndIsVerifiedTrue();
 }
