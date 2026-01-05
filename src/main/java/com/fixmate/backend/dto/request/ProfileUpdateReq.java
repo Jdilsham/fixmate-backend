@@ -3,6 +3,8 @@ package com.fixmate.backend.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class ProfileUpdateReq {
 
@@ -14,6 +16,6 @@ public class ProfileUpdateReq {
 
     private String profileImageUrl;
 
-    private String addressLine1;
+    private String address;
     private String city;
 }
