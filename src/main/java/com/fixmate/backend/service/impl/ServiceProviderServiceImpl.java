@@ -128,10 +128,15 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         provider.setSkill(req.getSkill());
         provider.setExperience(req.getExperience());
         provider.setProfileImage(req.getProfileImageUrl());
+
         provider.setDescription(req.getDescription());
         provider.setCity(req.getCity());
         provider.setRating(req.getRating());
        // provider.setIsVerified(false);
+
+
+
+
     }
 
     @Override

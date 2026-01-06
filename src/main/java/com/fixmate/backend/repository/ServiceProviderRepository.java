@@ -39,5 +39,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     """)
     List<AdminPendingProvider> findPendingProvidersForAdmin();
 
+    List<ServiceProvider> findByIsVerifiedTrueAndIsAvailableTrue();
+
 
 }
