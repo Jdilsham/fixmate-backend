@@ -7,13 +7,17 @@ import com.fixmate.backend.dto.response.ProviderProfileDTO;
 import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.entity.Payment;
 import com.fixmate.backend.entity.ServiceProvider;
+import com.fixmate.backend.entity.Services;
+import com.fixmate.backend.exception.ResourceNotFoundException;
 import com.fixmate.backend.mapper.ProviderMapper;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
+import com.fixmate.backend.repository.ServiceRepository;
 import com.fixmate.backend.service.ServiceProviderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.ZoneId;
@@ -30,6 +34,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final BookingRepository bookingRepository;
     private final ProviderMapper providerMapper;
+    private final ServiceRepository serviceRepository;
 
     @Override
     public void requestVerification(Long userId) {
@@ -124,8 +129,14 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         provider.setExperience(req.getExperience());
         provider.setProfileImage(req.getProfileImageUrl());
 
+        provider.setDescription(req.getDescription());
+        provider.setCity(req.getCity());
+        provider.setRating(req.getRating());
+       // provider.setIsVerified(false);
 
-        provider.setIsVerified(false);
+
+
+
     }
 
     @Override
@@ -156,6 +167,60 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         return new EarningSummaryDTO(
                 total != null ? total : BigDecimal.ZERO
         );
+    }
+
+    @Override
+    public ProviderProfileDTO getProfileById(Long providerId, Long currentUserId) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByServiceProviderIdAndIsVerifiedTrue(providerId)
+                .orElseThrow(() -> new RuntimeException("Provider not found"));
+
+        ProviderProfileDTO dto = providerMapper.toProfileDTO(provider);
+
+        boolean isOwner = currentUserId != null &&
+                provider.getUser().getId().equals(currentUserId);
+
+        dto.setIsOwner(isOwner);
+
+        return dto;
+    }
+
+    @Override
+    public void updateDescription(Long providerId, Long userId, String description) {
+
+        ServiceProvider provider = serviceProviderRepository.findById(providerId)
+                .orElseThrow(() -> new RuntimeException("Provider not found"));
+
+        if (!provider.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Not profile owner");
+        }
+
+        provider.setDescription(description);
+    }
+
+    @Override
+    public void addServiceToProvider(Long userId, Long serviceId) {
+
+        // Resolve provider from logged-in user
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Service provider not found"));
+
+        //  Fetch the SERVICE using ServiceRepository (IMPORTANT FIX)
+        Services service = serviceRepository
+                .findById(serviceId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Service not found"));
+
+        // Prevent duplicate service linking (best practice)
+        if (provider.getServices().contains(service)) {
+            return;
+        }
+
+        //  Add service to provider
+        provider.getServices().add(service);
     }
 
 

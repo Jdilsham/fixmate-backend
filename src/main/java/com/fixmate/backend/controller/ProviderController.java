@@ -3,6 +3,7 @@ package com.fixmate.backend.controller;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.service.CustomUserDetailsService;
 import com.fixmate.backend.service.ProviderBookingService;
 import com.fixmate.backend.service.ServiceProviderService;
 
@@ -25,6 +26,22 @@ public class ProviderController {
     public ProviderProfileDTO profile(Authentication auth) {
         return providerService.getProfile(getUserId(auth));
     }
+
+    @GetMapping("/{id}")
+    public ProviderProfileDTO getProviderProfile(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        Long currentUserId = null;
+
+        if (authentication != null &&
+                authentication.getPrincipal() instanceof User user) {
+            currentUserId = user.getId();
+        }
+
+        return providerService.getProfileById(id, currentUserId);
+    }
+
 
     @PutMapping("/profile")
     public void updateProfile(
@@ -67,6 +84,20 @@ public class ProviderController {
     @GetMapping("/earnings")
     public EarningSummaryDTO earnings(Authentication auth) {
         return providerService.getEarnings(getUserId(auth));
+    }
+
+    @PostMapping("/services/{serviceId}")
+    public void addServiceToProfile(
+            @PathVariable Long serviceId,
+            Authentication authentication
+    ) {
+        User user = (User) authentication.getPrincipal();
+
+        providerService.addServiceToProvider(
+                user.getId(),
+                serviceId
+        );
+
     }
 
     private Long getUserId(Authentication auth) {

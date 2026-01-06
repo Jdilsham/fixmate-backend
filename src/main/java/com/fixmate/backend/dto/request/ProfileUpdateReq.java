@@ -18,4 +18,7 @@ public class ProfileUpdateReq {
 
     private String address;
     private String city;
+    private String description;
+    private BigDecimal rating;
+
 }
