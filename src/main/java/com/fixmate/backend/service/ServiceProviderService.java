@@ -10,6 +10,12 @@ public interface ServiceProviderService {
 
     ProviderProfileDTO getProfile(Long userId);
 
+    ProviderProfileDTO getProfileById(Long providerId, Long currentUserId);
+
+    void updateDescription(Long providerId, Long userId, String description);
+
+    void addServiceToProvider(Long serviceId, Long userId);
+
     void updateProfile(Long userId, ProfileUpdateReq req);
 
     void requestVerification(Long userId);
