@@ -125,6 +125,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         provider.setProfileImage(req.getProfileImageUrl());
 
 
+
         provider.setIsVerified(false);
     }
 
