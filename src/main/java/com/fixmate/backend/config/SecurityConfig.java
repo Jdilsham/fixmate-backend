@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/auth/google").permitAll()
 
-                        .requestMatchers(
+                          .requestMatchers(
                                 org.springframework.http.HttpMethod.GET,
                                 "/api/v1/service-providers/**"
                         ).permitAll()
@@ -66,6 +66,8 @@ public class SecurityConfig {
 
                         // 🟢 CUSTOMER only
                         .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/provider/**").hasAnyRole("SERVICE_PROVIDER", "CUSTOMER")
 
                         // 🔵 SERVICE PROVIDER only
                         .requestMatchers("/api/provider/**").hasRole("SERVICE_PROVIDER")
