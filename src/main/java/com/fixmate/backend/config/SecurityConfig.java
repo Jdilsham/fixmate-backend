@@ -56,6 +56,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/auth/google").permitAll()
 
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.GET,
+                                "/api/v1/service-providers/**"
+                        ).permitAll()
+
                         // 🔴 ADMIN only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

@@ -1,5 +1,6 @@
 package com.fixmate.backend.controller;
 
+import com.fixmate.backend.dto.response.AdminPendingProvider;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.service.AdminService;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,13 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    // 🔍 View pending providers
+    // View pending providers
     @GetMapping("/providers/pending")
-    public ResponseEntity<List<ServiceProvider>> getPendingProviders() {
+    public ResponseEntity<List<AdminPendingProvider>> getPendingProviders() {
         return ResponseEntity.ok(adminService.getPendingProviders());
     }
 
-    // ✅ Approve provider
+    // Approve provider
     @PutMapping("/providers/{providerId}/approve")
     public ResponseEntity<String> approveProvider(@PathVariable Long providerId) {
         adminService.approveProvider(providerId);

@@ -1,35 +1,30 @@
 package com.fixmate.backend.service;
 
+import com.fixmate.backend.dto.request.ProfileUpdateReq;
+import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.ServiceProvider;
-import com.fixmate.backend.repository.ServiceProviderRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-@Service
-public class ServiceProviderService {
+import java.util.List;
 
-    private final ServiceProviderRepository serviceProviderRepository;
+public interface ServiceProviderService {
 
-    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository) {
-        this.serviceProviderRepository = serviceProviderRepository;
-    }
+    ProviderProfileDTO getProfile(Long userId);
 
-    // 🔐 COMMON CHECK METHOD
-    public ServiceProvider getVerifiedProviderByUserId(Long userId) {
+    ProviderProfileDTO getProfileById(Long providerId, Long currentUserId);
 
-        ServiceProvider provider = serviceProviderRepository.findByUserId(userId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Service provider profile not found")
-                );
+    void updateDescription(Long providerId, Long userId, String description);
 
-        if (!provider.getIsVerified()) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Your service provider account is not approved yet"
-            );
-        }
+    void addServiceToProvider(Long serviceId, Long userId);
 
-        return provider;
-    }
+    void updateProfile(Long userId, ProfileUpdateReq req);
+
+    void requestVerification(Long userId);
+
+    List<ProviderBookingResponse> getBookings(Long userId);
+
+    EarningSummaryDTO getEarnings(Long userId);
+
+    ServiceProvider getVerifiedProviderByUserId(Long userId);
+
+    boolean toggleAvailability(String email);
 }
