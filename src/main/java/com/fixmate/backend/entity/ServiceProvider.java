@@ -49,7 +49,8 @@ public class ServiceProvider {
     @Column(name = "longitude", precision = 10, scale = 7)
     private BigDecimal longitude;
 
-
+    @Column(name = "work_pdf_url")
+    private String workPdfUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
