@@ -13,12 +13,14 @@ import com.fixmate.backend.mapper.ProviderMapper;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.ServiceRepository;
+import com.fixmate.backend.service.FileStorageService;
 import com.fixmate.backend.service.ServiceProviderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.ZoneId;
 
@@ -35,6 +37,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     private final BookingRepository bookingRepository;
     private final ProviderMapper providerMapper;
     private final ServiceRepository serviceRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public void requestVerification(Long userId) {
@@ -128,14 +131,24 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         provider.setSkill(req.getSkill());
         provider.setExperience(req.getExperience());
         provider.setProfileImage(req.getProfileImageUrl());
-
+        //provider.setAddress(req.getAddress());
         provider.setDescription(req.getDescription());
         provider.setCity(req.getCity());
         provider.setRating(req.getRating());
        // provider.setIsVerified(false);
 
+        MultipartFile pdf = req.getWorkPdf();
 
+        if (pdf != null && !pdf.isEmpty()) {
 
+            if (!"application/pdf".equalsIgnoreCase(pdf.getContentType())) {
+                throw new IllegalArgumentException("Only PDF files are allowed");
+            }
+
+            String pdfUrl = fileStorageService.upload(pdf);
+            provider.setWorkPdfUrl(pdfUrl);
+        }
+        serviceProviderRepository.save(provider);
 
     }
 
