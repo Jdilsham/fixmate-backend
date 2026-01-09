@@ -23,7 +23,10 @@ public class BookingRequest {
     private String description;
 
     //optional snapshot fallback enabled
-    private String address;
+    private String addressLine1;
+    private String addressLine2;
+    private String province;
+
     private String city;
     private String phone;
     private BigDecimal latitude;

@@ -19,7 +19,15 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  Long addressId;
 
-    private String address;
+    @Column(name = "address_line_1", nullable = false)
+    private String addressLine1;
+
+    @Column(name = "address_line_2")
+    private String addressLine2;
+
+    @Column(nullable = false)
+    private String province;
+
     private String city;
 
     private BigDecimal latitude;

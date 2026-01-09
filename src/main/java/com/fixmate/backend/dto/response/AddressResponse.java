@@ -9,7 +9,10 @@ import java.math.BigDecimal;
 public class AddressResponse {
     private Long id;
 
-    private String address;
+    private String addressLine1;
+    private String addressLine2;
+    private String province;
+
     private String city;
     private BigDecimal latitude;
     private BigDecimal longitude;
