@@ -8,6 +8,8 @@ import com.fixmate.backend.service.ProviderBookingService;
 import com.fixmate.backend.service.ServiceProviderService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,10 +45,10 @@ public class ProviderController {
     }
 
 
-    @PutMapping("/profile")
+    @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void updateProfile(
             Authentication auth,
-            @RequestBody ProfileUpdateReq req
+            @ModelAttribute ProfileUpdateReq req
     ) {
         providerService.updateProfile(getUserId(auth), req);
     }
@@ -87,18 +89,21 @@ public class ProviderController {
     }
 
     @PostMapping("/services/{serviceId}")
-    public void addServiceToProfile(
+    public ResponseEntity<String> addServiceToProfile(
             @PathVariable Long serviceId,
             Authentication authentication
     ) {
-        User user = (User) authentication.getPrincipal();
+        User user =
+                (User) authentication.getPrincipal();
 
         providerService.addServiceToProvider(
                 user.getId(),
                 serviceId
         );
 
+        return ResponseEntity.ok("Service added successfully");
     }
+
 
     private Long getUserId(Authentication auth) {
         return ((User) auth.getPrincipal()).getId();

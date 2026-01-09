@@ -2,6 +2,7 @@ package com.fixmate.backend.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
@@ -21,4 +22,5 @@ public class ProfileUpdateReq {
     private String description;
     private BigDecimal rating;
 
+    private MultipartFile workPdf;
 }
