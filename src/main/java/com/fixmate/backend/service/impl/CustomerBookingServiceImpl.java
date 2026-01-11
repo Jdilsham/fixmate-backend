@@ -24,7 +24,7 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
     private final CustomerMapper mapper;
     private final BookingRepository bookingRepository;
     private final ServiceProviderRepository serviceProviderRepository;
-    private final ServiceRepository serviceRepository;
+    private final ProviderServiceRepository providerServiceRepository;
     private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
 
@@ -37,19 +37,20 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         User customer = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // PROVIDER
-        ServiceProvider provider = serviceProviderRepository.findById(dto.getProviderId())
-                .orElseThrow(() -> new ResourceNotFoundException("Service Provider not found"));
+        // PROVIDER SERVICE (provider + service + price)
+        ProviderService providerService =
+                providerServiceRepository.findById(dto.getProviderServiceId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException("Provider service not found")
+                        );
+
+        ServiceProvider provider = providerService.getServiceProvider();
 
         if (!Boolean.TRUE.equals(provider.getIsAvailable())) {
             throw new ResponseStatusException(CONFLICT, "Service Provider not available");
         }
 
-        // SERVICE
-        Services service = serviceRepository.findById(dto.getServiceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
-
-       // Resolve snapshot fields
+        // Resolve snapshot fields
         String addressLine1 = dto.getAddressLine1();
         String addressLine2 = dto.getAddressLine2();
         String city = dto.getCity();
@@ -79,7 +80,6 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
             phone = customer.getPhone();
         }
 
-        // Build snapshot address string
         String fullAddress =
                 addressLine1 +
                         (addressLine2 != null ? ", " + addressLine2 : "") +
@@ -90,9 +90,9 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         Booking booking = new Booking();
         booking.setUser(customer);
         booking.setServiceProvider(provider);
-        booking.setService(service);
+        booking.setProviderService(providerService);
         booking.setScheduledAt(dto.getScheduledAt());
-        booking.setTotalPrice(service.getBasePrice());
+        booking.setTotalPrice(providerService.getBasePrice()); // ✅ CORRECT
         booking.setDescription(dto.getDescription());
         booking.setStatus(BookingStatus.PENDING);
 
@@ -115,4 +115,5 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
                 .status(saved.getStatus())
                 .build();
     }
+
 }
