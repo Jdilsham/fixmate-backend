@@ -55,8 +55,8 @@ public class Booking {
     private ServiceProvider serviceProvider;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_id")
-    private Services service;
+    @JoinColumn(name = "provider_service_id", nullable = false)
+    private ProviderService providerService;
 
     @OneToOne(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Review review;
