@@ -100,6 +100,8 @@ public class ProviderController {
 
     }
 
+
+
     private Long getUserId(Authentication auth) {
         return ((User) auth.getPrincipal()).getId();
     }
