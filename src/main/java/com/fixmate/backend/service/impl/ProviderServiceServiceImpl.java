@@ -25,21 +25,21 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
     @Override
     public void addServiceToProvider(Long userId, AddServiceRequestDTO dto) {
 
-        // 1️⃣ Get provider by logged-in user
+        //  Get provider by logged-in user
         ServiceProvider provider = serviceProviderRepository
                 .findByUserId(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Service provider not found")
                 );
 
-        // 2️⃣ Get service (dropdown selection)
+        //  Get service (dropdown selection)
         Services service = serviceRepository
                 .findById(dto.getServiceId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Service not found")
                 );
 
-        // 3️⃣ Prevent duplicate service for same provider
+        //  Prevent duplicate service for same provider
         boolean alreadyExists =
                 providerServiceRepository
                         .existsByServiceProvider_ServiceProviderIdAndService_ServiceId(
@@ -53,7 +53,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
             );
         }
 
-        // 4️⃣ Create provider-specific service
+        //  Create provider-specific service
         ProviderService providerService = new ProviderService();
         providerService.setServiceProvider(provider);
         providerService.setService(service);
@@ -62,7 +62,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
         providerService.setEstimatedTimeMinutes(dto.getEstimatedTimeMinutes());
         providerService.setIsActive(true);
 
-        // 5️⃣ Save
+        //  Save
         providerServiceRepository.save(providerService);
     }
 }
