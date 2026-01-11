@@ -92,7 +92,7 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         booking.setServiceProvider(provider);
         booking.setProviderService(providerService);
         booking.setScheduledAt(dto.getScheduledAt());
-        booking.setTotalPrice(providerService.getBasePrice()); // ✅ CORRECT
+        booking.setTotalPrice(providerService.getBasePrice()); //  CORRECT
         booking.setDescription(dto.getDescription());
         booking.setStatus(BookingStatus.PENDING);
 

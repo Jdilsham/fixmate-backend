@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class BookingRequest {
     @NotNull
     private Long providerServiceId;
-
     @NotNull
     @Future(message = "Booking time must be in the future")
     private Instant scheduledAt;
