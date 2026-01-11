@@ -7,7 +7,7 @@ import com.fixmate.backend.dto.response.ProviderProfileDTO;
 import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.entity.Payment;
 import com.fixmate.backend.entity.ServiceProvider;
-import com.fixmate.backend.entity.Services;
+import com.fixmate.backend.entity.ProviderService;
 import com.fixmate.backend.exception.ResourceNotFoundException;
 import com.fixmate.backend.mapper.ProviderMapper;
 import com.fixmate.backend.repository.BookingRepository;
@@ -36,7 +36,6 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final BookingRepository bookingRepository;
     private final ProviderMapper providerMapper;
-    private final ServiceRepository serviceRepository;
     private final FileStorageService fileStorageService;
 
     @Override
@@ -136,6 +135,9 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         provider.setCity(req.getCity());
         provider.setRating(req.getRating());
        // provider.setIsVerified(false);
+        if (req.getPhone() != null) {
+            provider.getUser().setPhone(req.getPhone());
+        }
 
         MultipartFile pdf = req.getWorkPdf();
 
@@ -212,30 +214,6 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         provider.setDescription(description);
     }
 
-    @Override
-    public void addServiceToProvider(Long userId, Long serviceId) {
-
-        // Resolve provider from logged-in user
-        ServiceProvider provider = serviceProviderRepository
-                .findByUserId(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Service provider not found"));
-
-        //  Fetch the SERVICE using ServiceRepository (IMPORTANT FIX)
-        Services service = serviceRepository
-                .findById(serviceId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Service not found"));
-
-        // Prevent duplicate service linking (best practice)
-        if (provider.getServices().contains(service)) {
-            return;
-        }
-
-        //  Add service to provider
-        provider.getServices().add(service);
-    }
-
 
     private ProviderBookingResponse mapToBookingDetail(Booking booking) {
 
@@ -244,7 +222,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         dto.setBookingId(booking.getBookingId());
         dto.setCustomerName(booking.getUser().getFirstName());
         dto.setCustomerPhone(booking.getUser().getPhone());
-        dto.setServiceTitle(booking.getService().getTitle());
+        dto.setServiceTitle(booking.getProviderService().getService().getTitle());
         dto.setDescription(booking.getDescription());
         dto.setScheduledAt(
                 booking.getScheduledAt()
