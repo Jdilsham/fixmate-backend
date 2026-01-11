@@ -92,7 +92,7 @@ public class PaymentService {
         );
 
         dto.setServiceName(
-                payment.getBooking().getService().getTitle()
+                payment.getBooking().getProviderService().getService().getTitle()
         );
 
         dto.setWorkedTime(payment.getWorkedTime());
