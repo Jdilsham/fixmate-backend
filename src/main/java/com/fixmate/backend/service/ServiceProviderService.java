@@ -14,7 +14,7 @@ public interface ServiceProviderService {
 
     void updateDescription(Long providerId, Long userId, String description);
 
-    void addServiceToProvider(Long serviceId, Long userId);
+    //void addServiceToProvider(Long serviceId, Long userId);
 
     void updateProfile(Long userId, ProfileUpdateReq req);
 
