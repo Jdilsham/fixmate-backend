@@ -150,7 +150,7 @@ public class PaymentService {
             );
         }
 
-        // ❗ Ensure customer already paid
+        // Ensure customer already paid
         if (payment.getStatus() != PaymentStatus.PAID) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
