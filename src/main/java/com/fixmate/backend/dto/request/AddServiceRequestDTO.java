@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @Data
 public class AddServiceRequestDTO {
     @NotNull
-    private Long serviceId;   // dropdown selection
+    private Long serviceId;  // dropdown selection
 
     @NotNull
     private BigDecimal basePrice;
