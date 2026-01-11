@@ -24,23 +24,15 @@ public class Services {
     private Long serviceId;
 
     private String title;
-    private String description;
-
-    @Column(name = "base_price")
-    private BigDecimal basePrice;
-
-    @Column(name = "duration_estimate")
-    private String durationEstimate;
+    //private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false )
     private ServiceCategory category;
 
-    @ManyToMany(mappedBy = "services", fetch = FetchType.LAZY)
-    private Set<ServiceProvider> providers = new HashSet<>();
+    @OneToMany(mappedBy = "service", fetch = FetchType.LAZY)
+    private Set<ProviderService> providerServices = new HashSet<>();
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = false)
-    private Set<Booking> bookings = new HashSet<>();
 
 
 }
