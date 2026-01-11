@@ -1,24 +1,25 @@
 package com.fixmate.backend.service.impl;
 
+import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.ProviderBookingResponse;
 import com.fixmate.backend.dto.response.EarningSummaryDTO;
 import com.fixmate.backend.dto.response.ProviderProfileDTO;
-import com.fixmate.backend.entity.Booking;
-import com.fixmate.backend.entity.Payment;
-import com.fixmate.backend.entity.ServiceProvider;
-import com.fixmate.backend.entity.ProviderService;
+import com.fixmate.backend.entity.*;
+import com.fixmate.backend.exception.InvalidPasswordException;
 import com.fixmate.backend.exception.ResourceNotFoundException;
 import com.fixmate.backend.mapper.ProviderMapper;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.ServiceRepository;
+import com.fixmate.backend.repository.UserRepository;
 import com.fixmate.backend.service.FileStorageService;
 import com.fixmate.backend.service.ServiceProviderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -37,6 +38,8 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     private final BookingRepository bookingRepository;
     private final ProviderMapper providerMapper;
     private final FileStorageService fileStorageService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void requestVerification(Long userId) {
@@ -152,6 +155,27 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         }
         serviceProviderRepository.save(provider);
 
+    }
+
+    @Override
+    public void changePassword(Long userId, ChangePasswordRequest request){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->  new ResourceNotFoundException("User not found"));
+
+        //verify current password
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())){
+            throw new InvalidPasswordException("Invalid current password");
+        }
+        //confirm new password
+        if (request.getConfirmationPassword() != null && !request.getNewPassword().equals(request.getConfirmationPassword())){
+            throw new InvalidPasswordException("Confirmation password not match");
+        }
+
+        //encode and update new pasword
+        String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(encodedPassword);
+
+        userRepository.save(user);
     }
 
     @Override
