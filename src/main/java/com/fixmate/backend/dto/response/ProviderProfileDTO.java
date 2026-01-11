@@ -18,7 +18,8 @@ public class ProviderProfileDTO {
     private Boolean isAvailable;
     private String profileImage;
     private String city;
+    private String phone;
 
-    private List<ServiceResponseDTO> services;
+    private List<ProviderServiceResponseDTO> services;
     private Boolean isOwner;
 }

@@ -1,13 +1,19 @@
 package com.fixmate.backend.controller;
 
+import com.fixmate.backend.dto.request.AddServiceRequestDTO;
+import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.service.CustomUserDetailsService;
 import com.fixmate.backend.service.ProviderBookingService;
+import com.fixmate.backend.service.ProviderServiceService;
 import com.fixmate.backend.service.ServiceProviderService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +27,7 @@ public class ProviderController {
 
     private final ServiceProviderService providerService;
     private final ProviderBookingService bookingService;
+    private final ProviderServiceService providerServiceService;
 
     @GetMapping("/profile")
     public ProviderProfileDTO profile(Authentication auth) {
@@ -42,11 +49,21 @@ public class ProviderController {
         return providerService.getProfileById(id, currentUserId);
     }
 
+    @PutMapping("/change-password")
+    public ResponseEntity<String> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request
+    ){
+        User user = (User) authentication.getPrincipal();
+        providerService.changePassword(user.getId(), request);
+        return ResponseEntity.ok("Password changed successfully");
+    }
 
-    @PutMapping("/profile")
+
+    @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void updateProfile(
             Authentication auth,
-            @RequestBody ProfileUpdateReq req
+            @ModelAttribute ProfileUpdateReq req
     ) {
         providerService.updateProfile(getUserId(auth), req);
     }
@@ -86,20 +103,36 @@ public class ProviderController {
         return providerService.getEarnings(getUserId(auth));
     }
 
-    @PostMapping("/services/{serviceId}")
-    public void addServiceToProfile(
-            @PathVariable Long serviceId,
+//    @PostMapping("/services/{serviceId}")
+//    public ResponseEntity<String> addServiceToProfile(
+//            @PathVariable Long serviceId,
+//            Authentication authentication
+//    ) {
+//        User user =
+//                (User) authentication.getPrincipal();
+//
+//        providerService.addServiceToProvider(
+//                user.getId(),
+//                serviceId
+//        );
+//
+//        return ResponseEntity.ok("Service added successfully");
+//    }
+
+    @PostMapping("/services")
+    public ResponseEntity<?> addServiceToProvider(
+            @RequestBody @Valid AddServiceRequestDTO dto,
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
 
-        providerService.addServiceToProvider(
+        providerServiceService.addServiceToProvider(
                 user.getId(),
-                serviceId
+                dto
         );
 
+        return ResponseEntity.ok("Service added successfully");
     }
-
 
 
     private Long getUserId(Authentication auth) {

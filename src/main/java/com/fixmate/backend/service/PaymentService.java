@@ -92,7 +92,7 @@ public class PaymentService {
         );
 
         dto.setServiceName(
-                payment.getBooking().getService().getTitle()
+                payment.getBooking().getProviderService().getService().getTitle()
         );
 
         dto.setWorkedTime(payment.getWorkedTime());
@@ -150,7 +150,7 @@ public class PaymentService {
             );
         }
 
-        // ❗ Ensure customer already paid
+        // Ensure customer already paid
         if (payment.getStatus() != PaymentStatus.PAID) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,

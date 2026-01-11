@@ -24,87 +24,96 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
     private final CustomerMapper mapper;
     private final BookingRepository bookingRepository;
     private final ServiceProviderRepository serviceProviderRepository;
-    private final ServiceRepository serviceRepository;
+    private final ProviderServiceRepository providerServiceRepository;
     private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
-
 
 
     @Override
     @Transactional
     public CustomerBookingResponse createBooking(String email, BookingRequest dto) {
 
-        //USER
+        // USER
         User customer = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        //PROVIDER
-        ServiceProvider provider = serviceProviderRepository.findById(dto.getProviderId())
-                .orElseThrow(() -> new ResourceNotFoundException("Service Provider not found"));
+        // PROVIDER SERVICE (provider + service + price)
+        ProviderService providerService =
+                providerServiceRepository.findById(dto.getProviderServiceId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException("Provider service not found")
+                        );
 
-        if (!Boolean.TRUE.equals((provider.getIsAvailable()))){
-            throw new ResponseStatusException(CONFLICT,"Service Provider not available");
+        ServiceProvider provider = providerService.getServiceProvider();
+
+        if (!Boolean.TRUE.equals(provider.getIsAvailable())) {
+            throw new ResponseStatusException(CONFLICT, "Service Provider not available");
         }
 
-        //SERVICE
-        Services service = serviceRepository.findById(dto.getServiceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
+        // Resolve snapshot fields
+        String addressLine1 = dto.getAddressLine1();
+        String addressLine2 = dto.getAddressLine2();
+        String city = dto.getCity();
+        String province = dto.getProvince();
+        String phone = dto.getPhone();
+        var latitude = dto.getLatitude();
+        var longitude = dto.getLongitude();
 
+        // Fallback to profile address if missing
+        if (addressLine1 == null || city == null || province == null) {
 
-        //Resolve address
-        String resolvedAddress = dto.getAddress();
-        String resolvedCity = dto.getCity();
-        String resolvedPhone = dto.getPhone();
-        var resolvedLatitude = dto.getLatitude();
-        var resolvedLongitude = dto.getLongitude();
+            Address profileAddress = addressRepository
+                    .findFirstByUserIdOrderByAddressIdDesc(customer.getId())
+                    .orElseThrow(() ->
+                            new ResponseStatusException(
+                                    HttpStatus.BAD_REQUEST,
+                                    "Please provide an address"
+                            )
+                    );
 
-        if (resolvedAddress == null || resolvedCity == null) {
-            Address profileAddress = addressRepository.findFirstByUserIdOrderByAddressIdDesc(customer.getId())
-                    .orElse(null);
-
-            if (profileAddress == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please provide an address");
-            }
-
-            resolvedAddress = profileAddress.getAddress();
-            resolvedCity = profileAddress.getCity();
-            resolvedLatitude = profileAddress.getLatitude();
-            resolvedLongitude = profileAddress.getLongitude();
-            resolvedPhone = customer.getPhone();
-
+            addressLine1 = profileAddress.getAddressLine1();
+            addressLine2 = profileAddress.getAddressLine2();
+            city = profileAddress.getCity();
+            province = profileAddress.getProvince();
+            latitude = profileAddress.getLatitude();
+            longitude = profileAddress.getLongitude();
+            phone = customer.getPhone();
         }
 
-        //Booking
+        String fullAddress =
+                addressLine1 +
+                        (addressLine2 != null ? ", " + addressLine2 : "") +
+                        ", " + city +
+                        ", " + province;
+
+        // BOOKING
         Booking booking = new Booking();
         booking.setUser(customer);
         booking.setServiceProvider(provider);
-        booking.setService(service);
+        booking.setProviderService(providerService);
         booking.setScheduledAt(dto.getScheduledAt());
-        booking.setTotalPrice(service.getBasePrice());
+        booking.setTotalPrice(providerService.getBasePrice()); //  CORRECT
         booking.setDescription(dto.getDescription());
         booking.setStatus(BookingStatus.PENDING);
 
-        //snapshot entity
+        // SNAPSHOT CONTACT INFO
         BookingContactInfo contactInfo = BookingContactInfo.builder()
-                .address(resolvedAddress)
-                .city(resolvedCity)
-                .phone(resolvedPhone)
-                .latitude(resolvedLatitude)
-                .longitude(resolvedLongitude)
+                .address(fullAddress)
+                .city(city)
+                .phone(phone)
+                .latitude(latitude)
+                .longitude(longitude)
                 .booking(booking)
                 .build();
 
         booking.setContactInfo(contactInfo);
 
-        Booking saved =  bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
 
         return CustomerBookingResponse.builder()
                 .bookingId(saved.getBookingId())
                 .status(saved.getStatus())
                 .build();
-
-
     }
-
 
 }

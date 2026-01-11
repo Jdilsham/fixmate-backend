@@ -49,22 +49,19 @@ public class ServiceProvider {
     @Column(name = "longitude", precision = 10, scale = 7)
     private BigDecimal longitude;
 
-
+    @Column(name = "work_pdf_url")
+    private String workPdfUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProviderService> providerServices = new HashSet<>();
+
+    @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Booking> bookings = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "service_provider_service",
-            joinColumns = @JoinColumn(name = "service_provider_id"),
-            inverseJoinColumns = @JoinColumn(name = "service_id")
-    )
-    private Set<Services> services = new HashSet<>();
 
     @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Review> reviews = new HashSet<>();

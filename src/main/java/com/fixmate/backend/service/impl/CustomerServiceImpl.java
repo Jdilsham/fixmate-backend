@@ -12,11 +12,14 @@ import com.fixmate.backend.exception.ResourceNotFoundException;
 import com.fixmate.backend.mapper.CustomerMapper;
 import com.fixmate.backend.repository.*;
 import com.fixmate.backend.service.CustomerService;
+import com.fixmate.backend.util.FileStorageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 
@@ -33,6 +36,7 @@ public class CustomerServiceImpl  implements CustomerService {
     private final ServiceRepository serviceRepository;
     private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
+    private final FileStorageUtil fileStorageUtil;
 
 
     //get profile
@@ -75,12 +79,42 @@ public class CustomerServiceImpl  implements CustomerService {
         userRepository.save(user);
     }
 
+    @Override
+    public String uploadProfileImage(MultipartFile  file) {
+        User user = getCurrentUser();
 
+        //validate and store file
+        String imageUrl = fileStorageUtil.storeProfileImage(file, user.getId());
+
+        //update user
+        user.setProfilePic(imageUrl);
+        userRepository.save(user);
+
+        return imageUrl;
+
+    }
+
+//===============================HELPERS========================================
     //Ensure user exists
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,"User not found"));
     }
+
+    private User getCurrentUser() {
+        Object principal = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof User user)) {
+            throw new ResponseStatusException(UNAUTHORIZED, "Unauthorized");
+        }
+
+        return user;
+    }
+
+
 
 
 }

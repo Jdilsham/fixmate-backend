@@ -24,7 +24,9 @@ public class AddressServiceImpl implements AddressService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
                 );
         Address address = new Address();
-        address.setAddress(request.getAddress());
+        address.setAddressLine1(request.getAddressLine1());
+        address.setAddressLine2(request.getAddressLine2());
+        address.setProvince(request.getProvince());
         address.setCity(request.getCity());
         address.setLatitude(request.getLatitude());
         address.setLongitude(request.getLongitude());
@@ -36,7 +38,9 @@ public class AddressServiceImpl implements AddressService {
 
         return AddressResponse.builder()
                 .id(saved.getAddressId())
-                .address(saved.getAddress())
+                .addressLine1(saved.getAddressLine1())
+                .addressLine2(saved.getAddressLine2())
+                .province(saved.getProvince())
                 .city(saved.getCity())
                 .latitude(saved.getLatitude())
                 .longitude(saved.getLongitude())
