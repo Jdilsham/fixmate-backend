@@ -21,6 +21,7 @@ public class ProfileUpdateReq {
     private String city;
     private String description;
     private BigDecimal rating;
+    private String phone;
 
     private MultipartFile workPdf;
 }
