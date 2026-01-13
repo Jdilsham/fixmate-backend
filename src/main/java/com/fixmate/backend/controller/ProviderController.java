@@ -1,11 +1,9 @@
 package com.fixmate.backend.controller;
 
 import com.fixmate.backend.dto.request.AddServiceRequestDTO;
-import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.User;
-import com.fixmate.backend.service.CustomUserDetailsService;
 import com.fixmate.backend.service.ProviderBookingService;
 import com.fixmate.backend.service.ProviderServiceService;
 import com.fixmate.backend.service.ServiceProviderService;
@@ -47,16 +45,6 @@ public class ProviderController {
         }
 
         return providerService.getProfileById(id, currentUserId);
-    }
-
-    @PutMapping("/change-password")
-    public ResponseEntity<String> changePassword(
-            Authentication authentication,
-            @Valid @RequestBody ChangePasswordRequest request
-    ){
-        User user = (User) authentication.getPrincipal();
-        providerService.changePassword(user.getId(), request);
-        return ResponseEntity.ok("Password changed successfully");
     }
 
 
