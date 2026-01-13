@@ -1,6 +1,5 @@
 package com.fixmate.backend.service;
 
-import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.ServiceProvider;
@@ -15,8 +14,6 @@ public interface ServiceProviderService {
 
     void updateDescription(Long providerId, Long userId, String description);
 
-    //void addServiceToProvider(Long serviceId, Long userId);
-
     void updateProfile(Long userId, ProfileUpdateReq req);
 
     void requestVerification(Long userId);
@@ -29,5 +26,4 @@ public interface ServiceProviderService {
 
     boolean toggleAvailability(String email);
 
-    void changePassword(Long userId, ChangePasswordRequest request);
 }
