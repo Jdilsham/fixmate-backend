@@ -12,7 +12,4 @@ public interface CustomerService {
 
     void changePassword(Long userId, ChangePasswordRequest request);
 
-    String uploadProfileImage(MultipartFile file);
-
-
 }
