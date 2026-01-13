@@ -67,8 +67,8 @@ public class AuthService {
 
             ServiceProvider sp = new ServiceProvider();
             sp.setUser(savedUser);
-            sp.setIsVerified(true);   // must be approved by admin
-            sp.setIsAvailable(false);  // cannot work yet
+            sp.setIsVerified(false);   // must be approved by admin
+            sp.setIsAvailable(true);  // cannot work yet
 
             serviceProviderRepository.save(sp);
         }
