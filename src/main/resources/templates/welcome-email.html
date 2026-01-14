@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to FixMate</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        /* Header */
+        .header {
+            background-color: #007bff; /* FixMate Blue Color */
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        /* Body Content */
+        .content {
+            padding: 30px;
+            color: #333333;
+            line-height: 1.6;
+        }
+        .content h2 {
+            color: #007bff;
+            font-size: 22px;
+        }
+        .btn-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn {
+            background-color: #007bff;
+            color: #ffffff !important; /* Force white text */
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        /* Footer */
+        .footer {
+            background-color: #eeeeee;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>FixMate</h1>
+        <p>Your Service Partner</p>
+    </div>
+
+    <div class="content">
+        <h2>Hi <span th:text="${name}">User</span>! 👋</h2>
+
+        <p>Welcome to <strong>FixMate</strong>! We are thrilled to have you on board.</p>
+
+        <p>Whether you need a plumber, electrician, or any other expert, we've got you covered. You are now just one click away from finding the best professionals in your area.</p>
+
+        <div class="btn-container">
+            <a href="#" class="btn">Find a Service Now</a>
+        </div>
+
+        <p>If you have any questions, feel free to reply to this email. We're here to help!</p>
+
+        <p>Best Regards,<br>The FixMate Team</p>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 FixMate. All rights reserved.</p>
+        <p>
+            Need help? Contact us at
+            <a href="mailto:support@fixmate.app">support@fixmate.app</a>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

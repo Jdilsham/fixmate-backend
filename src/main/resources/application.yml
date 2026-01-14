@@ -17,17 +17,30 @@ spring:
     serialization:
       INDENT_OUTPUT: true
 
-servlet:
-  multipart:
-    max-file-size: 5MB
-    max-request-size: 5MB
 
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: app.fixmate@gmail.com
+    password: meli vwuj oqmu nbup
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+
+  servlet:
+   multipart:
+     max-file-size: 5MB
+     max-request-size: 5MB
+
 
 server:
   port: 8081
