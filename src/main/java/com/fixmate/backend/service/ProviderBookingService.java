@@ -8,7 +8,7 @@ public interface ProviderBookingService {
 
     List<Booking> getProviderBookings(Long ServiceProviderId);
 
-    void confirmBookings(Long bookingId, Long serviceProviderId);
+    void confirmBooking(Long bookingId, Long serviceProviderId, Long providerServiceId);
 
-    void cancelBookings(Long bookingId, Long serviceProviderId, String reason);
+    void cancelBooking(Long bookingId, Long serviceProviderId, Long providerServiceId, String reason);
 }
