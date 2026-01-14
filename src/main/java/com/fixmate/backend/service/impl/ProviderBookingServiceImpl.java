@@ -23,13 +23,14 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
     @Override
     public List<Booking> getProviderBookings(Long serviceProviderId){
-        return bookingRepository.findByServiceProvider_ServiceProviderId(serviceProviderId);
+        return bookingRepository.findByProviderService_ServiceProvider_ServiceProviderId(serviceProviderId);
     }
 
     @Override
-    public void confirmBookings(Long bookingId, Long serviceProviderId){
-        Booking booking = bookingRepository.findByBookingIdAndServiceProvider_ServiceProviderId(bookingId, serviceProviderId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking notFound."));
+    public void confirmBooking(Long bookingId, Long serviceProviderId, Long providerServiceId){
+        Booking booking = bookingRepository.findProviderBookingById
+                        (bookingId, providerServiceId, serviceProviderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking notFound."));
 
         if(booking.getStatus() != BookingStatus.PENDING){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending bookings can be confirmed.");
@@ -37,17 +38,18 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
 
         booking.setStatus(BookingStatus.ACCEPTED);
+        //bookingRepository.save(booking);
 
         notificationService.notifyCustomer(booking.getUser(), "Your booking has been CONFIRMED by the service provider.");
     }
 
     @Override
-    public void cancelBookings(Long bookingId, Long serviceProviderId, String reason) {
+    public void cancelBooking(Long bookingId, Long serviceProviderId, Long providerServiceId, String reason) {
         if(reason == null || reason.isBlank()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please provide a reason.");
         }
 
-        Booking booking = bookingRepository.findByBookingIdAndServiceProvider_ServiceProviderId(bookingId, serviceProviderId)
+        Booking booking = bookingRepository.findProviderBookingById(bookingId, providerServiceId, serviceProviderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found."));
 
         if(booking.getStatus() != BookingStatus.PENDING){
@@ -56,6 +58,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
         booking.setStatus(BookingStatus.CANCELLED);
         booking.setCancelReason(reason);
+        //bookingRepository.save(booking);
 
         notificationService.notifyCustomer(booking.getUser(), "Your booking has been cancelled by the service provider.");
     }
