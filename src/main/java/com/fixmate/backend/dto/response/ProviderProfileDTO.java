@@ -13,6 +13,7 @@ public class ProviderProfileDTO {
     private String fullName;
     private String description;
     private String skill;
+    private String experience;
     private BigDecimal rating;
     private Boolean isVerified;
     private Boolean isAvailable;
