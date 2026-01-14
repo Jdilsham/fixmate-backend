@@ -48,6 +48,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @Column(length = 6)
+    private String verificationCode;
+
+    @Column(nullable = false)
+    private boolean isVerified;
+
+
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
