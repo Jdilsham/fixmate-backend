@@ -91,22 +91,6 @@ public class ProviderController {
         return providerService.getEarnings(getUserId(auth));
     }
 
-//    @PostMapping("/services/{serviceId}")
-//    public ResponseEntity<String> addServiceToProfile(
-//            @PathVariable Long serviceId,
-//            Authentication authentication
-//    ) {
-//        User user =
-//                (User) authentication.getPrincipal();
-//
-//        providerService.addServiceToProvider(
-//                user.getId(),
-//                serviceId
-//        );
-//
-//        return ResponseEntity.ok("Service added successfully");
-//    }
-
     @PostMapping("/services")
     public ResponseEntity<?> addServiceToProvider(
             @RequestBody @Valid AddServiceRequestDTO dto,
