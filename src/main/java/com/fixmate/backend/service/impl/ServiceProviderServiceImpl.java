@@ -154,7 +154,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         ServiceProvider provider = getVerifiedProviderByUserId(userId);
 
         return bookingRepository
-                .findByServiceProvider_ServiceProviderId(
+                .findByProviderService_ServiceProvider_ServiceProviderId(
                         provider.getServiceProviderId()
                 )
                 .stream()
