@@ -3,7 +3,6 @@ package com.fixmate.backend.controller;
 import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.request.CustomerUpdateReq;
 import com.fixmate.backend.dto.response.CustomerProfileResponse;
-import com.fixmate.backend.dto.response.ProfileImageUploadRes;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.service.CustomerService;
 import jakarta.validation.Valid;
@@ -11,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -44,9 +42,4 @@ public class CustomerController {
         return ResponseEntity.ok("Password changed successfully");
     }
 
-    @PostMapping("profile-image")
-    public ResponseEntity<ProfileImageUploadRes> uploadProfileImage(@RequestParam("file") MultipartFile file){
-        String imageUrl = customerService.uploadProfileImage(file);
-        return ResponseEntity.ok(new ProfileImageUploadRes(imageUrl));
-    }
 }

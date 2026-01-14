@@ -17,6 +17,7 @@ public interface ProviderMapper {
     // MAIN PROFILE MAPPING
     @Mapping(target = "providerId", source = "serviceProviderId")
     @Mapping(target = "phone", source = "user.phone")
+    @Mapping(target = "experience", source = "experience")
     @Mapping(
             target = "fullName",
             expression = "java(provider.getUser().getFirstName() + \" \" + provider.getUser().getLastName())"
