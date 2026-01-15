@@ -1,9 +1,7 @@
 package com.fixmate.backend.controller;
 
-import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.request.CustomerUpdateReq;
 import com.fixmate.backend.dto.response.CustomerProfileResponse;
-import com.fixmate.backend.entity.User;
 import com.fixmate.backend.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,14 +30,5 @@ public class CustomerController {
 
     }
 
-    @PutMapping("/change-password")
-    public ResponseEntity<String> changePassword(
-            Authentication authentication,
-            @Valid @RequestBody ChangePasswordRequest request
-    ){
-        User user = (User) authentication.getPrincipal();
-        customerService.changePassword(user.getId(), request);
-        return ResponseEntity.ok("Password changed successfully");
-    }
 
 }
