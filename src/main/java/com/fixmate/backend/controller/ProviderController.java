@@ -3,7 +3,9 @@ package com.fixmate.backend.controller;
 import com.fixmate.backend.dto.request.AddServiceRequestDTO;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
+import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.mapper.BookingMapper;
 import com.fixmate.backend.service.ProviderBookingService;
 import com.fixmate.backend.service.ProviderServiceService;
 import com.fixmate.backend.service.ServiceProviderService;
@@ -26,6 +28,7 @@ public class ProviderController {
     private final ServiceProviderService providerService;
     private final ProviderBookingService bookingService;
     private final ProviderServiceService providerServiceService;
+    private final BookingMapper bookingMapper;
 
     @GetMapping("/profile")
     public ProviderProfileDTO profile(Authentication auth) {
@@ -71,19 +74,45 @@ public class ProviderController {
         providerService.requestVerification(getUserId(auth));
     }
 
-    @GetMapping("/bookings")
-    public List<ProviderBookingResponse> bookings(Authentication auth) {
-        return providerService.getBookings(getUserId(auth));
+    @GetMapping("/{serviceProviderId}/bookings")
+    public ResponseEntity<List<BookingResponseDTO>>getProviderBookings(
+            @PathVariable Long serviceProviderId
+    ){
+        return ResponseEntity.ok(
+          bookingMapper.toDtoList(
+             bookingService.getProviderBookings(serviceProviderId)
+          )
+        );
     }
 
-    @PostMapping("/bookings/{id}/confirm")
-    public void confirmBooking(@PathVariable("id") Long bookingId, Authentication auth) {
-        bookingService.confirmBookings(getUserId(auth), bookingId);
+    @PostMapping("/bookings/{bookingId}/confirm")
+    public ResponseEntity<Void> confirmBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            Authentication auth
+    ) {
+        bookingService.confirmBooking(
+                bookingId,
+                getUserId(auth),
+                providerServiceId
+        );
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/bookings/{id}/cancel")
-    public void cancelBooking(@PathVariable("id") Long bookingId, @RequestParam String reason, Authentication auth) {
-        bookingService.cancelBookings(getUserId(auth), bookingId, reason);
+    @PostMapping("/bookings/{bookingId}/cancel")
+    public ResponseEntity<Void> cancelBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            @RequestParam String reason,
+            Authentication auth
+    ) {
+        bookingService.cancelBooking(
+                bookingId,
+                getUserId(auth),
+                providerServiceId,
+                reason
+        );
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/earnings")
