@@ -104,6 +104,15 @@ public class ProviderController {
         return providerService.updateProviderAddress(userId, request);
     }
 
+    @PutMapping(value = "/verification/pdf",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    ) public void uploadVerificationPdf(
+
+            Authentication auth,
+            @RequestParam("pdf") MultipartFile pdf
+    ) {
+        providerService.uploadVerificationPdf(getUserId(auth), pdf);
+    }
 
 
     @PatchMapping("/availability")

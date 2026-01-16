@@ -1,5 +1,6 @@
 package com.fixmate.backend.entity;
 
+import com.fixmate.backend.enums.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,10 +30,14 @@ public class ServiceProvider {
     private String licenseNumber;
 
     @Column(name = "is_available")
-    private Boolean isAvailable = true;
+    private Boolean isAvailable = false;
 
     @Column(name = "is_verified")
     private Boolean isVerified = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status")
+    private VerificationStatus verificationStatus = VerificationStatus.NOT_SUBMITTED;
 
     @Column(name = "profile_image")
     private String profileImage;

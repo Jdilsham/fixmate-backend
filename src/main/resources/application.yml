@@ -4,6 +4,7 @@ spring:
     username: fixmate
     password: fixmate
 
+
   jpa:
     hibernate:
       ddl-auto: none

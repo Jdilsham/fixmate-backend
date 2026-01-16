@@ -34,4 +34,6 @@ public interface ServiceProviderService {
 
     void updateProfilePicture(Long userId, MultipartFile profilePic);
 
+    void uploadVerificationPdf(Long userId, MultipartFile pdf);
+
 }

@@ -7,6 +7,7 @@ import com.fixmate.backend.dto.response.ProviderBookingResponse;
 import com.fixmate.backend.dto.response.EarningSummaryDTO;
 import com.fixmate.backend.dto.response.ProviderProfileDTO;
 import com.fixmate.backend.entity.*;
+import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.mapper.ProviderMapper;
 import com.fixmate.backend.repository.AddressRepository;
 import com.fixmate.backend.repository.BookingRepository;
@@ -245,7 +246,49 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                 .build();
     }
 
+    public void uploadVerificationPdf(Long userId, MultipartFile pdf) {
 
+        if (pdf == null || pdf.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Verification PDF is required"
+            );
+        }
+
+        if (pdf.getContentType() == null ||
+                !pdf.getContentType().equalsIgnoreCase("application/pdf")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only PDF files are allowed"
+            );
+        }
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        String pdfUrl;
+        try {
+            pdfUrl = fileStorageService.upload(pdf);
+            System.out.println("PDF uploaded to: " + pdfUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "PDF upload failed"
+            );
+        }
+
+        provider.setWorkPdfUrl(pdfUrl);
+        provider.setVerificationStatus(VerificationStatus.PENDING);
+        provider.setIsVerified(false);
+        provider.setIsAvailable(false);
+    }
 
     @Override
     public List<ProviderBookingResponse> getBookings(Long userId) {
