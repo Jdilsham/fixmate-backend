@@ -4,6 +4,7 @@ import com.fixmate.backend.dto.request.EmailVerifyRequest;
 import com.fixmate.backend.dto.request.GoogleLoginRequest;
 import com.fixmate.backend.dto.request.LoginRequest;
 import com.fixmate.backend.dto.request.SignupRequest;
+import com.fixmate.backend.dto.response.AuthResponse;
 import com.fixmate.backend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,13 +32,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(
+    public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request
     ) {
         return ResponseEntity.ok(
                 authService.login(request)
         );
     }
+
 
     @PostMapping("/verify")
     public ResponseEntity<String> verify(

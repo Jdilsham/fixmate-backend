@@ -1,11 +1,14 @@
 package com.fixmate.backend.service.impl;
 
+import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
+import com.fixmate.backend.dto.response.AddressResponse;
 import com.fixmate.backend.dto.response.ProviderBookingResponse;
 import com.fixmate.backend.dto.response.EarningSummaryDTO;
 import com.fixmate.backend.dto.response.ProviderProfileDTO;
 import com.fixmate.backend.entity.*;
 import com.fixmate.backend.mapper.ProviderMapper;
+import com.fixmate.backend.repository.AddressRepository;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.service.FileStorageService;
@@ -32,6 +35,8 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     private final BookingRepository bookingRepository;
     private final ProviderMapper providerMapper;
     private final FileStorageService fileStorageService;
+    private final AddressRepository addressRepository;
+
 
     @Override
     public void requestVerification(Long userId) {
@@ -120,32 +125,127 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         )
                 );
 
-        provider.setSkill(req.getSkill());
-        provider.setExperience(req.getExperience());
-        provider.setProfileImage(req.getProfileImageUrl());
-        //provider.setAddress(req.getAddress());
-        provider.setDescription(req.getDescription());
-        provider.setCity(req.getCity());
-        provider.setRating(req.getRating());
-       // provider.setIsVerified(false);
-        if (req.getPhone() != null) {
-            provider.getUser().setPhone(req.getPhone());
-        }
+        User user = provider.getUser();
 
-        MultipartFile pdf = req.getWorkPdf();
-
-        if (pdf != null && !pdf.isEmpty()) {
-
-            if (!"application/pdf".equalsIgnoreCase(pdf.getContentType())) {
-                throw new IllegalArgumentException("Only PDF files are allowed");
-            }
-
-            String pdfUrl = fileStorageService.upload(pdf);
-            provider.setWorkPdfUrl(pdfUrl);
-        }
-        serviceProviderRepository.save(provider);
-
+        user.setFirstName(req.getFirstName());
+        user.setLastName(req.getLastName());
+        user.setPhone(req.getPhone());
     }
+
+    @Override
+    public void updateProfilePicture(Long userId, MultipartFile profilePic) {
+
+        if (profilePic == null || profilePic.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Profile picture is required"
+            );
+        }
+
+        if (!profilePic.getContentType().startsWith("image/")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only image files are allowed"
+            );
+        }
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        String imageUrl = fileStorageService.upload(profilePic);
+
+        provider.setProfileImage(imageUrl); // ✅ FIXED
+    }
+
+
+
+
+
+    @Override
+    @Transactional
+    public AddressResponse addProviderAddress(Long userId, AddressRequest request) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        if (addressRepository.findByUserId(userId).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Address already exists. Use update."
+            );
+        }
+
+        Address address = new Address();
+        address.setUser(provider.getUser());
+        address.setAddressLine1(request.getAddressLine1());
+        address.setAddressLine2(request.getAddressLine2());
+        address.setProvince(request.getProvince());
+        address.setCity(request.getCity());
+        address.setLatitude(request.getLatitude());
+        address.setLongitude(request.getLongitude());
+
+        Address saved = addressRepository.save(address);
+
+        return mapToResponse(saved);
+    }
+
+    @Transactional
+    public AddressResponse updateProviderAddress(Long userId, AddressRequest request) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        Address address = addressRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Address not found. Create it first."
+                        )
+                );
+
+        address.setAddressLine1(request.getAddressLine1());
+        address.setAddressLine2(request.getAddressLine2());
+        address.setProvince(request.getProvince());
+        address.setCity(request.getCity());
+        address.setLatitude(request.getLatitude());
+        address.setLongitude(request.getLongitude());
+
+        Address saved = addressRepository.save(address);
+
+        return mapToResponse(saved);
+    }
+
+    private AddressResponse mapToResponse(Address address) {
+        return AddressResponse.builder()
+                .id(address.getAddressId())
+                .addressLine1(address.getAddressLine1())
+                .addressLine2(address.getAddressLine2())
+                .province(address.getProvince())
+                .city(address.getCity())
+                .latitude(address.getLatitude())
+                .longitude(address.getLongitude())
+                .build();
+    }
+
+
 
     @Override
     public List<ProviderBookingResponse> getBookings(Long userId) {

@@ -3,10 +3,13 @@ package com.fixmate.backend.service.impl;
 import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.response.AddressResponse;
 import com.fixmate.backend.entity.Address;
+import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.repository.AddressRepository;
+import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.UserRepository;
 import com.fixmate.backend.service.AddressService;
+import com.fixmate.backend.service.ServiceProviderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,7 @@ public class AddressServiceImpl implements AddressService {
     private final UserRepository userRepository;
 
     @Override
-    public AddressResponse addProfileAddress(Long userId, AddressRequest request){
+    public AddressResponse addProfileAddress(Long userId, AddressRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
                 );
@@ -31,10 +34,10 @@ public class AddressServiceImpl implements AddressService {
         address.setLatitude(request.getLatitude());
         address.setLongitude(request.getLongitude());
 
-       // address.setBooking(null);
+        // address.setBooking(null);
         address.setUser(user);
 
-        Address saved =  addressRepository.save(address);
+        Address saved = addressRepository.save(address);
 
         return AddressResponse.builder()
                 .id(saved.getAddressId())
@@ -47,5 +50,4 @@ public class AddressServiceImpl implements AddressService {
                 .build();
 
     }
-
 }

@@ -1,8 +1,10 @@
 package com.fixmate.backend.service;
 
+import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.ServiceProvider;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,5 +27,11 @@ public interface ServiceProviderService {
     ServiceProvider getVerifiedProviderByUserId(Long userId);
 
     boolean toggleAvailability(String email);
+
+    AddressResponse addProviderAddress(Long userId, AddressRequest request);
+
+    AddressResponse updateProviderAddress(Long userId, AddressRequest request);
+
+    void updateProfilePicture(Long userId, MultipartFile profilePic);
 
 }
