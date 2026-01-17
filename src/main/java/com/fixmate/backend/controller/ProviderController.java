@@ -7,6 +7,7 @@ import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.mapper.BookingMapper;
+import com.fixmate.backend.repository.ServiceRepository;
 import com.fixmate.backend.service.ProviderBookingService;
 import com.fixmate.backend.service.ProviderServiceService;
 import com.fixmate.backend.service.ServiceProviderService;
@@ -33,6 +34,8 @@ public class ProviderController {
     private final ProviderBookingService bookingService;
     private final ProviderServiceService providerServiceService;
     private final BookingMapper bookingMapper;
+    private final ServiceRepository serviceRepository;
+
 
     private Long getUserId(Authentication authentication) {
         return ((User) authentication.getPrincipal()).getId();
@@ -221,5 +224,15 @@ public class ProviderController {
         );
     }
 
+    @GetMapping("/services/categories")
+    public List<ServiceCategoryResponse> getAllServiceCategories() {
+        return serviceRepository.findAll()
+                .stream()
+                .map(service -> new ServiceCategoryResponse(
+                        service.getServiceId(),
+                        service.getTitle()
+                ))
+                .toList();
+    }
 
 }

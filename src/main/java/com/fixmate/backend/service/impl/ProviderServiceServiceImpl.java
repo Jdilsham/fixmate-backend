@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.fixmate.backend.enums.VerificationStatus;
+import com.fixmate.backend.exception.BadRequestException;
+
 
 
 @Service
@@ -63,7 +65,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
                 );
 
         if (exists) {
-            throw new IllegalStateException("Service already added by provider");
+            throw new BadRequestException("Service already exists");
         }
 
         // pricing validation
