@@ -114,7 +114,9 @@ public class ProviderController {
             Authentication auth,
             @RequestParam("pdf") MultipartFile pdf
     ) {
+
         providerService.uploadVerificationPdf(getUserId(auth), pdf);
+
     }
 
 
