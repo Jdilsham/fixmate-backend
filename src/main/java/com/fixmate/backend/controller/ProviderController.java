@@ -208,7 +208,18 @@ public class ProviderController {
         return ResponseEntity.ok("Service added successfully");
     }
 
+    @GetMapping("/services")
+    public ResponseEntity<List<ProviderServiceCardResponse>> getProviderServices(
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
 
+        System.out.println("JWT USER ID = " + user.getId()); // 👈 ADD THIS
+
+        return ResponseEntity.ok(
+                providerServiceService.getProviderServices(user.getId())
+        );
+    }
 
 
 }

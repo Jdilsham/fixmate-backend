@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fixmate.backend.dto.request.AddProviderServiceRequest;
+import com.fixmate.backend.dto.response.ProviderServiceCardResponse;
 import com.fixmate.backend.dto.response.PublicServiceCardResponse;
+import com.fixmate.backend.entity.Address;
 import com.fixmate.backend.entity.ProviderService;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.Services;
 import com.fixmate.backend.exception.ResourceNotFoundException;
+import com.fixmate.backend.mapper.ProviderMapper;
 import com.fixmate.backend.repository.ProviderServiceRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.ServiceRepository;
@@ -32,6 +35,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final ServiceRepository serviceRepository;
     private final ProviderServiceRepository providerServiceRepository;
+    private final ProviderMapper providerMapper;
 
     @Override
     public void addServiceToProvider(
@@ -120,22 +124,59 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
                 )
                 .stream()
                 .map(ps -> {
-                    PublicServiceCardResponse dto =
-                            new PublicServiceCardResponse();
+                    PublicServiceCardResponse dto = new PublicServiceCardResponse();
 
+                    // IDs
                     dto.setProviderServiceId(ps.getId());
+                    dto.setServiceId(ps.getService().getServiceId());
+
+                    // Service info
                     dto.setServiceTitle(ps.getService().getTitle());
                     dto.setCategoryName(ps.getService().getCategory().getName());
+
+                    // Provider info
                     dto.setProviderName(
                             ps.getServiceProvider().getUser().getFirstName()
                                     + " "
                                     + ps.getServiceProvider().getUser().getLastName()
                     );
+                    dto.setRating(ps.getServiceProvider().getRating());
+                    dto.setLocation(
+                            ps.getServiceProvider().getUser().getAddresses().stream()
+                                    .findFirst()
+                                    .map(Address::getCity)
+                                    .orElse(null)
+                    );
+
+
+                    // Pricing
                     dto.setFixedPrice(ps.getFixedPrice());
                     dto.setHourlyRate(ps.getHourlyRate());
 
                     return dto;
                 })
+                .toList();
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProviderServiceCardResponse> getProviderServices(Long userId) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Provider not found")
+                );
+
+        List<ProviderService> services =
+                providerServiceRepository
+                        .findByServiceProvider_ServiceProviderId(
+                                provider.getServiceProviderId()
+                        );
+
+        return services.stream()
+                .map(providerMapper::toProviderServiceDTO)
                 .toList();
     }
 
