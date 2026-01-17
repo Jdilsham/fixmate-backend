@@ -246,6 +246,14 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                 .build();
     }
 
+
+    public AddressResponse getProviderAddress(Long userId) {
+
+        return addressRepository.findByUserId(userId)
+                .map(this::mapToResponse)
+                .orElse(null); // important: no address yet
+    }
+
     public void uploadVerificationPdf(Long userId, MultipartFile pdf) {
 
         if (pdf == null || pdf.isEmpty()) {

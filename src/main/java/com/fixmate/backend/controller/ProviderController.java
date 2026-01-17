@@ -84,7 +84,10 @@ public class ProviderController {
         providerService.updateProfilePicture(getUserId(auth), profilePic);
     }
 
-
+    @GetMapping("/address")
+    public AddressResponse getProviderAddress(Authentication auth) {
+        return providerService.getProviderAddress(getUserId(auth));
+    }
 
     @PostMapping("/address")
     public AddressResponse createAddress(
@@ -129,6 +132,8 @@ public class ProviderController {
     public void requestVerification(Authentication auth) {
         providerService.requestVerification(getUserId(auth));
     }
+
+
 
     @GetMapping("/{serviceProviderId}/bookings")
     public ResponseEntity<List<BookingResponseDTO>>getProviderBookings(

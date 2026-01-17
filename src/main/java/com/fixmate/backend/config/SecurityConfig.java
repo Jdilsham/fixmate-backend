@@ -55,9 +55,9 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/auth/google").permitAll()
-                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/files/**").permitAll()
 
-                          .requestMatchers(
+                        .requestMatchers(
                                 org.springframework.http.HttpMethod.GET,
                                 "/api/v1/service-providers/**"
                         ).permitAll()

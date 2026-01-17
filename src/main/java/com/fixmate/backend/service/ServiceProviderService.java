@@ -28,6 +28,8 @@ public interface ServiceProviderService {
 
     boolean toggleAvailability(String email);
 
+    AddressResponse getProviderAddress(Long userId);
+
     AddressResponse addProviderAddress(Long userId, AddressRequest request);
 
     AddressResponse updateProviderAddress(Long userId, AddressRequest request);
