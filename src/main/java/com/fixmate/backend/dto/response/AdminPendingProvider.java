@@ -1,5 +1,6 @@
 package com.fixmate.backend.dto.response;
 
+import com.fixmate.backend.enums.VerificationStatus;
 import java.time.Instant;
 
 public record AdminPendingProvider(
@@ -12,6 +13,7 @@ public record AdminPendingProvider(
         String experience,
         String licenseNumber,
         String profileImage,
-        Boolean verified,
+        String workPdfUrl,
+        VerificationStatus verificationStatus,
         Instant createdAt
 ) {}

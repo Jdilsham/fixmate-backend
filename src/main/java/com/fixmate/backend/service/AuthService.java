@@ -3,6 +3,7 @@ package com.fixmate.backend.service;
 import com.fixmate.backend.config.JwtUtil;
 import com.fixmate.backend.dto.request.LoginRequest;
 import com.fixmate.backend.dto.request.SignupRequest;
+import com.fixmate.backend.dto.response.AuthResponse;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.enums.Role;
@@ -61,7 +62,7 @@ public class AuthService {
 
             ServiceProvider provider = new ServiceProvider();
             provider.setUser(savedUser);
-            provider.setIsVerified(true);     // must be approved by admin
+            provider.setIsVerified(false);     // must be approved by admin
             provider.setIsAvailable(false);   // cannot work yet
 
             serviceProviderRepository.save(provider);
@@ -73,7 +74,7 @@ public class AuthService {
         );
     }
 
-    public String login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
 
         userRepository.findByEmail(request.getEmail())
                 .ifPresent(user -> {
@@ -105,11 +106,17 @@ public class AuthService {
             );
         }
 
-        return jwtUtil.generateToken(
+        String token = jwtUtil.generateToken(
                 user.getEmail(),
                 user.getRole().name()
         );
+
+        return new AuthResponse(
+                token,
+                user.getRole().name()
+        );
     }
+
 
 
     //verify email and send welcome email

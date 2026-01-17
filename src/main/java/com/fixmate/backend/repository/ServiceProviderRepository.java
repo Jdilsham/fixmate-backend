@@ -20,23 +20,24 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     Optional<ServiceProvider> findByServiceProviderIdAndIsVerifiedTrue(Long id);
 
     @Query("""
-        SELECT new com.fixmate.backend.dto.response.AdminPendingProvider(
-            sp.serviceProviderId,
-            u.firstName,
-            u.lastName,
-            u.email,
-            u.phone,
-            sp.skill,
-            sp.experience,
-            sp.licenseNumber,
-            sp.profileImage,
-            sp.isVerified,
-            u.createdAt
-        )
-        FROM ServiceProvider sp
-        JOIN sp.user u
-        WHERE sp.isVerified = false
-    """)
+    SELECT new com.fixmate.backend.dto.response.AdminPendingProvider(
+        sp.serviceProviderId,
+        u.firstName,
+        u.lastName,
+        u.email,
+        u.phone,
+        sp.skill,
+        sp.experience,
+        sp.licenseNumber,
+        sp.profileImage,
+        sp.workPdfUrl,
+        sp.verificationStatus,
+        u.createdAt
+    )
+    FROM ServiceProvider sp
+    JOIN sp.user u
+    WHERE sp.verificationStatus = com.fixmate.backend.enums.VerificationStatus.PENDING
+""")
     List<AdminPendingProvider> findPendingProvidersForAdmin();
 
     List<ServiceProvider> findByIsVerifiedTrueAndIsAvailableTrue();

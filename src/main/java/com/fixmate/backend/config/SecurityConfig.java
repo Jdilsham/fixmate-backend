@@ -4,6 +4,7 @@ import com.fixmate.backend.repository.UserRepository;
 import com.fixmate.backend.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -50,13 +51,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))   // ✅ ADD THIS LINE
                 .authorizeHttpRequests(auth -> auth
 
-                        // ✅ Public endpoints
+
                         .requestMatchers("/healthz/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/auth/google").permitAll()
+                        .requestMatchers("/files/**").permitAll()
 
-                          .requestMatchers(
+
+                        .requestMatchers(
                                 org.springframework.http.HttpMethod.GET,
                                 "/api/v1/service-providers/**"
                         ).permitAll()

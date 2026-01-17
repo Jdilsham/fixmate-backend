@@ -31,20 +31,15 @@ public class AuthController {
         );
     }
 
-    /*@PostMapping("/login")
-    public ResponseEntity<?> login(
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request
     ) {
         return ResponseEntity.ok(
                 authService.login(request)
         );
-    }*/
-
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest r) {
-        String token = authService.login(r);
-        return ResponseEntity.ok(new AuthResponse(token));
     }
+
 
     @PostMapping("/verify")
     public ResponseEntity<String> verify(

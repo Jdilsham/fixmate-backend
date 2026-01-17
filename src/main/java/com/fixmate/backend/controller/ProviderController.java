@@ -1,19 +1,26 @@
 package com.fixmate.backend.controller;
 
 import com.fixmate.backend.dto.request.AddServiceRequestDTO;
+import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
+import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.mapper.BookingMapper;
 import com.fixmate.backend.service.ProviderBookingService;
 import com.fixmate.backend.service.ProviderServiceService;
 import com.fixmate.backend.service.ServiceProviderService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +33,8 @@ public class ProviderController {
     private final ServiceProviderService providerService;
     private final ProviderBookingService bookingService;
     private final ProviderServiceService providerServiceService;
+    private final BookingMapper bookingMapper;
+
 
     @GetMapping("/profile")
     public ProviderProfileDTO profile(Authentication auth) {
@@ -48,13 +57,68 @@ public class ProviderController {
     }
 
 
-    @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/profile")
     public void updateProfile(
             Authentication auth,
-            @ModelAttribute ProfileUpdateReq req
+            @Valid @RequestBody ProfileUpdateReq req
     ) {
         providerService.updateProfile(getUserId(auth), req);
     }
+
+
+    @PutMapping(
+            value = "/profile/picture",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public void updateProfilePicture(
+            Authentication auth,
+            @RequestParam(value = "profilePic", required = false) MultipartFile profilePic
+    ) {
+        if (profilePic == null || profilePic.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Profile picture file is required"
+            );
+        }
+
+        providerService.updateProfilePicture(getUserId(auth), profilePic);
+    }
+
+    @GetMapping("/address")
+    public AddressResponse getProviderAddress(Authentication auth) {
+        return providerService.getProviderAddress(getUserId(auth));
+    }
+
+    @PostMapping("/address")
+    public AddressResponse createAddress(
+            Authentication auth,
+            @RequestBody AddressRequest request
+    ) {
+        Long userId = getUserId(auth);
+        return providerService.addProviderAddress(userId, request);
+    }
+
+    @PutMapping("/address")
+    public AddressResponse updateAddress(
+            Authentication auth,
+            @RequestBody AddressRequest request
+    ) {
+        Long userId = getUserId(auth);
+        return providerService.updateProviderAddress(userId, request);
+    }
+
+    @PutMapping(value = "/verification/pdf",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    ) public void uploadVerificationPdf(
+
+            Authentication auth,
+            @RequestParam("pdf") MultipartFile pdf
+    ) {
+
+        providerService.uploadVerificationPdf(getUserId(auth), pdf);
+
+    }
+
 
     @PatchMapping("/availability")
     public Map<String, Boolean> toggleAvailability(Authentication authentication) {
@@ -71,19 +135,47 @@ public class ProviderController {
         providerService.requestVerification(getUserId(auth));
     }
 
-    @GetMapping("/bookings")
-    public List<ProviderBookingResponse> bookings(Authentication auth) {
-        return providerService.getBookings(getUserId(auth));
+
+
+    @GetMapping("/{serviceProviderId}/bookings")
+    public ResponseEntity<List<BookingResponseDTO>>getProviderBookings(
+            @PathVariable Long serviceProviderId
+    ){
+        return ResponseEntity.ok(
+          bookingMapper.toDtoList(
+             bookingService.getProviderBookings(serviceProviderId)
+          )
+        );
     }
 
-    @PostMapping("/bookings/{id}/confirm")
-    public void confirmBooking(@PathVariable("id") Long bookingId, Authentication auth) {
-        bookingService.confirmBookings(getUserId(auth), bookingId);
+    @PostMapping("/bookings/{bookingId}/confirm")
+    public ResponseEntity<Void> confirmBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            Authentication auth
+    ) {
+        bookingService.confirmBooking(
+                bookingId,
+                getUserId(auth),
+                providerServiceId
+        );
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/bookings/{id}/cancel")
-    public void cancelBooking(@PathVariable("id") Long bookingId, @RequestParam String reason, Authentication auth) {
-        bookingService.cancelBookings(getUserId(auth), bookingId, reason);
+    @PostMapping("/bookings/{bookingId}/cancel")
+    public ResponseEntity<Void> cancelBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            @RequestParam String reason,
+            Authentication auth
+    ) {
+        bookingService.cancelBooking(
+                bookingId,
+                getUserId(auth),
+                providerServiceId,
+                reason
+        );
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/earnings")
