@@ -33,7 +33,7 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
         c.name,                      
         CONCAT(u.firstName, ' ', u.lastName), 
         u.profilePic,                
-        ps.fixedPrice,              
+        ps.isFixedPrice,             
         ps.hourlyRate,               
         AVG(r.rating),              
         a.city
@@ -59,7 +59,7 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
         u.firstName,
         u.lastName,
         u.profilePic,
-        ps.fixedPrice,
+        ps.isFixedPrice,
         ps.hourlyRate,
         a.city
 """)

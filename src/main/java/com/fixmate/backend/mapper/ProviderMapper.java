@@ -54,7 +54,7 @@ public interface ProviderMapper {
                 .serviceTitle(ps.getService().getTitle())
                 .categoryName(ps.getService().getCategory().getName())
                 .description(ps.getDescription())
-                .fixedPrice(ps.getFixedPrice())
+                .fixedPriceAvailable(ps.getIsFixedPrice())
                 .hourlyRate(ps.getHourlyRate())
                 .verificationStatus(ps.getVerificationStatus())
                 .isActive(ps.getIsActive())

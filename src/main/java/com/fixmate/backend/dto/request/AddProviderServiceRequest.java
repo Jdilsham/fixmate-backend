@@ -14,6 +14,8 @@ public class AddProviderServiceRequest {
     private String description;
 
     // Pricing (both allowed)
-    private BigDecimal fixedPrice;
+    @NotNull
+    private Boolean fixedPriceAvailable;
+
     private BigDecimal hourlyRate;
 }

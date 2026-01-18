@@ -221,7 +221,7 @@ public class ProviderController {
     ) {
         User user = (User) auth.getPrincipal();
 
-        System.out.println("JWT USER ID = " + user.getId()); // 👈 ADD THIS
+        System.out.println("JWT USER ID = " + user.getId());
 
         return ResponseEntity.ok(
                 providerServiceService.getProviderServices(user.getId())

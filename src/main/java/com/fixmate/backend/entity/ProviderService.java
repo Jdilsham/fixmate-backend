@@ -38,8 +38,8 @@ public class ProviderService {
     private String description;
 
     // PRICING
-    @Column(name = "fixed_price", precision = 10, scale = 2)
-    private BigDecimal fixedPrice;
+    @Column(name = "is_fixed_price", nullable = false)
+    private Boolean isFixedPrice = false;
 
     @Column(name = "hourly_rate", precision = 10, scale = 2)
     private BigDecimal hourlyRate;

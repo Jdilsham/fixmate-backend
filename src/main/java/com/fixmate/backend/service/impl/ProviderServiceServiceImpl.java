@@ -69,9 +69,9 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
         }
 
         // pricing validation
-        if (dto.getFixedPrice() == null && dto.getHourlyRate() == null) {
-            throw new IllegalArgumentException(
-                    "Either fixed price or hourly rate must be provided"
+        if (dto.getHourlyRate() == null && !dto.getFixedPriceAvailable()) {
+            throw new BadRequestException(
+                    "Either hourly rate or fixed price availability must be provided"
             );
         }
 
@@ -82,7 +82,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
         providerService.setServiceProvider(provider);
         providerService.setService(service);
         providerService.setDescription(dto.getDescription());
-        providerService.setFixedPrice(dto.getFixedPrice());
+        providerService.setIsFixedPrice(dto.getFixedPriceAvailable());
         providerService.setHourlyRate(dto.getHourlyRate());
         providerService.setQualificationDoc(pdfPath);
         providerService.setVerificationStatus(VerificationStatus.PENDING);

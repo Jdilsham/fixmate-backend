@@ -21,7 +21,8 @@ public class PublicServiceCardResponse {
     private String providerName;
     private String providerProfileImage;
 
-    private BigDecimal fixedPrice;
+    private Boolean fixedPriceAvailable;
+
     private BigDecimal hourlyRate;
 
     private Double rating;
@@ -36,7 +37,7 @@ public class PublicServiceCardResponse {
             String categoryName,
             String providerName,
             String providerProfilePic,
-            BigDecimal fixedPrice,
+            Boolean fixedPrice,
             BigDecimal hourlyRate,
             Double rating,
             String location
@@ -49,7 +50,7 @@ public class PublicServiceCardResponse {
         this.categoryName = categoryName;
         this.providerName = providerName;
         this.providerProfileImage = providerProfilePic;
-        this.fixedPrice = fixedPrice;
+        this.fixedPriceAvailable = fixedPrice;
         this.hourlyRate = hourlyRate;
         this.rating = rating;
         this.location = location;

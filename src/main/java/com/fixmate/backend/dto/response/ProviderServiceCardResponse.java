@@ -18,7 +18,7 @@ public class ProviderServiceCardResponse {
 
     private String description;
 
-    private BigDecimal fixedPrice;
+    private Boolean fixedPriceAvailable;
     private BigDecimal hourlyRate;
 
     private VerificationStatus verificationStatus;
