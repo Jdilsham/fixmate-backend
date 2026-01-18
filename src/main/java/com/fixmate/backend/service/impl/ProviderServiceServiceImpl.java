@@ -117,13 +117,11 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PublicServiceCardResponse> getApprovedServices() {
 
         return providerServiceRepository
-                .findByVerificationStatusAndIsActive(
-                        VerificationStatus.APPROVED,
-                        true
-                )
+                .findPublicApprovedServices(VerificationStatus.APPROVED)
                 .stream()
                 .map(ps -> {
                     PublicServiceCardResponse dto = new PublicServiceCardResponse();
@@ -143,13 +141,13 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
                                     + ps.getServiceProvider().getUser().getLastName()
                     );
                     dto.setRating(ps.getServiceProvider().getRating());
+
                     dto.setLocation(
                             ps.getServiceProvider().getUser().getAddresses().stream()
                                     .findFirst()
                                     .map(Address::getCity)
                                     .orElse(null)
                     );
-
 
                     // Pricing
                     dto.setFixedPrice(ps.getFixedPrice());
@@ -159,6 +157,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
                 })
                 .toList();
     }
+
 
 
     @Override
