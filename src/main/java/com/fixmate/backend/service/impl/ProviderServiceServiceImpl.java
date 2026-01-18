@@ -121,42 +121,9 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
     public List<PublicServiceCardResponse> getApprovedServices() {
 
         return providerServiceRepository
-                .findPublicApprovedServices(VerificationStatus.APPROVED)
-                .stream()
-                .map(ps -> {
-                    PublicServiceCardResponse dto = new PublicServiceCardResponse();
-
-                    // IDs
-                    dto.setProviderServiceId(ps.getId());
-                    dto.setServiceId(ps.getService().getServiceId());
-
-                    // Service info
-                    dto.setServiceTitle(ps.getService().getTitle());
-                    dto.setCategoryName(ps.getService().getCategory().getName());
-
-                    // Provider info
-                    dto.setProviderName(
-                            ps.getServiceProvider().getUser().getFirstName()
-                                    + " "
-                                    + ps.getServiceProvider().getUser().getLastName()
-                    );
-                    dto.setRating(ps.getServiceProvider().getRating());
-
-                    dto.setLocation(
-                            ps.getServiceProvider().getUser().getAddresses().stream()
-                                    .findFirst()
-                                    .map(Address::getCity)
-                                    .orElse(null)
-                    );
-
-                    // Pricing
-                    dto.setFixedPrice(ps.getFixedPrice());
-                    dto.setHourlyRate(ps.getHourlyRate());
-
-                    return dto;
-                })
-                .toList();
+                .findPublicApprovedServices(VerificationStatus.APPROVED);
     }
+
 
 
 
