@@ -3,6 +3,7 @@ package com.fixmate.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fixmate.backend.dto.request.AddProviderServiceRequest;
 import com.fixmate.backend.dto.request.AddressRequest;
+import com.fixmate.backend.dto.request.FinalizeBookingRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.User;
@@ -35,7 +36,7 @@ public class ProviderController {
     private final ProviderServiceService providerServiceService;
     private final BookingMapper bookingMapper;
     private final ServiceRepository serviceRepository;
-
+    private final ProviderBookingService providerBookingService;
 
     private Long getUserId(Authentication authentication) {
         return ((User) authentication.getPrincipal()).getId();
@@ -186,6 +187,46 @@ public class ProviderController {
         );
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/bookings/{bookingId}/start")
+    public ResponseEntity<Void> startJob(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            Authentication auth
+    ) {
+        providerBookingService.startJob(
+                bookingId,
+                getUserId(auth),
+                providerServiceId
+        );
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/bookings/{bookingId}/finalize")
+    public ResponseEntity<Void> finalizeBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            @RequestBody FinalizeBookingRequest request,
+            Authentication auth
+    ) {
+        providerBookingService.finalizeBooking(
+                bookingId,
+                getUserId(auth),
+                providerServiceId,
+                request
+        );
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+
+
+
+
+
+
 
     @GetMapping("/earnings")
     public EarningSummaryDTO earnings(Authentication auth) {
