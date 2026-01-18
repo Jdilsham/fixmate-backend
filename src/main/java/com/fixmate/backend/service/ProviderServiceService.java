@@ -1,6 +1,7 @@
 package com.fixmate.backend.service;
 
 import com.fixmate.backend.dto.request.AddProviderServiceRequest;
+import com.fixmate.backend.dto.response.ProviderBookingResponse;
 import com.fixmate.backend.dto.response.ProviderServiceCardResponse;
 import com.fixmate.backend.dto.response.PublicServiceCardResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,5 +19,7 @@ public interface ProviderServiceService {
     List<PublicServiceCardResponse> getApprovedServices();
 
     List<ProviderServiceCardResponse> getProviderServices(Long userId);
+
+
 
 }

@@ -148,15 +148,14 @@ public class ProviderController {
 
 
     @GetMapping("/{serviceProviderId}/bookings")
-    public ResponseEntity<List<BookingResponseDTO>>getProviderBookings(
+    public ResponseEntity<List<ProviderBookingResponse>> getProviderBookings(
             @PathVariable Long serviceProviderId
-    ){
+    ) {
         return ResponseEntity.ok(
-          bookingMapper.toDtoList(
-             bookingService.getProviderBookings(serviceProviderId)
-          )
+                providerBookingService.getProviderBookingResponses(serviceProviderId)
         );
     }
+
 
     @PostMapping("/bookings/{bookingId}/confirm")
     public ResponseEntity<Void> confirmBooking(

@@ -1,6 +1,7 @@
 package com.fixmate.backend.service.impl;
 
 import com.fixmate.backend.dto.request.FinalizeBookingRequest;
+import com.fixmate.backend.dto.response.ProviderBookingResponse;
 import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.enums.BookingStatus;
 import com.fixmate.backend.enums.PricingType;
@@ -14,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -179,5 +182,58 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         // Make provider available again
         booking.getServiceProvider().setIsAvailable(true);
     }
+
+    @Override
+    public List<ProviderBookingResponse> getProviderBookingResponses(Long serviceProviderId) {
+
+        List<Booking> bookings =
+                bookingRepository.findByProviderService_ServiceProvider_ServiceProviderId(serviceProviderId);
+
+        return bookings.stream().map(booking -> {
+
+            ProviderBookingResponse dto = new ProviderBookingResponse();
+
+            dto.setBookingId(booking.getBookingId());
+            dto.setStatus(booking.getStatus());
+            dto.setDescription(booking.getDescription());
+            dto.setPaymentAmount(booking.getTotalPrice());
+            dto.setPaymentType(booking.getPricingType().name());
+
+
+            if (booking.getUser() != null) {
+                dto.setCustomerName(
+                        booking.getUser().getFirstName() + " " + booking.getUser().getLastName()
+                );
+                dto.setCustomerPhone(booking.getUser().getPhone());
+            }
+
+            if (booking.getContactInfo() != null) {
+                dto.setBookingAddress(booking.getContactInfo().getAddress());
+                dto.setBookingPhone(booking.getContactInfo().getPhone());
+                dto.setLatitude(booking.getContactInfo().getLatitude());
+                dto.setLongitude(booking.getContactInfo().getLongitude());
+            }
+
+            if (booking.getProviderService() != null &&
+                    booking.getProviderService().getService() != null) {
+
+                dto.setServiceTitle(
+                        booking.getProviderService().getService().getTitle()
+                );
+            }
+            if (booking.getScheduledAt() != null) {
+                dto.setScheduledAt(
+                        LocalDateTime.ofInstant(
+                                booking.getScheduledAt(),
+                                ZoneId.systemDefault()
+                        )
+                );
+            }
+
+            return dto;
+
+        }).toList();
+    }
+
 
 }
