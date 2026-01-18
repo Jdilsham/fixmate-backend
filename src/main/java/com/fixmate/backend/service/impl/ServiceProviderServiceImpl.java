@@ -140,7 +140,8 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
             );
         }
 
-        if (!profilePic.getContentType().startsWith("image/")) {
+        if (profilePic.getContentType() == null ||
+                !profilePic.getContentType().startsWith("image/")) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Only image files are allowed"
@@ -156,13 +157,12 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         )
                 );
 
+        User user = provider.getUser();
+
         String imageUrl = fileStorageService.upload(profilePic);
 
-        provider.setProfileImage(imageUrl); // ✅ FIXED
+        user.setProfilePic(imageUrl);
     }
-
-
-
 
 
     @Override

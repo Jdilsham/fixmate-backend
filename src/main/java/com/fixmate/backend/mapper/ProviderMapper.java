@@ -26,6 +26,9 @@ public interface ProviderMapper {
             target = "services",
             expression = "java(mapProviderServices(provider.getProviderServices()))"
     )
+
+    @Mapping(target = "profileImage", source = "user.profilePic")
+
     ProviderProfileDTO toProfileDTO(ServiceProvider provider);
 
     // MAP LIST OF PROVIDER SERVICES

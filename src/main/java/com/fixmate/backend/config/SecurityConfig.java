@@ -75,6 +75,10 @@ public class SecurityConfig {
                         // 🔵 SERVICE PROVIDER only
                         .requestMatchers("/api/provider/**").hasRole("SERVICE_PROVIDER")
 
+                        // 🟣 USER (customer + provider)
+                        .requestMatchers("/api/user/**")
+                        .hasAnyRole("CUSTOMER", "SERVICE_PROVIDER")
+
                         // 🔐 Any other request needs login
                         .anyRequest().authenticated()
                 )

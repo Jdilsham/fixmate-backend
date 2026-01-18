@@ -31,15 +31,10 @@ public class ClientViewServiceImpl implements ClientViewService {
 
         String defaultImage = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-        String imageUrl;
+        String imageUrl = user.getProfilePic() != null
+                ? user.getProfilePic()
+                : defaultImage;
 
-        if (provider.getProfileImage() != null) {
-            imageUrl = provider.getProfileImage();
-        } else if (user.getProfilePic() != null) {
-            imageUrl = user.getProfilePic();
-        } else {
-            imageUrl = defaultImage;
-        }
 
         return ServiceProviderCardDTO.builder()
                 .id(provider.getServiceProviderId())

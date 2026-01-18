@@ -38,10 +38,14 @@ public class UserController {
 
     @PostMapping("/profile/image")
     public ResponseEntity<String> uploadProfileImage(
-            @RequestParam MultipartFile file
+            @AuthenticationPrincipal User user,
+            @RequestParam("file") MultipartFile file
     ) {
-        return ResponseEntity.ok(userService.uploadProfileImage(file));
+        return ResponseEntity.ok(
+                userService.uploadProfileImage(user.getId(), file)
+        );
     }
+
 
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(

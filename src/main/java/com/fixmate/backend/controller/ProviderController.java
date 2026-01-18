@@ -71,7 +71,11 @@ public class ProviderController {
         providerService.updateProfile(getUserId(auth), req);
     }
 
-
+    /**
+     * @deprecated Use POST /api/user/profile/image instead.
+     * Profile images are now handled at User level.
+     */
+    @Deprecated
     @PutMapping(
             value = "/profile/picture",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
