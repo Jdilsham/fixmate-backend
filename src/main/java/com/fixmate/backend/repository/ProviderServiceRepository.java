@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProviderServiceRepository extends JpaRepository<ProviderService, Long> {
     boolean existsByServiceProvider_ServiceProviderIdAndService_ServiceId(
@@ -66,5 +67,52 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
     List<PublicServiceCardResponse> findPublicApprovedServices(
             VerificationStatus status
     );
+
+    @Query("""
+    SELECT new com.fixmate.backend.dto.response.PublicServiceCardResponse(
+        ps.id,
+        sp.serviceProviderId,
+        s.serviceId,
+        s.title,
+        ps.description,
+        c.name,
+        CONCAT(u.firstName, ' ', u.lastName),
+        u.profilePic,
+        ps.isFixedPrice,
+        ps.hourlyRate,
+        AVG(r.rating),
+        a.city
+    )
+    FROM ProviderService ps
+    JOIN ps.service s
+    JOIN s.category c
+    JOIN ps.serviceProvider sp
+    JOIN sp.user u
+    LEFT JOIN Address a ON a.user.id = u.id
+    LEFT JOIN Review r ON r.serviceProvider.id = sp.serviceProviderId
+    WHERE ps.id = :providerServiceId
+      AND ps.verificationStatus = :status
+      AND ps.isActive = true
+      AND sp.isAvailable = true
+      AND sp.isVerified = true
+    GROUP BY
+        ps.id,
+        sp.serviceProviderId,
+        s.serviceId,
+        s.title,
+        ps.description,
+        c.name,
+        u.firstName,
+        u.lastName,
+        u.profilePic,
+        ps.isFixedPrice,
+        ps.hourlyRate,
+        a.city
+""")
+    Optional<PublicServiceCardResponse> findPublicServiceById(
+            Long providerServiceId,
+            VerificationStatus status
+    );
+
 
 }

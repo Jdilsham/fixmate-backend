@@ -4,6 +4,7 @@ import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.response.PublicServiceCardResponse;
 import com.fixmate.backend.dto.response.UserMeResponse;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.service.ClientViewService;
 import com.fixmate.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class UserController {
 
     private final UserService userService;
     private final ProviderServiceService providerServiceService;
+    private final ClientViewService clientViewService;
 
     @GetMapping("/me")
     public UserMeResponse me(@AuthenticationPrincipal User user) {
@@ -63,6 +65,18 @@ public class UserController {
                 providerServiceService.getApprovedServices()
         );
     }
+
+
+
+    @GetMapping("/service/{providerServiceId}")
+    public ResponseEntity<PublicServiceCardResponse> getServiceDetails(
+            @PathVariable Long providerServiceId
+    ) {
+        return ResponseEntity.ok(
+                clientViewService.getPublicServiceById(providerServiceId)
+        );
+    }
+
 
 }
 

@@ -1,8 +1,11 @@
 package com.fixmate.backend.service.impl;
 
+import com.fixmate.backend.dto.response.PublicServiceCardResponse;
 import com.fixmate.backend.dto.response.ServiceProviderCardDTO;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.enums.VerificationStatus;
+import com.fixmate.backend.repository.ProviderServiceRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.service.ClientViewService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientViewServiceImpl implements ClientViewService {
     private final ServiceProviderRepository serviceProviderRepository;
+    private final ProviderServiceRepository providerServiceRepository;
 
     @Override
     public List<ServiceProviderCardDTO> getAllVerifiedAndAvailableProviders() {
@@ -48,4 +52,18 @@ public class ClientViewServiceImpl implements ClientViewService {
                 .build();
 
     }
+
+    @Override
+    public PublicServiceCardResponse getPublicServiceById(Long providerServiceId) {
+
+        return providerServiceRepository
+                .findPublicServiceById(
+                        providerServiceId,
+                        VerificationStatus.APPROVED
+                )
+                .orElseThrow(() ->
+                        new RuntimeException("Service not found")
+                );
+    }
+
 }

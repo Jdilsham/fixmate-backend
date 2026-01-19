@@ -7,5 +7,7 @@ public interface UserService {
     String uploadProfileImage(Long userId, MultipartFile file);
 
     void changePassword(Long userId, ChangePasswordRequest request);
+
+
 }
 
