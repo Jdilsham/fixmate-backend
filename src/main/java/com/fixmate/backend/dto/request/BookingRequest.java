@@ -1,5 +1,6 @@
 package com.fixmate.backend.dto.request;
 
+import com.fixmate.backend.enums.PricingType;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -18,6 +19,9 @@ public class BookingRequest {
 
     private String description;
 
+    @NotNull
+    private PricingType pricingType;
+
     //optional snapshot fallback enabled
     private String addressLine1;
     private String addressLine2;
@@ -27,6 +31,4 @@ public class BookingRequest {
     private String phone;
     private BigDecimal latitude;
     private BigDecimal longitude;
-
-
 }

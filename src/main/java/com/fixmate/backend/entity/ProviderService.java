@@ -1,5 +1,6 @@
 package com.fixmate.backend.entity;
 
+import com.fixmate.backend.enums.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,17 +33,27 @@ public class ProviderService {
     @JoinColumn(name = "service_id", nullable = false)
     private Services service;
 
-    // PROVIDER-SPECIFIC FIELDS
-    @Column(name = "base_price", nullable = false)
-    private BigDecimal basePrice;
-
+    // PROVIDER-SPECIFIC DETAILS
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "estimated_time_minutes", nullable = false)
-    private Integer estimatedTimeMinutes;
+    // PRICING
+    @Column(name = "is_fixed_price", nullable = false)
+    private Boolean isFixedPrice = false;
 
+    @Column(name = "hourly_rate", precision = 10, scale = 2)
+    private BigDecimal hourlyRate;
+
+    // QUALIFICATION PROOF (PDF path)
+    @Column(name = "qualification_doc")
+    private String qualificationDoc;
+
+    // SERVICE VERIFICATION
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status", nullable = false)
+    private VerificationStatus verificationStatus = VerificationStatus.PENDING;
+
+    // STATUS
     @Column(name = "is_active")
     private Boolean isActive = true;
 }
-

@@ -2,10 +2,7 @@ package com.fixmate.backend.service.impl;
 
 import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
-import com.fixmate.backend.dto.response.AddressResponse;
-import com.fixmate.backend.dto.response.ProviderBookingResponse;
-import com.fixmate.backend.dto.response.EarningSummaryDTO;
-import com.fixmate.backend.dto.response.ProviderProfileDTO;
+import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.*;
 import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.mapper.ProviderMapper;
@@ -143,7 +140,8 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
             );
         }
 
-        if (!profilePic.getContentType().startsWith("image/")) {
+        if (profilePic.getContentType() == null ||
+                !profilePic.getContentType().startsWith("image/")) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Only image files are allowed"
@@ -159,13 +157,12 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         )
                 );
 
+        User user = provider.getUser();
+
         String imageUrl = fileStorageService.upload(profilePic);
 
-        provider.setProfileImage(imageUrl); // ✅ FIXED
+        user.setProfilePic(imageUrl);
     }
-
-
-
 
 
     @Override
@@ -397,4 +394,5 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
 
         return dto;
     }
+
 }
