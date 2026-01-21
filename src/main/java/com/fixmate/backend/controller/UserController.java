@@ -38,6 +38,7 @@ public class UserController {
         );
     }
 
+    //upload profile image
     @PostMapping("/profile/image")
     public ResponseEntity<String> uploadProfileImage(
             @AuthenticationPrincipal User user,
@@ -48,7 +49,7 @@ public class UserController {
         );
     }
 
-
+    //change password
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(
             Authentication authentication,
@@ -57,24 +58,6 @@ public class UserController {
         User user = (User) authentication.getPrincipal();
         userService.changePassword(user.getId(), request);
         return ResponseEntity.ok("Password changed successfully");
-    }
-
-    @GetMapping("/services")
-    public ResponseEntity<List<PublicServiceCardResponse>> getServices() {
-        return ResponseEntity.ok(
-                providerServiceService.getApprovedServices()
-        );
-    }
-
-
-
-    @GetMapping("/service/{providerServiceId}")
-    public ResponseEntity<PublicServiceCardResponse> getServiceDetails(
-            @PathVariable Long providerServiceId
-    ) {
-        return ResponseEntity.ok(
-                clientViewService.getPublicServiceById(providerServiceId)
-        );
     }
 
 
