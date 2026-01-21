@@ -187,15 +187,6 @@ public class ProviderController {
         return ResponseEntity.ok("Booking canceled");
     }
 
-    @PostMapping("/bookings/{bookingId}/complete")
-    public ResponseEntity<String> completeBooking(
-            @PathVariable Long bookingId,
-            Authentication auth
-    ){
-        User user = (User) auth.getPrincipal();
-        bookingService.completeBooking(user.getId(), bookingId);
-        return ResponseEntity.ok("Booking has been completed");
-    }
 
     @PostMapping("/bookings/{bookingId}/start")
     public ResponseEntity<Void> startJob(
@@ -226,15 +217,6 @@ public class ProviderController {
         );
         return ResponseEntity.ok().build();
     }
-
-
-
-
-
-
-
-
-
 
 
     @GetMapping("/earnings")
