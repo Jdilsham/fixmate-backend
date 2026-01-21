@@ -65,4 +65,30 @@ public class EmailService {
                 ctx
         );
     }
+
+    // send otp to new email
+    public void sendEmailChangeOtp(String toEmail, String code) {
+        Context ctx = new Context();
+        ctx.setVariable("code", code);
+
+        sendHtmlEmail(
+                toEmail,
+                "FixMate – Verify Your New Email",
+                "email-change-otp",
+                ctx
+        );
+    }
+
+    // security alert
+    public void sendEmailChangeAlert(String toEmail) {
+        Context ctx = new Context();
+
+        sendHtmlEmail(
+                toEmail,
+                "FixMate – Email Address Changed",
+                "email-change-alert",
+                ctx
+        );
+    }
+
 }
