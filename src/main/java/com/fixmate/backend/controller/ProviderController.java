@@ -4,7 +4,6 @@ import com.fixmate.backend.dto.request.AddServiceRequestDTO;
 import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
-import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.mapper.BookingMapper;
 import com.fixmate.backend.service.ProviderBookingService;
@@ -16,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -149,7 +147,7 @@ public class ProviderController {
     }
 
     @PostMapping("/bookings/{bookingId}/confirm")
-    public ResponseEntity<Void> confirmBooking(
+    public ResponseEntity<String> confirmBooking(
             @PathVariable Long bookingId,
             @RequestParam Long providerServiceId,
             Authentication auth
@@ -159,11 +157,11 @@ public class ProviderController {
                 getUserId(auth),
                 providerServiceId
         );
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Booking confirmed");
     }
 
     @PostMapping("/bookings/{bookingId}/cancel")
-    public ResponseEntity<Void> cancelBooking(
+    public ResponseEntity<String> cancelBooking(
             @PathVariable Long bookingId,
             @RequestParam Long providerServiceId,
             @RequestParam String reason,
@@ -175,7 +173,17 @@ public class ProviderController {
                 providerServiceId,
                 reason
         );
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Booking canceled");
+    }
+
+    @PostMapping("/bookings/{bookingId}/complete")
+    public ResponseEntity<String> completeBooking(
+            @PathVariable Long bookingId,
+            Authentication auth
+    ){
+        User user = (User) auth.getPrincipal();
+        bookingService.completeBooking(user.getId(), bookingId);
+        return ResponseEntity.ok("Booking has been completed");
     }
 
     @GetMapping("/earnings")
