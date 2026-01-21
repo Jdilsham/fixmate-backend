@@ -60,6 +60,23 @@ public class UserController {
         return ResponseEntity.ok("Password changed successfully");
     }
 
+    @GetMapping("/services")
+    public ResponseEntity<List<PublicServiceCardResponse>> getServices() {
+        return ResponseEntity.ok(
+                providerServiceService.getApprovedServices()
+        );
+    }
+
+
+
+    @GetMapping("/service/{providerServiceId}")
+    public ResponseEntity<PublicServiceCardResponse> getServiceDetails(
+            @PathVariable Long providerServiceId
+    ) {
+        return ResponseEntity.ok(
+                clientViewService.getPublicServiceById(providerServiceId)
+        );
+    }
 
 }
 
