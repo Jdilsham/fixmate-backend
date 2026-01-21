@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final FileStorageUtil fileStorageUtil;
     private final PasswordEncoder passwordEncoder;
 
+    //upload profile pic
     @Override
     public String uploadProfileImage(MultipartFile file) {
         User user = getCurrentUser();
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService {
         return imageUrl;
     }
 
-    //change password
+    //change password logic
     @Override
     @Transactional
     public void changePassword(Long userId, ChangePasswordRequest request){
@@ -65,9 +66,9 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    // ================= HELPERS =================
+    // ================= HELPERS ======================
 
-    //Ensure user exists
+    //ensure user exists
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND,"User not found"));

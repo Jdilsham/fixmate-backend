@@ -30,6 +30,7 @@ public class UserController {
         );
     }
 
+    //upload profile image
     @PostMapping("/profile/image")
     public ResponseEntity<String> uploadProfileImage(
             @RequestParam MultipartFile file
@@ -37,6 +38,7 @@ public class UserController {
         return ResponseEntity.ok(userService.uploadProfileImage(file));
     }
 
+    //change password
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(
             Authentication authentication,
@@ -46,6 +48,7 @@ public class UserController {
         userService.changePassword(user.getId(), request);
         return ResponseEntity.ok("Password changed successfully");
     }
+
 
 }
 
