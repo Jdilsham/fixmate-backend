@@ -11,4 +11,6 @@ public interface ProviderBookingService {
     void confirmBooking(Long bookingId, Long serviceProviderId, Long providerServiceId);
 
     void cancelBooking(Long bookingId, Long serviceProviderId, Long providerServiceId, String reason);
+
+    void completeBooking(Long providerUserId, Long bookingId);
 }
