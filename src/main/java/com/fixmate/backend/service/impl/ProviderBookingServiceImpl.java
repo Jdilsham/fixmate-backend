@@ -62,4 +62,21 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
         notificationService.notifyCustomer(booking.getUser(), "Your booking has been cancelled by the service provider.");
     }
+
+    @Override
+    public void completeBooking(Long providerUserId, Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found."));
+
+        if(!booking.getServiceProvider().getUser().getId().equals(providerUserId)){
+            throw new RuntimeException("You are not allowed to complete this booking");
+        }
+
+        if(booking.getStatus() != BookingStatus.ACCEPTED){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ACCEPTED bookings can be complete.");
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        //booking.setCompletedAt(Instant.now());
+    }
 }
