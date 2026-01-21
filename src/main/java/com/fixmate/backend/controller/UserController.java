@@ -1,8 +1,10 @@
 package com.fixmate.backend.controller;
 
 import com.fixmate.backend.dto.request.ChangePasswordRequest;
+import com.fixmate.backend.dto.response.PublicServiceCardResponse;
 import com.fixmate.backend.dto.response.UserMeResponse;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.service.ClientViewService;
 import com.fixmate.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.fixmate.backend.service.ProviderServiceService;
+
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -18,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     private final UserService userService;
+    private final ProviderServiceService providerServiceService;
+    private final ClientViewService clientViewService;
 
     @GetMapping("/me")
     public UserMeResponse me(@AuthenticationPrincipal User user) {
@@ -33,9 +41,12 @@ public class UserController {
     //upload profile image
     @PostMapping("/profile/image")
     public ResponseEntity<String> uploadProfileImage(
-            @RequestParam MultipartFile file
+            @AuthenticationPrincipal User user,
+            @RequestParam("file") MultipartFile file
     ) {
-        return ResponseEntity.ok(userService.uploadProfileImage(file));
+        return ResponseEntity.ok(
+                userService.uploadProfileImage(user.getId(), file)
+        );
     }
 
     //change password

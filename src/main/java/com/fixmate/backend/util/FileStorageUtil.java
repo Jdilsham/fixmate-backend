@@ -39,7 +39,7 @@ public class FileStorageUtil {
             Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
             // Public URL (served via static resources)
-            return "/uploads/profile-pics/" + fileName;
+            return "/files/profile-pics/" + fileName;
         }catch (IOException e) {
             throw new ResponseStatusException(
                     BAD_REQUEST,

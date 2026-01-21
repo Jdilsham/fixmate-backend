@@ -1,6 +1,6 @@
 package com.fixmate.backend.enums;
 
-public enum PaymentType {
+public enum PricingType {
     FIXED,
     HOURLY
 }

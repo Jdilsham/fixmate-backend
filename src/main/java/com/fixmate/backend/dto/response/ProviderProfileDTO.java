@@ -21,6 +21,6 @@ public class ProviderProfileDTO {
     private String city;
     private String phone;
 
-    private List<ProviderServiceResponseDTO> services;
+    private List<ProviderServiceCardResponse> services;
     private Boolean isOwner;
 }

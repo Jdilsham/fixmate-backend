@@ -1,12 +1,14 @@
 package com.fixmate.backend.controller;
 
-import com.fixmate.backend.dto.request.AddServiceRequestDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fixmate.backend.dto.request.AddProviderServiceRequest;
 import com.fixmate.backend.dto.request.AddressRequest;
+import com.fixmate.backend.dto.request.FinalizeBookingRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
 import com.fixmate.backend.dto.response.*;
-import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.mapper.BookingMapper;
+import com.fixmate.backend.repository.ServiceRepository;
 import com.fixmate.backend.service.ProviderBookingService;
 import com.fixmate.backend.service.ProviderServiceService;
 import com.fixmate.backend.service.ServiceProviderService;
@@ -16,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +35,12 @@ public class ProviderController {
     private final ProviderBookingService bookingService;
     private final ProviderServiceService providerServiceService;
     private final BookingMapper bookingMapper;
+    private final ServiceRepository serviceRepository;
+    private final ProviderBookingService providerBookingService;
+
+    private Long getUserId(Authentication authentication) {
+        return ((User) authentication.getPrincipal()).getId();
+    }
 
 
     @GetMapping("/profile")
@@ -65,7 +72,11 @@ public class ProviderController {
         providerService.updateProfile(getUserId(auth), req);
     }
 
-
+    /**
+     * @deprecated Use POST /api/user/profile/image instead.
+     * Profile images are now handled at User level.
+     */
+    @Deprecated
     @PutMapping(
             value = "/profile/picture",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -136,17 +147,15 @@ public class ProviderController {
     }
 
 
-
     @GetMapping("/{serviceProviderId}/bookings")
-    public ResponseEntity<List<BookingResponseDTO>>getProviderBookings(
+    public ResponseEntity<List<ProviderBookingResponse>> getProviderBookings(
             @PathVariable Long serviceProviderId
-    ){
+    ) {
         return ResponseEntity.ok(
-          bookingMapper.toDtoList(
-             bookingService.getProviderBookings(serviceProviderId)
-          )
+                providerBookingService.getProviderBookingResponses(serviceProviderId)
         );
     }
+
 
     @PostMapping("/bookings/{bookingId}/confirm")
     public ResponseEntity<Void> confirmBooking(
@@ -178,28 +187,96 @@ public class ProviderController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/bookings/{bookingId}/start")
+    public ResponseEntity<Void> startJob(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            Authentication auth
+    ) {
+        providerBookingService.startJob(
+                bookingId,
+                getUserId(auth),
+                providerServiceId
+        );
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/bookings/{bookingId}/finalize")
+    public ResponseEntity<Void> finalizeBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            @RequestBody FinalizeBookingRequest request,
+            Authentication auth
+    ) {
+        providerBookingService.finalizeBooking(
+                bookingId,
+                getUserId(auth),
+                providerServiceId,
+                request
+        );
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+
+
+
+
+
+
+
     @GetMapping("/earnings")
     public EarningSummaryDTO earnings(Authentication auth) {
         return providerService.getEarnings(getUserId(auth));
     }
 
-    @PostMapping("/services")
+    @PostMapping(value = "/services", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addServiceToProvider(
-            @RequestBody @Valid AddServiceRequestDTO dto,
+            @RequestPart("data") String data,
+            @RequestPart("qualificationPdf") MultipartFile qualificationPdf,
             Authentication authentication
-    ) {
+    ) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        AddProviderServiceRequest dto =
+                objectMapper.readValue(data, AddProviderServiceRequest.class);
+
         User user = (User) authentication.getPrincipal();
 
         providerServiceService.addServiceToProvider(
                 user.getId(),
-                dto
+                dto,
+                qualificationPdf
         );
 
         return ResponseEntity.ok("Service added successfully");
     }
 
+    @GetMapping("/services")
+    public ResponseEntity<List<ProviderServiceCardResponse>> getProviderServices(
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
 
-    private Long getUserId(Authentication auth) {
-        return ((User) auth.getPrincipal()).getId();
+        System.out.println("JWT USER ID = " + user.getId());
+
+        return ResponseEntity.ok(
+                providerServiceService.getProviderServices(user.getId())
+        );
     }
+
+    @GetMapping("/services/categories")
+    public List<ServiceCategoryResponse> getAllServiceCategories() {
+        return serviceRepository.findAll()
+                .stream()
+                .map(service -> new ServiceCategoryResponse(
+                        service.getServiceId(),
+                        service.getTitle()
+                ))
+                .toList();
+    }
+
 }

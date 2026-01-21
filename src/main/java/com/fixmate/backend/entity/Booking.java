@@ -1,6 +1,7 @@
 package com.fixmate.backend.entity;
 
 import com.fixmate.backend.enums.BookingStatus;
+import com.fixmate.backend.enums.PricingType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -65,6 +66,9 @@ public class Booking {
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private BookingContactInfo contactInfo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pricing_type", nullable = false)
+    private PricingType pricingType;
 
 
    /* @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)

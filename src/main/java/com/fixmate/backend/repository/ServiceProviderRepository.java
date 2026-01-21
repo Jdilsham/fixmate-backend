@@ -29,7 +29,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
         sp.skill,
         sp.experience,
         sp.licenseNumber,
-        sp.profileImage,
+        u.profilePic,
         sp.workPdfUrl,
         sp.verificationStatus,
         u.createdAt

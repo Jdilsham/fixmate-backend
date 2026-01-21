@@ -1,7 +1,7 @@
 package com.fixmate.backend.mapper;
 
 import com.fixmate.backend.dto.response.ProviderProfileDTO;
-import com.fixmate.backend.dto.response.ProviderServiceResponseDTO;
+import com.fixmate.backend.dto.response.ProviderServiceCardResponse;
 import com.fixmate.backend.entity.ProviderService;
 import com.fixmate.backend.entity.ServiceProvider;
 import org.mapstruct.Mapper;
@@ -26,10 +26,13 @@ public interface ProviderMapper {
             target = "services",
             expression = "java(mapProviderServices(provider.getProviderServices()))"
     )
+
+    @Mapping(target = "profileImage", source = "user.profilePic")
+
     ProviderProfileDTO toProfileDTO(ServiceProvider provider);
 
     // MAP LIST OF PROVIDER SERVICES
-    default List<ProviderServiceResponseDTO> mapProviderServices(
+    default List<ProviderServiceCardResponse> mapProviderServices(
             Set<ProviderService> providerServices) {
 
         if (providerServices == null) {
@@ -42,16 +45,21 @@ public interface ProviderMapper {
     }
 
     // MAP SINGLE PROVIDER SERVICE
-    default ProviderServiceResponseDTO toProviderServiceDTO(
+    default ProviderServiceCardResponse toProviderServiceDTO(
             ProviderService ps) {
 
-        return ProviderServiceResponseDTO.builder()
+        return ProviderServiceCardResponse.builder()
                 .providerServiceId(ps.getId())
                 .serviceId(ps.getService().getServiceId())
-                .title(ps.getService().getTitle())
-                .basePrice(ps.getBasePrice())
-                .estimatedTimeMinutes(ps.getEstimatedTimeMinutes())
+                .serviceTitle(ps.getService().getTitle())
+                .categoryName(ps.getService().getCategory().getName())
                 .description(ps.getDescription())
+                .fixedPriceAvailable(ps.getIsFixedPrice())
+                .hourlyRate(ps.getHourlyRate())
+                .verificationStatus(ps.getVerificationStatus())
+                .isActive(ps.getIsActive())
+                .qualificationDoc(ps.getQualificationDoc())
                 .build();
     }
+
 }

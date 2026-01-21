@@ -29,8 +29,10 @@ public class UserServiceImpl implements UserService {
 
     //upload profile pic
     @Override
-    public String uploadProfileImage(MultipartFile file) {
-        User user = getCurrentUser();
+    public String uploadProfileImage(Long userId, MultipartFile file) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         String imageUrl = fileStorageUtil.storeProfileImage(
                 file,
