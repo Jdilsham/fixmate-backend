@@ -39,9 +39,6 @@ public class ServiceProvider {
     @Column(name = "verification_status")
     private VerificationStatus verificationStatus = VerificationStatus.NOT_SUBMITTED;
 
-    @Column(name = "profile_image")
-    private String profileImage;
-
     @Column(columnDefinition = "TEXT")
     private String description;
 

@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+
 import static org.springframework.http.HttpStatus.CONFLICT;
 
 @Service
@@ -50,35 +52,31 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
             throw new ResponseStatusException(CONFLICT, "Service Provider not available");
         }
 
-        // Resolve snapshot fields
-        String addressLine1 = dto.getAddressLine1();
-        String addressLine2 = dto.getAddressLine2();
-        String city = dto.getCity();
-        String province = dto.getProvince();
-        String phone = dto.getPhone();
-        var latitude = dto.getLatitude();
-        var longitude = dto.getLongitude();
+        // Load customer profile address
+        Address profileAddress = addressRepository
+                .findFirstByUserIdOrderByAddressIdDesc(customer.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "No address found in profile"
+                ));
 
-        // Fallback to profile address if missing
-        if (addressLine1 == null || city == null || province == null) {
+        String addressLine1 = profileAddress.getAddressLine1();
+        String addressLine2 = profileAddress.getAddressLine2();
+        String city = profileAddress.getCity();
+        String province = profileAddress.getProvince();
+        BigDecimal latitude = profileAddress.getLatitude();
+        BigDecimal longitude = profileAddress.getLongitude();
+        String phone = customer.getPhone();
 
-            Address profileAddress = addressRepository
-                    .findFirstByUserIdOrderByAddressIdDesc(customer.getId())
-                    .orElseThrow(() ->
-                            new ResponseStatusException(
-                                    HttpStatus.BAD_REQUEST,
-                                    "Please provide an address"
-                            )
-                    );
+        // Override ONLY if customer sent values
+        if (dto.getAddressLine1() != null) addressLine1 = dto.getAddressLine1();
+        if (dto.getAddressLine2() != null) addressLine2 = dto.getAddressLine2();
+        if (dto.getCity() != null) city = dto.getCity();
+        if (dto.getProvince() != null) province = dto.getProvince();
+        if (dto.getLatitude() != null) latitude = dto.getLatitude();
+        if (dto.getLongitude() != null) longitude = dto.getLongitude();
+        if (dto.getPhone() != null) phone = dto.getPhone();
 
-            addressLine1 = profileAddress.getAddressLine1();
-            addressLine2 = profileAddress.getAddressLine2();
-            city = profileAddress.getCity();
-            province = profileAddress.getProvince();
-            latitude = profileAddress.getLatitude();
-            longitude = profileAddress.getLongitude();
-            phone = customer.getPhone();
-        }
 
         String fullAddress =
                 addressLine1 +
@@ -92,9 +90,10 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         booking.setServiceProvider(provider);
         booking.setProviderService(providerService);
         booking.setScheduledAt(dto.getScheduledAt());
-        booking.setTotalPrice(providerService.getBasePrice()); //  CORRECT
         booking.setDescription(dto.getDescription());
         booking.setStatus(BookingStatus.PENDING);
+        booking.setPricingType(dto.getPricingType());
+
 
         // SNAPSHOT CONTACT INFO
         BookingContactInfo contactInfo = BookingContactInfo.builder()

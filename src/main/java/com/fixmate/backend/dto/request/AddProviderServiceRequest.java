@@ -6,15 +6,16 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class AddServiceRequestDTO {
-    @NotNull
-    private Long serviceId;  // dropdown selection
+public class AddProviderServiceRequest {
 
     @NotNull
-    private BigDecimal basePrice;
+    private Long serviceId;
 
     private String description;
 
+    // Pricing (both allowed)
     @NotNull
-    private Integer estimatedTimeMinutes;
+    private Boolean fixedPriceAvailable;
+
+    private BigDecimal hourlyRate;
 }
