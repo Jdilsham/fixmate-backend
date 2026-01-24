@@ -2,6 +2,7 @@ package com.fixmate.backend.service;
 
 import com.fixmate.backend.dto.request.PaymentRequest;
 import com.fixmate.backend.dto.response.CustomerPaymentView;
+import com.fixmate.backend.dto.response.PayHereSandboxResponse;
 import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.entity.Payment;
 import com.fixmate.backend.entity.ServiceProvider;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class PaymentService {
@@ -56,11 +59,48 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         // Update booking status
-        booking.setStatus(BookingStatus.PENDING);
+        booking.setStatus(BookingStatus.PAYMENT_PENDING);
         bookingRepository.save(booking);
 
         //send notification + email
     }
+
+    public String initiateCardPayment(Long paymentId, User customerUser) {
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Payment not found"
+                ));
+
+        // Ownership check
+        if (!payment.getCustomer().getId().equals(customerUser.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "You cannot pay this payment"
+            );
+        }
+
+        // State check
+        if (payment.getStatus() != PaymentStatus.REQUESTED) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Payment is not in REQUESTED state"
+            );
+        }
+
+        // Mark as CARD payment
+        payment.setPaymentMethod(PaymentMethod.CARD);
+        payment.setStatus(PaymentStatus.PROCESSING);
+
+        // Sandbox transaction reference
+        String sandboxRef = "SANDBOX_TXN_" + System.currentTimeMillis();
+        payment.setTransactionRef(sandboxRef);
+
+        paymentRepository.save(payment);
+
+        // For now we return transaction ref
+        return sandboxRef;
+    }
+
 
     public CustomerPaymentView getPaymentForCustomer(
             Long bookingId,
@@ -169,6 +209,54 @@ public class PaymentService {
 
         // send email + notification
     }
+
+    public PayHereSandboxResponse initiatePayHereSandbox(
+            Long paymentId, User customerUser) {
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Payment not found"
+                ));
+
+        if (!payment.getCustomer().getId().equals(customerUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        if (payment.getStatus() != PaymentStatus.REQUESTED) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Payment is not in REQUESTED state"
+            );
+        }
+
+        payment.setPaymentMethod(PaymentMethod.CARD);
+        payment.setStatus(PaymentStatus.PROCESSING);
+
+        String orderId = "PH_SANDBOX_" + System.currentTimeMillis();
+        payment.setTransactionRef(orderId);
+        paymentRepository.save(payment);
+
+        Map<String, String> fields = new HashMap<>();
+        fields.put("merchant_id", "1233735");
+        fields.put("order_id", orderId);
+        fields.put("items", "FixMate Service Payment");
+        fields.put("currency", "LKR");
+        fields.put("amount", payment.getAmount().toString());
+        fields.put("first_name", customerUser.getFirstName());
+        fields.put("last_name", customerUser.getLastName());
+        fields.put("email", customerUser.getEmail());
+        fields.put("phone", customerUser.getPhone());
+        fields.put("return_url", "http://localhost:3000/payment-success");
+        fields.put("cancel_url", "http://localhost:3000/payment-cancel");
+        fields.put("notify_url", "http://localhost:8081/api/payments/webhook/payhere-sandbox");
+
+        PayHereSandboxResponse response = new PayHereSandboxResponse();
+        response.setCheckoutUrl("https://sandbox.payhere.lk/pay/checkout");
+        response.setFields(fields);
+
+        return response;
+    }
+
 
 }
 

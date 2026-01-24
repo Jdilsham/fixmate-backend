@@ -1,6 +1,7 @@
 package com.fixmate.backend.controller;
 
 import com.fixmate.backend.dto.response.CustomerPaymentView;
+import com.fixmate.backend.dto.response.PayHereSandboxResponse;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.service.PaymentService;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,6 @@ public class CustomerPaymentController {
         );
     }
 
-
     @PostMapping("/pay-cash/{paymentId}")
     public ResponseEntity<?> payCash(
             @PathVariable Long paymentId,
@@ -40,4 +40,16 @@ public class CustomerPaymentController {
         paymentService.payByCash(paymentId, customerUser);
         return ResponseEntity.ok("Payment marked as PAID (Cash)");
     }
+
+    @PostMapping("/pay-payhere-sandbox/{paymentId}")
+    public ResponseEntity<PayHereSandboxResponse> payWithPayHereSandbox(
+            @PathVariable Long paymentId,
+            @AuthenticationPrincipal User customerUser) {
+
+        return ResponseEntity.ok(
+                paymentService.initiatePayHereSandbox(paymentId, customerUser)
+        );
+    }
+
+
 }
