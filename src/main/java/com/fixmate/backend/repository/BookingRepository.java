@@ -42,4 +42,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
           AND p.status = com.fixmate.backend.enums.PaymentStatus.CONFIRMED
     """)
     BigDecimal sumConfirmedAmounts(Long providerId);
+
+    List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
+
 }

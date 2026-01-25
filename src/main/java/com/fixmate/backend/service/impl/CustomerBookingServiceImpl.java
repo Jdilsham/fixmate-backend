@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 
@@ -113,6 +114,27 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
                 .bookingId(saved.getBookingId())
                 .status(saved.getStatus())
                 .build();
+    }
+
+
+    @Override
+    public List<Booking> getMyBookings(Long customerId) {
+        return bookingRepository
+                .findByUserIdOrderByCreatedAtDesc(customerId);
+    }
+
+
+    @Override
+    public List<Booking> getMyBookingsByEmail(String email) {
+
+        User customer = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found")
+                );
+
+        return bookingRepository
+                .findByUserIdOrderByCreatedAtDesc(customer.getId());
+
     }
 
 }
