@@ -50,48 +50,64 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
     }
 
     @Override
-    public void cancelBooking(Long bookingId, Long serviceProviderId, Long providerServiceId, String reason) {
-        if(reason == null || reason.isBlank()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please provide a reason.");
-        }
-
-        Booking booking = bookingRepository.findProviderBookingById(bookingId, providerServiceId, serviceProviderId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found."));
-
-        if(booking.getStatus() != BookingStatus.PENDING){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending bookings can be cancelled.");
-        }
-
-        booking.setStatus(BookingStatus.CANCELLED);
-        booking.setCancelReason(reason);
-        booking.getServiceProvider().setIsAvailable(true);
-
-        notificationService.notifyCustomer(booking.getUser(), "Your booking has been cancelled by the service provider.");
-    }
-
-        @Override
-        public void startJob(Long bookingId, Long serviceProviderId, Long providerServiceId) {
-
-            Booking booking = bookingRepository.findProviderBookingById(
-                    bookingId, providerServiceId, serviceProviderId
-            ).orElseThrow(() -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Booking not found"
-            ));
-
-            if (booking.getStatus() != BookingStatus.ACCEPTED) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Only accepted bookings can be started"
-                );
-            }
-
-            booking.setStatus(BookingStatus.IN_PROGRESS);
-
-            notificationService.notifyCustomer(
-                    booking.getUser(),
-                    "Service provider has started your job"
+    public void rejectBooking(
+            Long bookingId,
+            Long serviceProviderId,
+            Long providerServiceId,
+            String reason
+    ) {
+        if (reason == null || reason.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Please provide a reason."
             );
         }
+
+        Booking booking = bookingRepository.findProviderBookingById(
+                bookingId, providerServiceId, serviceProviderId
+        ).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Booking not found."
+        ));
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Only pending bookings can be rejected."
+            );
+        }
+
+        booking.setStatus(BookingStatus.REJECTED);
+        booking.setRejectionReason(reason);
+        booking.setRejectedAt(LocalDateTime.now());
+
+        notificationService.notifyCustomer(
+                booking.getUser(),
+                "Your booking has been rejected. Reason: " + reason
+        );
+    }
+
+
+    @Override
+    public void startJob(Long bookingId, Long serviceProviderId, Long providerServiceId) {
+
+        Booking booking = bookingRepository.findProviderBookingById(
+                bookingId, providerServiceId, serviceProviderId
+        ).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Booking not found"
+        ));
+
+        if (booking.getStatus() != BookingStatus.ACCEPTED) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only accepted bookings can be started"
+            );
+        }
+
+        booking.setStatus(BookingStatus.IN_PROGRESS);
+
+        notificationService.notifyCustomer(
+                booking.getUser(),
+                "Service provider has started your job"
+        );
+    }
 
     @Override
     public void finalizeBooking(
@@ -229,6 +245,11 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                         )
                 );
             }
+            dto.setProviderServiceId(
+                    booking.getProviderService().getId()
+            );
+
+
 
             return dto;
 

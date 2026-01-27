@@ -41,7 +41,7 @@ public class CustomerPaymentController {
         return ResponseEntity.ok("Payment marked as PAID (Cash)");
     }
 
-    @PostMapping("/pay-payhere-sandbox/{paymentId}")
+    @PostMapping("/pay-here-sandbox/{paymentId}")
     public ResponseEntity<PayHereSandboxResponse> payWithPayHereSandbox(
             @PathVariable Long paymentId,
             @AuthenticationPrincipal User customerUser) {

@@ -30,6 +30,10 @@ public class CustomerBookingResponse {
     private String pricingType;
     private String description;
 
+    private String rejectionReason;
+    private LocalDateTime rejectedAt;
+
+
     public static CustomerBookingResponse from(@NotNull Booking booking) {
         return CustomerBookingResponse.builder()
                 .bookingId(booking.getBookingId())
@@ -61,6 +65,11 @@ public class CustomerBookingResponse {
 
                 .pricingType(booking.getPricingType().name())
                 .description(booking.getDescription())
+
+                .rejectionReason(booking.getRejectionReason())
+                .rejectedAt(booking.getRejectedAt())
+
+
                 .build();
     }
 }

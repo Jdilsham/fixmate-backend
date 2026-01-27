@@ -46,6 +46,11 @@ spring:
 server:
   port: 8081
 
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+
 management:
   endpoints:
     web:
@@ -68,5 +73,15 @@ app:
 
 
 payhere:
-  merchant-id: "1220000"   # DEMO merchant id
+  merchant-id: "1233735"   # DEMO merchant id
   checkout-url: "https://sandbox.payhere.lk/pay/checkout"
+  merchant-secret: "MTI5MDEyODMyMjc4Njg5Nzc4MzE2Mzc4MzM1MDEzMzQyOTg2MzQ3"
+
+
+
+logging:
+  level:
+    root: ERROR
+    org.springframework.web: DEBUG
+    com.fixmate.backend: DEBUG
+

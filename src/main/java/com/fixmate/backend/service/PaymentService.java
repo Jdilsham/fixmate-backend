@@ -15,6 +15,9 @@ import com.fixmate.backend.repository.PaymentRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.beans.factory.annotation.Value;
+import java.security.MessageDigest;
+
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -22,6 +25,13 @@ import java.util.Map;
 
 @Service
 public class PaymentService {
+
+    @Value("${payhere.merchant-id}")
+    private String merchantId;
+
+    @Value("${payhere.merchant-secret}")
+    private String merchantSecret;
+
 
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
@@ -213,6 +223,18 @@ public class PaymentService {
     public PayHereSandboxResponse initiatePayHereSandbox(
             Long paymentId, User customerUser) {
 
+        if (isBlank(customerUser.getFirstName())
+                || isBlank(customerUser.getLastName())
+                || isBlank(customerUser.getEmail())
+                || isBlank(customerUser.getPhone())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Customer profile incomplete for card payment"
+            );
+        }
+
+
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Payment not found"
@@ -233,15 +255,37 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.PROCESSING);
 
         String orderId = "PH_SANDBOX_" + System.currentTimeMillis();
+
+        String amountFormatted = String.format("%.2f", payment.getAmount());
+
+        String secretMd5 = md5(merchantSecret).toUpperCase();
+
+        String hash = md5(
+                merchantId +
+                        orderId +
+                        amountFormatted +
+                        "LKR" +
+                        secretMd5
+        ).toUpperCase();
+
+
+
         payment.setTransactionRef(orderId);
         paymentRepository.save(payment);
 
+        if (customerUser.getPhone() == null || customerUser.getPhone().isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Customer phone number is required to pay by card"
+            );
+        }
+
         Map<String, String> fields = new HashMap<>();
-        fields.put("merchant_id", "1233735");
+        fields.put("merchant_id", merchantId);
         fields.put("order_id", orderId);
         fields.put("items", "FixMate Service Payment");
         fields.put("currency", "LKR");
-        fields.put("amount", payment.getAmount().toString());
+        fields.put("amount", amountFormatted);
         fields.put("first_name", customerUser.getFirstName());
         fields.put("last_name", customerUser.getLastName());
         fields.put("email", customerUser.getEmail());
@@ -249,12 +293,31 @@ public class PaymentService {
         fields.put("return_url", "http://localhost:3000/payment-success");
         fields.put("cancel_url", "http://localhost:3000/payment-cancel");
         fields.put("notify_url", "http://localhost:8081/api/payments/webhook/payhere-sandbox");
+        fields.put("hash", hash);
 
         PayHereSandboxResponse response = new PayHereSandboxResponse();
         response.setCheckoutUrl("https://sandbox.payhere.lk/pay/checkout");
         response.setFields(fields);
 
         return response;
+    }
+
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    private String md5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : messageDigest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("MD5 error", e);
+        }
     }
 
 
