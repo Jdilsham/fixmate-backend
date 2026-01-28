@@ -14,7 +14,6 @@ import java.util.List;
 public interface BookingMapper {
     @Mapping(target = "status", expression = "java(booking.getStatus().name())")
     @Mapping(target = "user", source = "user", qualifiedByName = "toUserSummary")
-    @Mapping(target = "cancelReason", source = "cancelReason")
     BookingResponseDTO toDto(Booking booking);
 
     List<BookingResponseDTO> toDtoList(List<Booking> bookings);

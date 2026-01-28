@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,9 +42,6 @@ public class Booking {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "cancel_reason", length = 255)
-    private String cancelReason;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -69,6 +67,14 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     @Column(name = "pricing_type", nullable = false)
     private PricingType pricingType;
+
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
+    @Column(name = "rejected_at")
+    private LocalDateTime rejectedAt;
+
+
 
 
    /* @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
