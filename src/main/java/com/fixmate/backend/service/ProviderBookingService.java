@@ -12,8 +12,6 @@ public interface ProviderBookingService {
 
     void confirmBooking(Long bookingId, Long serviceProviderId, Long providerServiceId);
 
-    void cancelBooking(Long bookingId, Long serviceProviderId, Long providerServiceId, String reason);
-
     void startJob(Long bookingId, Long serviceProviderId, Long providerServiceId);
 
     void finalizeBooking(
@@ -26,4 +24,13 @@ public interface ProviderBookingService {
     void markAsPaid(Long bookingId, String customerEmail);
 
     List<ProviderBookingResponse> getProviderBookingResponses(Long serviceProviderId);
+
+    void rejectBooking(
+            Long bookingId,
+            Long serviceProviderId,
+            Long providerServiceId,
+            String reason
+    );
+
+
 }

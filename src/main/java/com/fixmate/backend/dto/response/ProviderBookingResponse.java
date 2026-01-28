@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class ProviderBookingResponse {
     private Long bookingId;
     private BookingStatus status;
+    private Long providerServiceId;
 
     private String customerName;
     private String customerPhone;

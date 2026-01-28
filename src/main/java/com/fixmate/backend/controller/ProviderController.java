@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -158,7 +159,7 @@ public class ProviderController {
 
 
     @PostMapping("/bookings/{bookingId}/confirm")
-    public ResponseEntity<String> confirmBooking(
+    public ResponseEntity<Void> confirmBooking(
             @PathVariable Long bookingId,
             @RequestParam Long providerServiceId,
             Authentication auth
@@ -168,24 +169,29 @@ public class ProviderController {
                 getUserId(auth),
                 providerServiceId
         );
-        return ResponseEntity.ok("Booking confirmed");
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/bookings/{bookingId}/cancel")
-    public ResponseEntity<String> cancelBooking(
+
+    @PostMapping("/bookings/{bookingId}/reject")
+    @PreAuthorize("hasRole('SERVICE_PROVIDER')")
+    public ResponseEntity<?> rejectBooking(
             @PathVariable Long bookingId,
             @RequestParam Long providerServiceId,
-            @RequestParam String reason,
+            @RequestBody Map<String, String> body,
             Authentication auth
     ) {
-        bookingService.cancelBooking(
+        providerBookingService.rejectBooking(
                 bookingId,
                 getUserId(auth),
                 providerServiceId,
-                reason
+                body.get("reason")
         );
-        return ResponseEntity.ok("Booking canceled");
+
+        return ResponseEntity.ok().build();
     }
+
+
 
 
     @PostMapping("/bookings/{bookingId}/start")
@@ -217,6 +223,15 @@ public class ProviderController {
         );
         return ResponseEntity.ok().build();
     }
+
+
+
+
+
+
+
+
+
 
 
     @GetMapping("/earnings")
