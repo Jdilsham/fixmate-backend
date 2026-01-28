@@ -47,4 +47,13 @@ public class AdminController {
         return ResponseEntity.ok("Provider service verification updated");
     }
 
+    @PutMapping("/providers/{providerId}/reject")
+    public ResponseEntity<Void> rejectProvider(
+            @PathVariable Long providerId,
+            @RequestParam(required = false) String reason
+    ) {
+        adminService.rejectProvider(providerId, reason);
+        return ResponseEntity.ok().build();
+    }
+
 }

@@ -45,12 +45,17 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
             AddProviderServiceRequest dto,
             MultipartFile qualificationPdf
     ) {
-
         ServiceProvider provider = serviceProviderRepository
                 .findByUserId(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Service provider not found")
                 );
+
+        if (!Boolean.TRUE.equals(provider.getIsVerified())) {
+            throw new BadRequestException(
+                    "Provider account is not approved yet"
+            );
+        }
 
         Services service = serviceRepository
                 .findById(dto.getServiceId())
@@ -123,9 +128,6 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
         return providerServiceRepository
                 .findPublicApprovedServices(VerificationStatus.APPROVED);
     }
-
-
-
 
     @Override
     @Transactional(readOnly = true)

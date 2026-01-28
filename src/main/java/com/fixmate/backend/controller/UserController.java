@@ -54,7 +54,7 @@ public class UserController {
     public ResponseEntity<String> changePassword(
             Authentication authentication,
             @Valid @RequestBody ChangePasswordRequest request
-    ){
+    ) {
         User user = (User) authentication.getPrincipal();
         userService.changePassword(user.getId(), request);
         return ResponseEntity.ok("Password changed successfully");
@@ -68,7 +68,6 @@ public class UserController {
     }
 
 
-
     @GetMapping("/service/{providerServiceId}")
     public ResponseEntity<PublicServiceCardResponse> getServiceDetails(
             @PathVariable Long providerServiceId
@@ -78,5 +77,15 @@ public class UserController {
         );
     }
 
-}
+    @GetMapping("/services/{providerServiceId}/available-slots")
+    public ResponseEntity<List<String>> getAvailableSlots(
+            @PathVariable Long providerServiceId,
+            @RequestParam String date
+    ) {
+        return ResponseEntity.ok(
+                clientViewService.getAvailableSlots(providerServiceId, date)
+        );
+
+        }
+    }
 

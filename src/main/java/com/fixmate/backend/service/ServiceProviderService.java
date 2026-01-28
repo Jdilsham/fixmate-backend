@@ -2,6 +2,7 @@ package com.fixmate.backend.service;
 
 import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
+import com.fixmate.backend.dto.request.ProviderProfessionalInfoRequest;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.ServiceProvider;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,5 +38,12 @@ public interface ServiceProviderService {
     void updateProfilePicture(Long userId, MultipartFile profilePic);
 
     void uploadVerificationPdf(Long userId, MultipartFile pdf);
+
+    void uploadIdFront(Long userId, MultipartFile file);
+
+    void uploadIdBack(Long userId, MultipartFile file);
+
+    void updateProfessionalInfo(Long userId, ProviderProfessionalInfoRequest request);
+
 
 }

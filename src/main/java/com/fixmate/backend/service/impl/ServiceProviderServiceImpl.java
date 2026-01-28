@@ -2,6 +2,7 @@ package com.fixmate.backend.service.impl;
 
 import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
+import com.fixmate.backend.dto.request.ProviderProfessionalInfoRequest;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.*;
 import com.fixmate.backend.enums.VerificationStatus;
@@ -36,6 +37,22 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     private final AddressRepository addressRepository;
 
 
+    private boolean isActivationComplete(ServiceProvider provider) {
+
+        boolean hasAddress = addressRepository
+                .existsByUserId(provider.getUser().getId());
+
+        return provider.getIdFrontUrl() != null
+                && provider.getIdBackUrl() != null
+                && provider.getWorkPdfUrl() != null
+                && provider.getSkill() != null && !provider.getSkill().isBlank()
+                && provider.getExperience() != null && !provider.getExperience().isBlank()
+                && provider.getDescription() != null && !provider.getDescription().isBlank()
+                && hasAddress;
+    }
+
+
+
     @Override
     public void requestVerification(Long userId) {
 
@@ -48,13 +65,19 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         )
                 );
 
+        if (!isActivationComplete(provider)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Please complete all required details before requesting verification"
+            );
+        }
 
-
-        System.out.println(
-                "Verification requested for provider ID: " +
-                        provider.getServiceProviderId()
-        );
+        // move to admin review
+        provider.setVerificationStatus(VerificationStatus.PENDING);
+        provider.setIsVerified(false);
+        provider.setIsAvailable(false);
     }
+
 
 
     @Override
@@ -251,6 +274,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                 .orElse(null); // important: no address yet
     }
 
+    @Override
     public void uploadVerificationPdf(Long userId, MultipartFile pdf) {
 
         if (pdf == null || pdf.isEmpty()) {
@@ -260,14 +284,83 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
             );
         }
 
-        if (pdf.getContentType() == null ||
-                !pdf.getContentType().equalsIgnoreCase("application/pdf")) {
+        if (!"application/pdf".equalsIgnoreCase(pdf.getContentType())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Only PDF files are allowed"
             );
         }
 
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Service provider profile not found"
+                ));
+
+        String pdfUrl = fileStorageService.upload(pdf);
+        provider.setWorkPdfUrl(pdfUrl);
+
+        //re-verification if already approved
+        if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
+            provider.setVerificationStatus(VerificationStatus.PENDING);
+            provider.setIsVerified(false);
+            provider.setIsAvailable(false);
+        }
+    }
+
+
+    @Override
+    public void uploadIdFront(Long userId, MultipartFile file) {
+
+        validateIdFile(file);
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Service provider profile not found"
+                ));
+
+        String url = fileStorageService.upload(file);
+        provider.setIdFrontUrl(url);
+
+        //re-verification logic
+        if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
+            provider.setVerificationStatus(VerificationStatus.PENDING);
+            provider.setIsVerified(false);
+            provider.setIsAvailable(false);
+        }
+    }
+
+    @Override
+    public void uploadIdBack(Long userId, MultipartFile file) {
+
+        validateIdFile(file);
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Service provider profile not found"
+                ));
+
+        String url = fileStorageService.upload(file);
+        provider.setIdBackUrl(url);
+
+        //re-verification logic
+        if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
+            provider.setVerificationStatus(VerificationStatus.PENDING);
+            provider.setIsVerified(false);
+            provider.setIsAvailable(false);
+        }
+    }
+
+    @Override
+    public void updateProfessionalInfo(
+            Long userId,
+            ProviderProfessionalInfoRequest request
+    ) {
         ServiceProvider provider = serviceProviderRepository
                 .findByUserId(userId)
                 .orElseThrow(() ->
@@ -277,23 +370,14 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         )
                 );
 
-        String pdfUrl;
-        try {
-            pdfUrl = fileStorageService.upload(pdf);
-            System.out.println("PDF uploaded to: " + pdfUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "PDF upload failed"
-            );
-        }
+        provider.setSkill(request.getSkill());
+        provider.setExperience(request.getExperience());
+        provider.setDescription(request.getDescription());
 
-        provider.setWorkPdfUrl(pdfUrl);
-        provider.setVerificationStatus(VerificationStatus.PENDING);
-        provider.setIsVerified(false);
-        provider.setIsAvailable(false);
+        // IMPORTANT: do NOT change verification status here
     }
+
+
 
     @Override
     public List<ProviderBookingResponse> getBookings(Long userId) {
@@ -395,4 +479,25 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         return dto;
     }
 
+    private void validateIdFile(MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "ID file is required"
+            );
+        }
+
+        if (file.getContentType() == null ||
+                !(file.getContentType().startsWith("image/")
+                        || file.getContentType().equals("application/pdf"))) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only image or PDF files are allowed"
+            );
+        }
+    }
 }
+
+
+

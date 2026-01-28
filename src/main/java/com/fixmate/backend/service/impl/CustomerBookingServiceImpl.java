@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
@@ -23,6 +27,9 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 @Service
 @RequiredArgsConstructor
 public class CustomerBookingServiceImpl implements CustomerBookingService {
+
+    private static final long BOOKING_DURATION_SECONDS = 2 * 60 * 60; // 2 hours
+
     private final UserRepository userRepository;
     private final CustomerMapper mapper;
     private final BookingRepository bookingRepository;
@@ -36,11 +43,34 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
     @Transactional
     public CustomerBookingResponse createBooking(String email, BookingRequest dto) {
 
+        // =======================
+        // VALIDATE BOOKING TIME
+        // =======================
+        Instant scheduledAt = dto.getScheduledAt();
+
+        if (scheduledAt == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Service date and time are required"
+            );
+        }
+
+        LocalDateTime utcDateTime =
+                LocalDateTime.ofInstant(scheduledAt, ZoneOffset.UTC);
+
+        // Reject date-only bookings (00:00 UTC)
+        if (utcDateTime.getHour() == 0 && utcDateTime.getMinute() == 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Please select a service time"
+            );
+        }
+
         // USER
         User customer = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // PROVIDER SERVICE (provider + service + price)
+        // PROVIDER SERVICE
         ProviderService providerService =
                 providerServiceRepository.findById(dto.getProviderServiceId())
                         .orElseThrow(() ->
@@ -52,6 +82,33 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         if (!Boolean.TRUE.equals(provider.getIsAvailable())) {
             throw new ResponseStatusException(CONFLICT, "Service Provider not available");
         }
+
+        // =======================
+        // CHECK TIME OVERLAP
+        // =======================
+
+        // 2-hour booking slot
+                Instant startTime = scheduledAt;
+                Instant endTime = scheduledAt.plusSeconds(BOOKING_DURATION_SECONDS);
+
+        // Expand search window to catch overlaps
+                Instant startBoundary = startTime.minusSeconds(BOOKING_DURATION_SECONDS);
+
+                List<Booking> conflicts =
+                        bookingRepository.findPotentialOverlaps(
+                                provider.getServiceProviderId(),
+                                startBoundary,
+                                endTime
+                        );
+
+                if (!conflicts.isEmpty()) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT,
+                            "Service provider is already booked for this time"
+                    );
+                }
+
+
 
         // Load customer profile address
         Address profileAddress = addressRepository
@@ -84,6 +141,9 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
                         (addressLine2 != null ? ", " + addressLine2 : "") +
                         ", " + city +
                         ", " + province;
+
+
+
 
         // BOOKING
         Booking booking = new Booking();
