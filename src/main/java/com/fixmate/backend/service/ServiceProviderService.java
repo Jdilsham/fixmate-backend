@@ -45,5 +45,4 @@ public interface ServiceProviderService {
 
     void updateProfessionalInfo(Long userId, ProviderProfessionalInfoRequest request);
 
-
 }

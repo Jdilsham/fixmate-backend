@@ -317,4 +317,20 @@ public class ProviderController {
                 .toList();
     }
 
+    @PatchMapping("/service/{providerServiceId}/active")
+    public ResponseEntity<Void> toggleServiceActive(
+            @PathVariable Long providerServiceId,
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
+
+        providerServiceService.toggleActive(
+                providerServiceId,
+                user.getId()
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
+
 }

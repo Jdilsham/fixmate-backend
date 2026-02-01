@@ -9,6 +9,7 @@ import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.mapper.ProviderMapper;
 import com.fixmate.backend.repository.AddressRepository;
 import com.fixmate.backend.repository.BookingRepository;
+import com.fixmate.backend.repository.ProviderServiceRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.service.FileStorageService;
 import com.fixmate.backend.service.ServiceProviderService;
@@ -35,6 +36,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     private final ProviderMapper providerMapper;
     private final FileStorageService fileStorageService;
     private final AddressRepository addressRepository;
+    private final ProviderServiceRepository providerServiceRepository;
 
 
     private boolean isActivationComplete(ServiceProvider provider) {
@@ -301,12 +303,16 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         String pdfUrl = fileStorageService.upload(pdf);
         provider.setWorkPdfUrl(pdfUrl);
 
+
+
         //re-verification if already approved
         if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
             provider.setVerificationStatus(VerificationStatus.PENDING);
             provider.setIsVerified(false);
             provider.setIsAvailable(false);
         }
+
+
     }
 
 
@@ -324,6 +330,8 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
 
         String url = fileStorageService.upload(file);
         provider.setIdFrontUrl(url);
+
+
 
         //re-verification logic
         if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
@@ -348,12 +356,15 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         String url = fileStorageService.upload(file);
         provider.setIdBackUrl(url);
 
+
+
         //re-verification logic
         if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
             provider.setVerificationStatus(VerificationStatus.PENDING);
             provider.setIsVerified(false);
             provider.setIsAvailable(false);
         }
+
     }
 
     @Override
@@ -497,6 +508,8 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
             );
         }
     }
+
+
 }
 
 
