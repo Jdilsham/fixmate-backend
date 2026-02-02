@@ -32,6 +32,7 @@ public interface ProviderMapper {
     @Mapping(target = "idFrontUrl", source = "idFrontUrl")
     @Mapping(target = "idBackUrl", source = "idBackUrl")
     @Mapping(target = "workPdfUrl", source = "workPdfUrl")
+    @Mapping(target = "verificationStatus", source = "verificationStatus")
 
     ProviderProfileDTO toProfileDTO(ServiceProvider provider);
 
