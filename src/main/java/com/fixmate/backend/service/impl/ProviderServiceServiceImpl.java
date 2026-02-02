@@ -21,6 +21,7 @@ import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.ServiceRepository;
 import com.fixmate.backend.service.ProviderServiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,12 +46,17 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
             AddProviderServiceRequest dto,
             MultipartFile qualificationPdf
     ) {
-
         ServiceProvider provider = serviceProviderRepository
                 .findByUserId(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Service provider not found")
                 );
+
+        if (!Boolean.TRUE.equals(provider.getIsVerified())) {
+            throw new BadRequestException(
+                    "Provider account is not approved yet"
+            );
+        }
 
         Services service = serviceRepository
                 .findById(dto.getServiceId())
@@ -124,9 +130,6 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
                 .findPublicApprovedServices(VerificationStatus.APPROVED);
     }
 
-
-
-
     @Override
     @Transactional(readOnly = true)
     public List<ProviderServiceCardResponse> getProviderServices(Long userId) {
@@ -146,6 +149,24 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
         return services.stream()
                 .map(providerMapper::toProviderServiceDTO)
                 .toList();
+    }
+
+    @Override
+    @jakarta.transaction.Transactional
+    public void toggleActive(Long providerServiceId, Long userId) {
+
+        ProviderService providerService = providerServiceRepository
+                .findById(providerServiceId)
+                .orElseThrow(() -> new RuntimeException("Service not found"));
+
+        Long ownerUserId =
+                providerService.getServiceProvider().getUser().getId();
+
+        if (!ownerUserId.equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to modify this service");
+        }
+
+        providerService.setIsActive(!providerService.getIsActive());
     }
 
 }

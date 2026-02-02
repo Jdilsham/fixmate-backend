@@ -30,12 +30,10 @@ public class AdminService {
     public void approveProvider(Long providerId) {
 
         ServiceProvider provider = serviceProviderRepository.findById(providerId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Provider not found"
-                        )
-                );
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Provider not found"
+                ));
 
         if (provider.getVerificationStatus() != VerificationStatus.PENDING) {
             throw new ResponseStatusException(
@@ -44,9 +42,45 @@ public class AdminService {
             );
         }
 
+        if (provider.getIdFrontUrl() == null ||
+                provider.getIdBackUrl() == null ||
+                provider.getWorkPdfUrl() == null ||
+                provider.getSkill() == null || provider.getSkill().isBlank() ||
+                provider.getExperience() == null || provider.getExperience().isBlank() ||
+                provider.getDescription() == null || provider.getDescription().isBlank()) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Provider profile is incomplete"
+            );
+        }
+
         provider.setVerificationStatus(VerificationStatus.APPROVED);
         provider.setIsVerified(true);
         provider.setIsAvailable(true);
+    }
+
+
+    public void rejectProvider(Long providerId, String reason) {
+
+        ServiceProvider provider = serviceProviderRepository.findById(providerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Provider not found"
+                ));
+
+        if (provider.getVerificationStatus() != VerificationStatus.PENDING) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Provider is not pending verification"
+            );
+        }
+
+        provider.setVerificationStatus(VerificationStatus.REJECTED);
+        provider.setIsVerified(false);
+        provider.setIsAvailable(false);
+
+        // optional: log / store rejection reason later
     }
 
 }

@@ -67,4 +67,12 @@ public class ServiceProvider {
 
     @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Review> reviews = new HashSet<>();
+
+    @Column(name = "id_front_url")
+    private String idFrontUrl;
+
+    @Column(name = "id_back_url")
+    private String idBackUrl;
+
+
 }

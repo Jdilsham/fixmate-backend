@@ -9,4 +9,7 @@ public interface ClientViewService {
     List<ServiceProviderCardDTO> getAllVerifiedAndAvailableProviders();
 
     PublicServiceCardResponse getPublicServiceById(Long providerServiceId);
+
+    List<String> getAvailableSlots(Long providerServiceId, String date);
+
 }

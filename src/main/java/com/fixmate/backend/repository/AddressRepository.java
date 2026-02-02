@@ -10,4 +10,5 @@ public interface AddressRepository extends JpaRepository<Address,Long> {
     //Fetch the most recently added address
     Optional<Address> findFirstByUserIdOrderByAddressIdDesc(Long userId);
     Optional<Address> findByUserId(Long userId);
+    boolean existsByUserId(Long userId);
 }

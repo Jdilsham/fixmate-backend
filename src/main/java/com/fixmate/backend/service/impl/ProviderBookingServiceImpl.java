@@ -44,7 +44,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
 
         booking.setStatus(BookingStatus.ACCEPTED);
-        booking.getServiceProvider().setIsAvailable(false);
+
 
         notificationService.notifyCustomer(booking.getUser(), "Your booking has been CONFIRMED by the service provider.");
     }
@@ -195,8 +195,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         // Complete booking
         booking.setStatus(BookingStatus.COMPLETED);
 
-        // Make provider available again
-        booking.getServiceProvider().setIsAvailable(true);
+
     }
 
     @Override

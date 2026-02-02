@@ -20,6 +20,9 @@ public class ProviderProfileDTO {
     private String profileImage;
     private String city;
     private String phone;
+    private String idFrontUrl;
+    private String idBackUrl;
+    private String workPdfUrl;
 
     private List<ProviderServiceCardResponse> services;
     private Boolean isOwner;

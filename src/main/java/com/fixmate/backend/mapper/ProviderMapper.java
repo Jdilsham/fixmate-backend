@@ -29,6 +29,10 @@ public interface ProviderMapper {
 
     @Mapping(target = "profileImage", source = "user.profilePic")
 
+    @Mapping(target = "idFrontUrl", source = "idFrontUrl")
+    @Mapping(target = "idBackUrl", source = "idBackUrl")
+    @Mapping(target = "workPdfUrl", source = "workPdfUrl")
+
     ProviderProfileDTO toProfileDTO(ServiceProvider provider);
 
     // MAP LIST OF PROVIDER SERVICES

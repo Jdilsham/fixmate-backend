@@ -20,6 +20,6 @@ public interface ProviderServiceService {
 
     List<ProviderServiceCardResponse> getProviderServices(Long userId);
 
-
+    void toggleActive(Long providerServiceId, Long userId);
 
 }

@@ -1,10 +1,7 @@
 package com.fixmate.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fixmate.backend.dto.request.AddProviderServiceRequest;
-import com.fixmate.backend.dto.request.AddressRequest;
-import com.fixmate.backend.dto.request.FinalizeBookingRequest;
-import com.fixmate.backend.dto.request.ProfileUpdateReq;
+import com.fixmate.backend.dto.request.*;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.mapper.BookingMapper;
@@ -130,6 +127,40 @@ public class ProviderController {
         providerService.uploadVerificationPdf(getUserId(auth), pdf);
 
     }
+
+    @PutMapping(
+            value = "/verification/id-front",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<Void> uploadIdFront(
+            Authentication auth,
+            @RequestParam("file") MultipartFile file
+    ) {
+        providerService.uploadIdFront(getUserId(auth), file);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(
+            value = "/verification/id-back",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<Void> uploadIdBack(
+            Authentication auth,
+            @RequestParam("file") MultipartFile file
+    ) {
+        providerService.uploadIdBack(getUserId(auth), file);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/professional-info")
+    public ResponseEntity<Void> updateProfessionalInfo(
+            Authentication auth,
+            @Valid @RequestBody ProviderProfessionalInfoRequest request
+    ) {
+        providerService.updateProfessionalInfo(getUserId(auth), request);
+        return ResponseEntity.ok().build();
+    }
+
 
 
     @PatchMapping("/availability")
@@ -285,5 +316,21 @@ public class ProviderController {
                 ))
                 .toList();
     }
+
+    @PatchMapping("/service/{providerServiceId}/active")
+    public ResponseEntity<Void> toggleServiceActive(
+            @PathVariable Long providerServiceId,
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
+
+        providerServiceService.toggleActive(
+                providerServiceId,
+                user.getId()
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
 
 }
