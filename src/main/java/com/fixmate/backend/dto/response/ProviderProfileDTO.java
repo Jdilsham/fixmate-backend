@@ -16,6 +16,7 @@ public class ProviderProfileDTO {
     private String experience;
     private BigDecimal rating;
     private Boolean isVerified;
+    private String verificationStatus;
     private Boolean isAvailable;
     private String profileImage;
     private String city;
