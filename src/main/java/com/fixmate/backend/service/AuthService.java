@@ -10,6 +10,7 @@ import com.fixmate.backend.enums.Role;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.UserRepository;
 import com.fixmate.backend.service.impl.EmailService;
+import com.fixmate.backend.service.impl.OtpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,7 @@ public class AuthService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final GoogleAuthService googleAuthService;
     private final EmailService emailService;
+    private final OtpService otpService;
 
     public void signup(SignupRequest request) {
 
@@ -41,8 +43,6 @@ public class AuthService {
             );
         }
 
-        String otp = generateOtp();
-
         User user = new User(
                 request.getFirstName(),
                 request.getLastName(),
@@ -52,9 +52,10 @@ public class AuthService {
                 request.getRole()
         );
 
-        user.setVerificationCode(otp);
+
         user.setVerified(false);
 
+        String otp = otpService.generateOtp(user);
         User savedUser = userRepository.save(user);
 
         // Create service provider profile if needed
@@ -118,8 +119,7 @@ public class AuthService {
     }
 
 
-
-    //verify email and send welcome email
+    // ================= VERIFY USER =================
     public void verifyUser(String email, String code) {
 
         User user = userRepository.findByEmail(email)
@@ -129,24 +129,48 @@ public class AuthService {
                 ));
 
         if (user.isVerified()) {
-            return;
-        }
-
-        if (!code.equals(user.getVerificationCode())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Invalid verification code"
+                    "User already verified"
             );
         }
 
-        user.setVerified(true);
-        user.setVerificationCode(null);
+        otpService.validateOtp(user, code);
 
+        user.setVerified(true);
+        otpService.clearOtp(user);
         userRepository.save(user);
 
-        //send welcome email
-        emailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
+        emailService.sendWelcomeEmail(
+                user.getEmail(),
+                user.getFirstName()
+        );
     }
+
+    // ================= RESEND OTP =================
+    public void resendOtp(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        if (user.isVerified()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "User already verified"
+            );
+        }
+
+        otpService.validateResendAllowed(user);
+
+        String otp = otpService.generateOtp(user);
+        userRepository.save(user);
+
+        emailService.sendVerificationCode(user.getEmail(), otp);
+    }
+
 
     //  GOOGLE LOGIN
     public String googleLogin(String idToken) {
@@ -188,10 +212,4 @@ public class AuthService {
         );
     }
 
-    //generate otp
-    private String generateOtp() {
-        return String.valueOf(
-                ThreadLocalRandom.current().nextInt(100000, 1_000_000)
-        );
-    }
 }

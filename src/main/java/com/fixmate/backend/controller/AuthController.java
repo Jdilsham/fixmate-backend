@@ -1,9 +1,6 @@
 package com.fixmate.backend.controller;
 
-import com.fixmate.backend.dto.request.EmailVerifyRequest;
-import com.fixmate.backend.dto.request.GoogleLoginRequest;
-import com.fixmate.backend.dto.request.LoginRequest;
-import com.fixmate.backend.dto.request.SignupRequest;
+import com.fixmate.backend.dto.request.*;
 import com.fixmate.backend.dto.response.AuthResponse;
 import com.fixmate.backend.service.AuthService;
 import jakarta.validation.Valid;
@@ -52,6 +49,16 @@ public class AuthController {
         return ResponseEntity.ok(
                 "Email verified successfully"
         );
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<String> resend(
+            @Valid @RequestBody ResendOtpRequest request
+    ){
+        authService.resendOtp(
+                request.getEmail()
+        );
+        return ResponseEntity.ok("OTP resent successfully");
     }
 
     @PostMapping("/google")
