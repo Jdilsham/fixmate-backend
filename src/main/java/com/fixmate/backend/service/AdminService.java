@@ -1,14 +1,19 @@
 package com.fixmate.backend.service;
 
+import com.fixmate.backend.dto.request.ServiceCategoryRequest;
 import com.fixmate.backend.dto.response.AdminDashboardStats;
 import com.fixmate.backend.dto.response.AdminPendingProvider;
 import com.fixmate.backend.dto.response.AdminUserView;
+import com.fixmate.backend.dto.response.ServiceCategoryResponse;
+import com.fixmate.backend.entity.ServiceCategory;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.User;
 import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.repository.BookingRepository;
+import com.fixmate.backend.repository.ServiceCategoryRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ public class AdminService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final ServiceCategoryRepository serviceCategoryRepository;
 
 
 //    this get the admin stats for the component in the dashboard
@@ -111,4 +117,57 @@ public class AdminService {
         // optional: log / store rejection reason later
     }
 
+//    get all categories to a list
+    public List<ServiceCategoryResponse> gatAllCategories(){
+        return serviceCategoryRepository.findAll().stream()
+                .map(category -> new ServiceCategoryResponse(
+                        category.getCategoryId(),
+                        category.getName()
+                )).toList();
+    }
+
+    public void createCategory(ServiceCategoryRequest request){
+        if (serviceCategoryRepository.findByNameIgnoreCase(request.getName()).isPresent()){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Service category already exists");
+        }
+
+        ServiceCategory category = new ServiceCategory();
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        serviceCategoryRepository.save(category);
+    }
+
+    public void updateCategory(Long id,  ServiceCategoryRequest req) {
+        ServiceCategory category = serviceCategoryRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found")
+        );
+
+        if (!category.getName().equalsIgnoreCase(req.getName()) &&
+        serviceCategoryRepository.findByNameIgnoreCase(req.getName()).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Service category already exists");
+        }
+
+        category.setName(req.getName());
+        category.setDescription(req.getDescription());
+        serviceCategoryRepository.save(category);
+    }
+
+    public void deleteCategory(Long id){
+        ServiceCategory category = serviceCategoryRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found")
+        );
+
+        if (!category.getServices().isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Bad Request"
+            );
+        }
+
+        serviceCategoryRepository.delete(category);
+    }
 }

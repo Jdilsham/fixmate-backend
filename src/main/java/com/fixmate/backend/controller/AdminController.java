@@ -1,13 +1,17 @@
 package com.fixmate.backend.controller;
 
+import com.fixmate.backend.dto.request.ServiceCategoryRequest;
 import com.fixmate.backend.dto.response.AdminDashboardStats;
 import com.fixmate.backend.dto.response.AdminPendingProvider;
 import com.fixmate.backend.dto.response.AdminUserView;
+import com.fixmate.backend.dto.response.ServiceCategoryResponse;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.service.AdminProviderServiceService;
 import com.fixmate.backend.service.AdminService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,6 +74,29 @@ public class AdminController {
     ) {
         adminService.rejectProvider(providerId, reason);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<ServiceCategoryResponse>> getAllCategories(){
+        return ResponseEntity.ok(adminService.gatAllCategories());
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<Void> createCategory(@Valid @RequestBody ServiceCategoryRequest req){
+        adminService.createCategory(req);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<Void> updateCategory(@PathVariable Long id , @Valid @RequestBody ServiceCategoryRequest req){
+        adminService.updateCategory(id,req);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/category/{id}")
+    public  ResponseEntity<Void> deleteCategory(@PathVariable Long id){
+        adminService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
