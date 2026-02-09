@@ -3,6 +3,7 @@ package com.fixmate.backend.service.impl;
 import com.fixmate.backend.dto.request.FinalizeBookingRequest;
 import com.fixmate.backend.dto.response.ProviderBookingResponse;
 import com.fixmate.backend.entity.Booking;
+import com.fixmate.backend.entity.Payment;
 import com.fixmate.backend.enums.BookingStatus;
 import com.fixmate.backend.enums.PricingType;
 import com.fixmate.backend.repository.BookingRepository;
@@ -207,12 +208,18 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         return bookings.stream().map(booking -> {
 
             ProviderBookingResponse dto = new ProviderBookingResponse();
+            Payment payment = booking.getPayment();
 
             dto.setBookingId(booking.getBookingId());
             dto.setStatus(booking.getStatus());
             dto.setDescription(booking.getDescription());
             dto.setPaymentAmount(booking.getTotalPrice());
             dto.setPaymentType(booking.getPricingType().name());
+            dto.setHourlyRate(
+                    booking.getProviderService() != null
+                            ? booking.getProviderService().getHourlyRate()
+                            : null
+            );
 
 
             if (booking.getUser() != null) {
@@ -248,7 +255,11 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                     booking.getProviderService().getId()
             );
 
-
+            if (payment != null) {
+                dto.setPaymentStatus(payment.getStatus().name());
+            } else {
+                dto.setPaymentStatus(null);
+            }
 
             return dto;
 

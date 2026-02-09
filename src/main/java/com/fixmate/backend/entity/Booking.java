@@ -75,8 +75,6 @@ public class Booking {
     private LocalDateTime rejectedAt;
 
 
-
-
    /* @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Address> addresses =  new HashSet<>();
 */

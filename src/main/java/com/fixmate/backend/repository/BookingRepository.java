@@ -82,5 +82,4 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 Instant dayEnd
         );
 
-
 }

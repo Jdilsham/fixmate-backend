@@ -311,8 +311,6 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
             provider.setIsVerified(false);
             provider.setIsAvailable(false);
         }
-
-
     }
 
 
@@ -479,7 +477,6 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         ? payment.getPaymentMethod().name()
                         : "N/A"
         );
-
 //        dto.setAddress(
 //                booking.getAddresses().stream()
 //                        .findFirst()

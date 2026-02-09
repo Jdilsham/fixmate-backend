@@ -26,9 +26,12 @@ public class ProviderBookingResponse {
 
     private BigDecimal paymentAmount;
     private String paymentType;
+    private BigDecimal hourlyRate;
 
     private String bookingAddress;
     private String bookingPhone;
     private BigDecimal latitude;
     private BigDecimal longitude;
+
+    private String paymentStatus;
 }
