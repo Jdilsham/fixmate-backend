@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -103,6 +104,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         }
 
         booking.setStatus(BookingStatus.IN_PROGRESS);
+        booking.setStartedAt(Instant.now());
 
         notificationService.notifyCustomer(
                 booking.getUser(),
@@ -251,9 +253,13 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                         )
                 );
             }
+            dto.setStartedAt(booking.getStartedAt());
+
             dto.setProviderServiceId(
                     booking.getProviderService().getId()
             );
+
+
 
             if (payment != null) {
                 dto.setPaymentStatus(payment.getStatus().name());

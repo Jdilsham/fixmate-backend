@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Data
@@ -23,6 +24,7 @@ public class ProviderBookingResponse {
     private String description;
 
     private LocalDateTime scheduledAt;
+    private Instant startedAt;
 
     private BigDecimal paymentAmount;
     private String paymentType;

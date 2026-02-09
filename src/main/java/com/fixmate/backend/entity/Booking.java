@@ -33,6 +33,9 @@ public class Booking {
     @Column(name = "scheduled_at")
     private Instant scheduledAt;
 
+    @Column(name = "started_at")
+    private Instant startedAt;
+
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
