@@ -74,5 +74,9 @@ public class ServiceProvider {
     @Column(name = "id_back_url")
     private String idBackUrl;
 
+    public boolean isProfileComplete(){
+        return idFrontUrl != null && idBackUrl != null && workPdfUrl != null && skill != null && !skill.isBlank() && description !=null && !description.isBlank() && experience != null && !experience.isBlank();
+    }
+
 
 }
