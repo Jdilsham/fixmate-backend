@@ -1,10 +1,7 @@
 package com.fixmate.backend.controller;
 
 import com.fixmate.backend.dto.request.ServiceCategoryRequest;
-import com.fixmate.backend.dto.response.AdminDashboardStats;
-import com.fixmate.backend.dto.response.AdminPendingProvider;
-import com.fixmate.backend.dto.response.AdminUserView;
-import com.fixmate.backend.dto.response.ServiceCategoryResponse;
+import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.service.AdminProviderServiceService;
@@ -67,15 +64,17 @@ public class AdminController {
         return ResponseEntity.ok("Provider service verification updated");
     }
 
-    @PutMapping("/providers/{providerId}/reject")
-    public ResponseEntity<Void> rejectProvider(
-            @PathVariable Long providerId,
-            @RequestParam(required = false) String reason
-    ) {
-        adminService.rejectProvider(providerId, reason);
-        return ResponseEntity.ok().build();
-    }
+//    @PutMapping("/providers/{providerId}/reject")
+//    public ResponseEntity<Void> rejectProvider(
+//            @PathVariable Long providerId,
+//            @RequestParam(required = false) String reason
+//    ) {
+//        adminService.rejectProvider(providerId, reason);
+//        return ResponseEntity.ok().build();
+//    }
 
+
+//   admin category endpoints
     @GetMapping("/categories")
     public ResponseEntity<List<ServiceCategoryResponse>> getAllCategories(){
         return ResponseEntity.ok(adminService.gatAllCategories());
@@ -99,4 +98,19 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+//    pending provider get req
+    @GetMapping("/providers/{id}")
+    public ResponseEntity<AdminProviderDetailResponse> getProviderDetail(@PathVariable Long id){
+        return  ResponseEntity.ok(adminService.getProviderDetails(id));
+    }
+
+//    rejecting a provider
+    @PutMapping("/providers/{id}/reject")
+    public ResponseEntity<Void> rejectProvider(@PathVariable Long id , @RequestBody String reason){
+        adminService.rejectProvider(id, reason);
+        return ResponseEntity.ok().build();
+    }
+
 }
+
+
