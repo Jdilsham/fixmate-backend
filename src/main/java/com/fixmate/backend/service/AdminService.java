@@ -5,6 +5,7 @@ import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.ServiceCategory;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.enums.Role;
 import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.repository.ServiceCategoryRepository;
@@ -13,6 +14,7 @@ import com.fixmate.backend.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -53,6 +55,21 @@ public class AdminService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
         );
+        User targetUser = userRepository.findById(userId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                        );
+        String currentAdminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+//        prevent self banning
+        if (targetUser.getEmail().equals(currentAdminEmail)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are Can't ban yourself");
+        }
+
+        if (targetUser.getRole() == Role.ADMIN){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are Can't ban other admins");
+        }
+
+
         user.setBanned(!user.isBanned());
         userRepository.save(user);
     }
