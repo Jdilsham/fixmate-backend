@@ -10,5 +10,5 @@ import java.math.BigDecimal;
 public class PaymentRequest {
     private Long bookingId;
     private BigDecimal amount;
-    private String workedTime;
+    private Long workedSeconds;
 }

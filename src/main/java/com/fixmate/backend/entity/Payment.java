@@ -38,8 +38,8 @@ public class Payment {
     @Column(name = "status", nullable = false)
     private PaymentStatus status;
 
-    @Column(name = "worked_time")
-    private String workedTime;
+    @Column(name = "worked_seconds")
+    private Long workedSeconds;
 
     @Column(name = "paid_at")
     private Instant paidAt;
