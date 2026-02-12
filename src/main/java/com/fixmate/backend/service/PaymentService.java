@@ -67,6 +67,8 @@ public class PaymentService {
 
         paymentRepository.save(payment);
 
+        booking.setPayment(payment);
+
         // Update booking status
         booking.setStatus(BookingStatus.PAYMENT_PENDING);
         bookingRepository.save(booking);
@@ -173,10 +175,17 @@ public class PaymentService {
             );
         }
 
-        // Update payment
+        if (payment.getStatus() != PaymentStatus.REQUESTED) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Payment is not in REQUESTED state"
+            );
+        }
+
         payment.setPaymentMethod(PaymentMethod.CASH);
-        payment.setStatus(PaymentStatus.PAID);
-        payment.setPaidAt(Instant.now());
+        payment.setStatus(PaymentStatus.CASH_WAITING_CONFIRMATION);
+
+        payment.setPaidAt(null);
 
         paymentRepository.save(payment);
     }
@@ -199,24 +208,31 @@ public class PaymentService {
             );
         }
 
-        // Ensure customer already paid
-        if (payment.getStatus() != PaymentStatus.PAID) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Payment is not yet paid by customer"
-            );
+        if (payment.getPaymentMethod() == PaymentMethod.CASH) {
+            if (payment.getStatus() != PaymentStatus.CASH_WAITING_CONFIRMATION) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Cash payment is not waiting for confirmation"
+                );
+            }
+
+            // Provider confirms cash received
+            payment.setStatus(PaymentStatus.CONFIRMED);
+            payment.setPaidAt(Instant.now());
+            paymentRepository.save(payment);
+
+            // Complete booking
+            Booking booking = payment.getBooking();
+            booking.setStatus(BookingStatus.COMPLETED);
+            bookingRepository.save(booking);
+
+            return;
         }
-
-        // Confirm payment
-        payment.setStatus(PaymentStatus.CONFIRMED);
-        paymentRepository.save(payment);
-
-        // Complete booking
-        Booking booking = payment.getBooking();
-        booking.setStatus(BookingStatus.COMPLETED);
-        bookingRepository.save(booking);
-
-        // send email + notification
+        // Card payment is confirmed by PayHere webhook.
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Card payments are confirmed automatically"
+        );
     }
 
     public PayHereSandboxResponse initiatePayHereSandbox(
