@@ -90,4 +90,42 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     """)
     BigDecimal sumConfirmedAmounts(@Param("providerId") Long providerId);
 
+
+    // KPI counts
+    long countByProviderService_ServiceProvider_ServiceProviderId(Long providerId);
+
+    long countByProviderService_ServiceProvider_ServiceProviderIdAndStatus(
+            Long providerId,
+            BookingStatus status
+    );
+
+    @Query("""
+        SELECT COUNT(b)
+        FROM Booking b
+        WHERE b.providerService.serviceProvider.serviceProviderId = :providerId
+          AND b.status IN :statuses
+    """)
+    long countByProviderAndStatuses(
+            @Param("providerId") Long providerId,
+            @Param("statuses") List<BookingStatus> statuses
+    );
+
+    // Today & Upcoming bookings
+    @Query("""
+        SELECT b
+        FROM Booking b
+        WHERE b.providerService.serviceProvider.serviceProviderId = :providerId
+          AND b.status NOT IN (
+              com.fixmate.backend.enums.BookingStatus.REJECTED,
+              com.fixmate.backend.enums.BookingStatus.CANCELLED
+          )
+          AND b.scheduledAt >= :from
+          AND b.scheduledAt < :to
+        ORDER BY b.scheduledAt ASC
+    """)
+    List<Booking> findProviderBookingsScheduledBetween(
+            @Param("providerId") Long providerId,
+            @Param("from") Instant from,
+            @Param("to") Instant to
+    );
 }
