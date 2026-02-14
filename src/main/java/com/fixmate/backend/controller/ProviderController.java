@@ -20,6 +20,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.fixmate.backend.dto.response.ProviderDashboardSummaryDTO;
+import com.fixmate.backend.service.ProviderDashboardService;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ public class ProviderController {
     private final BookingMapper bookingMapper;
     private final ServiceRepository serviceRepository;
     private final ProviderBookingService providerBookingService;
+    private final ProviderDashboardService providerDashboardService;
 
     private Long getUserId(Authentication authentication) {
         return ((User) authentication.getPrincipal()).getId();
@@ -61,6 +64,11 @@ public class ProviderController {
         return providerService.getProfileById(id, currentUserId);
     }
 
+    @GetMapping("/dashboard/summary")
+    @PreAuthorize("hasRole('SERVICE_PROVIDER')")
+    public ProviderDashboardSummaryDTO dashboardSummary(Authentication auth) {
+        return providerDashboardService.getSummary(getUserId(auth));
+    }
 
     @PutMapping("/profile")
     public void updateProfile(
