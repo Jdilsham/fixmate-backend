@@ -62,4 +62,52 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             @Param("from") Instant from,
             @Param("to") Instant to
     );
+
+    // ================= CUSTOMER DASHBOARD =================
+
+    // Lifetime spent (CONFIRMED only)
+    @Query("""
+    SELECT COALESCE(SUM(p.amount), 0)
+    FROM Payment p
+    WHERE p.customer.id = :customerId
+      AND p.status = :status
+""")
+    BigDecimal sumByCustomerAndStatus(
+            @Param("customerId") Long customerId,
+            @Param("status") PaymentStatus status
+    );
+
+    // Spent between dates (CONFIRMED only)
+    @Query("""
+    SELECT COALESCE(SUM(p.amount), 0)
+    FROM Payment p
+    WHERE p.customer.id = :customerId
+      AND p.status = :status
+      AND p.paidAt >= :from
+      AND p.paidAt < :to
+""")
+    BigDecimal sumByCustomerAndStatusAndPaidAtBetween(
+            @Param("customerId") Long customerId,
+            @Param("status") PaymentStatus status,
+            @Param("from") Instant from,
+            @Param("to") Instant to
+    );
+
+    // Payments for chart range
+    @Query("""
+    SELECT p
+    FROM Payment p
+    WHERE p.customer.id = :customerId
+      AND p.status = :status
+      AND p.paidAt IS NOT NULL
+      AND p.paidAt >= :from
+      AND p.paidAt < :to
+    ORDER BY p.paidAt ASC
+""")
+    List<Payment> findByCustomerAndStatusAndPaidAtBetween(
+            @Param("customerId") Long customerId,
+            @Param("status") PaymentStatus status,
+            @Param("from") Instant from,
+            @Param("to") Instant to
+    );
 }
