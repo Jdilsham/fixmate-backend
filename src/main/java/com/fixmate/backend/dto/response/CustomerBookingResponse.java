@@ -21,6 +21,7 @@ public class CustomerBookingResponse {
 
     private String customerName;
     private String phone;
+    private String providerPhone;
     private String address;
     private String city;
 
@@ -48,6 +49,13 @@ public class CustomerBookingResponse {
                                 booking.getServiceProvider().getUser().getLastName()
                                 : "Not assigned"
                 )
+
+                .providerPhone(
+                        booking.getServiceProvider() != null
+                                ? booking.getServiceProvider().getUser().getPhone()
+                                : null
+                )
+
                 .customerName(
                         booking.getUser().getFirstName() + " " +
                                 booking.getUser().getLastName()
@@ -62,14 +70,10 @@ public class CustomerBookingResponse {
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDateTime()
                 )
-
                 .pricingType(booking.getPricingType().name())
                 .description(booking.getDescription())
-
                 .rejectionReason(booking.getRejectionReason())
                 .rejectedAt(booking.getRejectedAt())
-
-
                 .build();
     }
 }
