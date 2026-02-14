@@ -11,5 +11,5 @@ public class FinalizeBookingRequest {
 
     // HOURLY pricing
     private BigDecimal hourlyRate;
-    private BigDecimal hoursWorked;
+    private Long workedSeconds;
 }

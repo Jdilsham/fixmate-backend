@@ -43,9 +43,6 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
     @Transactional
     public CustomerBookingResponse createBooking(String email, BookingRequest dto) {
 
-        // =======================
-        // VALIDATE BOOKING TIME
-        // =======================
         Instant scheduledAt = dto.getScheduledAt();
 
         if (scheduledAt == null) {
@@ -55,8 +52,7 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
             );
         }
 
-        LocalDateTime utcDateTime =
-                LocalDateTime.ofInstant(scheduledAt, ZoneOffset.UTC);
+        LocalDateTime utcDateTime = LocalDateTime.ofInstant(scheduledAt, ZoneOffset.UTC);
 
         // Reject date-only bookings (00:00 UTC)
         if (utcDateTime.getHour() == 0 && utcDateTime.getMinute() == 0) {
@@ -66,16 +62,12 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
             );
         }
 
-        // USER
         User customer = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // PROVIDER SERVICE
         ProviderService providerService =
                 providerServiceRepository.findById(dto.getProviderServiceId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException("Provider service not found")
-                        );
+                        .orElseThrow(() -> new ResourceNotFoundException("Provider service not found"));
 
         ServiceProvider provider = providerService.getServiceProvider();
 
@@ -83,69 +75,74 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
             throw new ResponseStatusException(CONFLICT, "Service Provider not available");
         }
 
-        // =======================
-        // CHECK TIME OVERLAP
-        // =======================
+        Instant startTime = scheduledAt;
+        Instant endTime = scheduledAt.plusSeconds(BOOKING_DURATION_SECONDS);
+        Instant startBoundary = startTime.minusSeconds(BOOKING_DURATION_SECONDS);
 
-        // 2-hour booking slot
-                Instant startTime = scheduledAt;
-                Instant endTime = scheduledAt.plusSeconds(BOOKING_DURATION_SECONDS);
+        List<Booking> conflicts =
+                bookingRepository.findPotentialOverlaps(
+                        provider.getServiceProviderId(),
+                        startBoundary,
+                        endTime
+                );
 
-        // Expand search window to catch overlaps
-                Instant startBoundary = startTime.minusSeconds(BOOKING_DURATION_SECONDS);
+        if (!conflicts.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Service provider is already booked for this time"
+            );
+        }
 
-                List<Booking> conflicts =
-                        bookingRepository.findPotentialOverlaps(
-                                provider.getServiceProviderId(),
-                                startBoundary,
-                                endTime
-                        );
+        if (dto.getLatitude() == null || dto.getLongitude() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Please pick your location on the map"
+            );
+        }
 
-                if (!conflicts.isEmpty()) {
-                    throw new ResponseStatusException(
-                            HttpStatus.CONFLICT,
-                            "Service provider is already booked for this time"
-                    );
-                }
+        if (dto.getAddressLine1() == null || dto.getAddressLine1().trim().isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Address is required (from map pin)"
+            );
+        }
 
+        if (dto.getProvince() == null || dto.getProvince().trim().isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Province is required (from map pin)"
+            );
+        }
 
+        String addressLine1 = dto.getAddressLine1().trim();
+        String addressLine2 = (dto.getAddressLine2() == null || dto.getAddressLine2().trim().isEmpty())
+                ? null
+                : dto.getAddressLine2().trim();
 
-        // Load customer profile address
-        Address profileAddress = addressRepository
-                .findFirstByUserIdOrderByAddressIdDesc(customer.getId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "No address found in profile"
-                ));
+        String city = (dto.getCity() == null || dto.getCity().trim().isEmpty())
+                ? null
+                : dto.getCity().trim();
 
-        String addressLine1 = profileAddress.getAddressLine1();
-        String addressLine2 = profileAddress.getAddressLine2();
-        String city = profileAddress.getCity();
-        String province = profileAddress.getProvince();
-        BigDecimal latitude = profileAddress.getLatitude();
-        BigDecimal longitude = profileAddress.getLongitude();
-        String phone = customer.getPhone();
+        String province = dto.getProvince().trim();
 
-        // Override ONLY if customer sent values
-        if (dto.getAddressLine1() != null) addressLine1 = dto.getAddressLine1();
-        if (dto.getAddressLine2() != null) addressLine2 = dto.getAddressLine2();
-        if (dto.getCity() != null) city = dto.getCity();
-        if (dto.getProvince() != null) province = dto.getProvince();
-        if (dto.getLatitude() != null) latitude = dto.getLatitude();
-        if (dto.getLongitude() != null) longitude = dto.getLongitude();
-        if (dto.getPhone() != null) phone = dto.getPhone();
+        BigDecimal latitude = dto.getLatitude();
+        BigDecimal longitude = dto.getLongitude();
 
+        String phone = (dto.getPhone() == null || dto.getPhone().trim().isEmpty())
+                ? customer.getPhone()
+                : dto.getPhone().trim();
 
-        String fullAddress =
-                addressLine1 +
-                        (addressLine2 != null ? ", " + addressLine2 : "") +
-                        ", " + city +
-                        ", " + province;
+        StringBuilder fullAddress = new StringBuilder();
+        fullAddress.append(addressLine1);
 
+        if (addressLine2 != null) {
+            fullAddress.append(", ").append(addressLine2);
+        }
+        if (city != null) {
+            fullAddress.append(", ").append(city);
+        }
+        fullAddress.append(", ").append(province);
 
-
-
-        // BOOKING
         Booking booking = new Booking();
         booking.setUser(customer);
         booking.setServiceProvider(provider);
@@ -156,9 +153,8 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         booking.setPricingType(dto.getPricingType());
 
 
-        // SNAPSHOT CONTACT INFO
         BookingContactInfo contactInfo = BookingContactInfo.builder()
-                .address(fullAddress)
+                .address(fullAddress.toString())
                 .city(city)
                 .phone(phone)
                 .latitude(latitude)
