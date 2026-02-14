@@ -50,8 +50,7 @@ public class ProviderDashboardServiceImpl implements ProviderDashboardService {
                 providerId, BookingStatus.COMPLETED
         );
 
-        // Income (CONFIRMED payments only)
-        ZoneId zone = ZoneId.systemDefault();
+        ZoneId zone = ZoneId.of("Asia/Colombo");
         LocalDate today = LocalDate.now(zone);
 
         Instant monthStart = today.withDayOfMonth(1).atStartOfDay(zone).toInstant();
