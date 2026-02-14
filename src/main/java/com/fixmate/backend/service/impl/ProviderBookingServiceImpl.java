@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -151,16 +152,18 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         } else { // HOURLY
 
             if (request.getHourlyRate() == null ||
-                    request.getHoursWorked() == null) {
+                    request.getWorkedSeconds() == null ||
+                    request.getWorkedSeconds() <= 0) {
 
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "Hourly rate and hours worked are required"
+                        "Hourly rate and worked time are required"
                 );
             }
 
             finalAmount = request.getHourlyRate()
-                    .multiply(request.getHoursWorked());
+                    .multiply(BigDecimal.valueOf(request.getWorkedSeconds()))
+                    .divide(BigDecimal.valueOf(3600), 2, RoundingMode.HALF_UP);
         }
 
         booking.setTotalPrice(finalAmount);

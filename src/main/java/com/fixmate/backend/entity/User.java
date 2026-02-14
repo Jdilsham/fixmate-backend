@@ -51,6 +51,12 @@ public class User implements UserDetails {
     @Column(length = 6)
     private String verificationCode;
 
+    @Column
+    private Instant otpExpiresAt;
+
+    @Column
+    private Instant lastOtpSentAt;
+
     @Column(nullable = false)
     private boolean isVerified;
 
