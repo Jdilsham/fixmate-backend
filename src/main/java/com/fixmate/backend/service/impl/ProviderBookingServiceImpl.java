@@ -3,6 +3,7 @@ package com.fixmate.backend.service.impl;
 import com.fixmate.backend.dto.request.FinalizeBookingRequest;
 import com.fixmate.backend.dto.response.ProviderBookingResponse;
 import com.fixmate.backend.entity.Booking;
+import com.fixmate.backend.entity.Payment;
 import com.fixmate.backend.enums.BookingStatus;
 import com.fixmate.backend.enums.PricingType;
 import com.fixmate.backend.repository.BookingRepository;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -102,6 +105,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         }
 
         booking.setStatus(BookingStatus.IN_PROGRESS);
+        booking.setStartedAt(Instant.now());
 
         notificationService.notifyCustomer(
                 booking.getUser(),
@@ -148,16 +152,18 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         } else { // HOURLY
 
             if (request.getHourlyRate() == null ||
-                    request.getHoursWorked() == null) {
+                    request.getWorkedSeconds() == null ||
+                    request.getWorkedSeconds() <= 0) {
 
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "Hourly rate and hours worked are required"
+                        "Hourly rate and worked time are required"
                 );
             }
 
             finalAmount = request.getHourlyRate()
-                    .multiply(request.getHoursWorked());
+                    .multiply(BigDecimal.valueOf(request.getWorkedSeconds()))
+                    .divide(BigDecimal.valueOf(3600), 2, RoundingMode.HALF_UP);
         }
 
         booking.setTotalPrice(finalAmount);
@@ -207,12 +213,18 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         return bookings.stream().map(booking -> {
 
             ProviderBookingResponse dto = new ProviderBookingResponse();
+            Payment payment = booking.getPayment();
 
             dto.setBookingId(booking.getBookingId());
             dto.setStatus(booking.getStatus());
             dto.setDescription(booking.getDescription());
             dto.setPaymentAmount(booking.getTotalPrice());
             dto.setPaymentType(booking.getPricingType().name());
+            dto.setHourlyRate(
+                    booking.getProviderService() != null
+                            ? booking.getProviderService().getHourlyRate()
+                            : null
+            );
 
 
             if (booking.getUser() != null) {
@@ -244,11 +256,19 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                         )
                 );
             }
+            dto.setStartedAt(booking.getStartedAt());
+
             dto.setProviderServiceId(
                     booking.getProviderService().getId()
             );
 
 
+
+            if (payment != null) {
+                dto.setPaymentStatus(payment.getStatus().name());
+            } else {
+                dto.setPaymentStatus(null);
+            }
 
             return dto;
 

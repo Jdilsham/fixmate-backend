@@ -36,13 +36,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     );
 
     // 🔹 Provider earnings (CONFIRMED payments only)
-    @Query("""
-        SELECT COALESCE(SUM(p.amount), 0)
-        FROM Payment p
-        WHERE p.provider.serviceProviderId = :providerId
-          AND p.status = com.fixmate.backend.enums.PaymentStatus.CONFIRMED
-    """)
-    BigDecimal sumConfirmedAmounts(Long providerId);
+//    @Query("""
+//        SELECT COALESCE(SUM(p.amount), 0)
+//        FROM Payment p
+//        WHERE p.provider.serviceProviderId = :providerId
+//          AND p.status = com.fixmate.backend.enums.PaymentStatus.CONFIRMED
+//    """)
+//    BigDecimal sumConfirmedAmounts(Long providerId);
 
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
 
@@ -82,5 +82,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 Instant dayEnd
         );
 
+    @Query("""
+        SELECT COALESCE(SUM(p.amount), 0)
+        FROM Payment p
+        WHERE (:providerId IS NULL OR p.provider.serviceProviderId = :providerId)
+          AND p.status = com.fixmate.backend.enums.PaymentStatus.CONFIRMED
+    """)
+    BigDecimal sumConfirmedAmounts(@Param("providerId") Long providerId);
 
 }
