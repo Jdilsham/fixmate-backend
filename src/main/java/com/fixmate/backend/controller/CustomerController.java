@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.fixmate.backend.dto.response.CustomerDashboardSummaryDTO;
+import com.fixmate.backend.service.CustomerDashboardService;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class CustomerController {
     private final CustomerService customerService;
     private final ProviderBookingService providerBookingService;
     private final CustomerBookingService customerBookingService;
+    private final CustomerDashboardService customerDashboardService;
 
 
     @GetMapping("/me")
@@ -56,6 +59,14 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/dashboard/summary")
+    public ResponseEntity<CustomerDashboardSummaryDTO> getCustomerDashboardSummary(
+            Authentication auth
+    ) {
+        return ResponseEntity.ok(
+                customerDashboardService.getSummary(auth.getName())
+        );
+    }
 
     @PostMapping("/bookings/{bookingId}/mark-paid")
     public ResponseEntity<Void> markBookingPaid(
