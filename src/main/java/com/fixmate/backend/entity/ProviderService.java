@@ -56,4 +56,10 @@ public class ProviderService {
     // STATUS
     @Column(name = "is_active")
     private Boolean isActive = true;
+
+    // SERVICE AREA (District)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "district_id")
+    private District district;
+
 }
