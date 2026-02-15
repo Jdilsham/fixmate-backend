@@ -14,4 +14,6 @@ public interface ReviewService {
     List<ReviewResponse> getReviewsForProvider(Long providerId);
 
     BigDecimal getAvgRating(Long providerId);
+
+    List<Long> getMyReviewedBookingIds(Long userId);
 }

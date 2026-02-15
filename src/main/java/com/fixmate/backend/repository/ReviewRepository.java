@@ -19,4 +19,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     """)
 
     BigDecimal calculateAvgRating(@Param("providerId") Long providerId);
+
+    @Query("""
+        SELECT r.booking.bookingId
+        FROM Review r
+        WHERE r.user.id = :userId
+    """)
+    List<Long> findReviewedBookingIdsByUser(@Param("userId") Long userId);
 }
