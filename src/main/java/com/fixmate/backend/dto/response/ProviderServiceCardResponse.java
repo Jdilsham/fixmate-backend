@@ -26,4 +26,5 @@ public class ProviderServiceCardResponse {
     private Boolean isActive;
 
     private String qualificationDoc;
+    private String district;
 }

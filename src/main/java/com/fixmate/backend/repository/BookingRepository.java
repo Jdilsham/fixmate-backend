@@ -35,15 +35,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                     @Param("serviceProviderId") Long serviceProviderId
     );
 
-    // 🔹 Provider earnings (CONFIRMED payments only)
-//    @Query("""
-//        SELECT COALESCE(SUM(p.amount), 0)
-//        FROM Payment p
-//        WHERE p.provider.serviceProviderId = :providerId
-//          AND p.status = com.fixmate.backend.enums.PaymentStatus.CONFIRMED
-//    """)
-//    BigDecimal sumConfirmedAmounts(Long providerId);
-
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     @Query("""
@@ -89,4 +80,85 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
           AND p.status = com.fixmate.backend.enums.PaymentStatus.CONFIRMED
     """)
     BigDecimal sumConfirmedAmounts(@Param("providerId") Long providerId);
+
+
+    // KPI counts
+    long countByProviderService_ServiceProvider_ServiceProviderId(Long providerId);
+
+    long countByProviderService_ServiceProvider_ServiceProviderIdAndStatus(
+            Long providerId,
+            BookingStatus status
+    );
+
+    @Query("""
+        SELECT COUNT(b)
+        FROM Booking b
+        WHERE b.providerService.serviceProvider.serviceProviderId = :providerId
+          AND b.status IN :statuses
+    """)
+    long countByProviderAndStatuses(
+            @Param("providerId") Long providerId,
+            @Param("statuses") List<BookingStatus> statuses
+    );
+
+    // Today & Upcoming bookings
+    @Query("""
+        SELECT b
+        FROM Booking b
+        WHERE b.providerService.serviceProvider.serviceProviderId = :providerId
+          AND b.status NOT IN (
+              com.fixmate.backend.enums.BookingStatus.REJECTED,
+              com.fixmate.backend.enums.BookingStatus.CANCELLED
+          )
+          AND b.scheduledAt >= :from
+          AND b.scheduledAt < :to
+        ORDER BY b.scheduledAt ASC
+    """)
+    List<Booking> findProviderBookingsScheduledBetween(
+            @Param("providerId") Long providerId,
+            @Param("from") Instant from,
+            @Param("to") Instant to
+    );
+
+
+    // ================= CUSTOMER DASHBOARD =================
+
+    // Total bookings
+    long countByUserId(Long userId);
+
+    // Counts by status
+    long countByUserIdAndStatus(Long userId, BookingStatus status);
+
+    @Query("""
+    SELECT COUNT(b)
+    FROM Booking b
+    WHERE b.user.id = :userId
+      AND b.status IN :statuses
+""")
+    long countByCustomerAndStatuses(
+            @Param("userId") Long userId,
+            @Param("statuses") List<BookingStatus> statuses
+    );
+
+    // Today & Upcoming bookings for customer
+    @Query("""
+    SELECT b
+    FROM Booking b
+    WHERE b.user.id = :userId
+      AND b.status NOT IN (
+          com.fixmate.backend.enums.BookingStatus.REJECTED,
+          com.fixmate.backend.enums.BookingStatus.CANCELLED
+      )
+      AND b.scheduledAt >= :from
+      AND b.scheduledAt < :to
+    ORDER BY b.scheduledAt ASC
+""")
+    List<Booking> findCustomerBookingsScheduledBetween(
+            @Param("userId") Long userId,
+            @Param("from") Instant from,
+            @Param("to") Instant to
+    );
+
+    // Recent bookings (last 5/10)
+    List<Booking> findTop10ByUserIdOrderByCreatedAtDesc(Long userId);
 }

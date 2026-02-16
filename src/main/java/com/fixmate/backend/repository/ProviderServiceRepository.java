@@ -26,25 +26,25 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
 
     @Query("""
     SELECT new com.fixmate.backend.dto.response.PublicServiceCardResponse(
-        ps.id,                     
-        sp.serviceProviderId,         
-        s.serviceId,                  
-        s.title,                     
-        ps.description,              
-        c.name,                      
-        CONCAT(u.firstName, ' ', u.lastName), 
-        u.profilePic,                
-        ps.isFixedPrice,             
-        ps.hourlyRate,               
-        AVG(r.rating),              
-        a.city
+        ps.id,
+        sp.serviceProviderId,
+        s.serviceId,
+        s.title,
+        ps.description,
+        c.name,
+        CONCAT(u.firstName, ' ', u.lastName),
+        u.profilePic,
+        ps.isFixedPrice,
+        ps.hourlyRate,
+        AVG(r.rating),
+        d.name
     )
     FROM ProviderService ps
     JOIN ps.service s
     JOIN s.category c
     JOIN ps.serviceProvider sp
     JOIN sp.user u
-    LEFT JOIN Address a ON a.user.id = u.id
+    LEFT JOIN ps.district d
     LEFT JOIN Review r ON r.serviceProvider.id = sp.serviceProviderId
     WHERE ps.verificationStatus = :status
       AND ps.isActive = true
@@ -62,11 +62,9 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
         u.profilePic,
         ps.isFixedPrice,
         ps.hourlyRate,
-        a.city
+        d.name
 """)
-    List<PublicServiceCardResponse> findPublicApprovedServices(
-            VerificationStatus status
-    );
+    List<PublicServiceCardResponse> findPublicApprovedServices(VerificationStatus status);
 
     @Query("""
     SELECT new com.fixmate.backend.dto.response.PublicServiceCardResponse(
@@ -81,14 +79,14 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
         ps.isFixedPrice,
         ps.hourlyRate,
         AVG(r.rating),
-        a.city
+        d.name
     )
     FROM ProviderService ps
     JOIN ps.service s
     JOIN s.category c
     JOIN ps.serviceProvider sp
     JOIN sp.user u
-    LEFT JOIN Address a ON a.user.id = u.id
+    LEFT JOIN ps.district d
     LEFT JOIN Review r ON r.serviceProvider.id = sp.serviceProviderId
     WHERE ps.id = :providerServiceId
       AND ps.verificationStatus = :status
@@ -107,7 +105,7 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
         u.profilePic,
         ps.isFixedPrice,
         ps.hourlyRate,
-        a.city
+        d.name
 """)
     Optional<PublicServiceCardResponse> findPublicServiceById(
             Long providerServiceId,

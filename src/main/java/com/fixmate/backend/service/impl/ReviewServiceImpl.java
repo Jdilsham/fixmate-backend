@@ -100,4 +100,11 @@ public class ReviewServiceImpl implements ReviewService {
     public BigDecimal getAvgRating(Long providerId){
         return reviewRepository.calculateAvgRating(providerId);
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> getMyReviewedBookingIds(Long userId) {
+        return reviewRepository.findReviewedBookingIdsByUser(userId);
+    }
 }
