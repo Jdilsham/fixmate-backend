@@ -1,5 +1,6 @@
 package com.fixmate.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,8 +19,10 @@ import java.util.Set;
 public class WantedPost {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -27,9 +30,10 @@ public class WantedPost {
     private String description;
     private Integer requiredCount;
     private String location;
-    private String status = "open";
+    private String status = "OPEN";
     private Instant createdAt = Instant.now();
 
-    @OneToMany(mappedBy = "wanted_posts",cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToMany(mappedBy = "wantedPost",cascade = CascadeType.ALL)
     private Set<WantedApplication> applications = new HashSet<>();
 }

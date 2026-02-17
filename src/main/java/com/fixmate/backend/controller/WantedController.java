@@ -1,8 +1,8 @@
 package com.fixmate.backend.controller;
 
 import com.fixmate.backend.dto.request.WantedPostRequest;
+import com.fixmate.backend.dto.response.WantedPostResponse;
 import com.fixmate.backend.entity.User;
-import com.fixmate.backend.entity.WantedPost;
 import com.fixmate.backend.service.WantedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,16 +18,16 @@ import java.util.List;
 public class WantedController {
     private final WantedService wantedService;
 
-    // 1. Get all advertisements (Public)
+    // 1. Get all advertisements (any authenticated user)
     @GetMapping
-    public ResponseEntity<List<WantedPost>> getAllPosts() {
+    public ResponseEntity<List<WantedPostResponse>> getAllPosts() {
         return ResponseEntity.ok(wantedService.getAllOpenPosts());
     }
 
     // 2. Publish an advertisement (Only Customers/Users)
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<WantedPost> createPost(
+    public ResponseEntity<WantedPostResponse> createPost(
             @RequestBody WantedPostRequest request,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(wantedService.createPost(request, user));

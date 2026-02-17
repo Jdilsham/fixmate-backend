@@ -43,5 +43,6 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
     List<ServiceProvider> findByIsVerifiedTrueAndIsAvailableTrue();
 
+    Optional<ServiceProvider> findByUserId(Long userId);
 
 }

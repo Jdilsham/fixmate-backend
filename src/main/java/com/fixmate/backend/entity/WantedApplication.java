@@ -1,5 +1,6 @@
 package com.fixmate.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,14 +16,17 @@ public class WantedApplication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "application_id")
     private Long id;
 
     // Link to the specific job advertisement
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wanted_post_id", nullable = false)
     private WantedPost wantedPost;
 
     // Link to the provider who applied
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id", nullable = false)
     private ServiceProvider serviceProvider;
