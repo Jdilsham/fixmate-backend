@@ -2,6 +2,7 @@ package com.fixmate.backend.service;
 
 import com.fixmate.backend.config.JwtUtil;
 import com.fixmate.backend.dto.request.LoginRequest;
+import com.fixmate.backend.dto.request.ResetPasswordRequest;
 import com.fixmate.backend.dto.request.SignupRequest;
 import com.fixmate.backend.dto.response.AuthResponse;
 import com.fixmate.backend.entity.ServiceProvider;
@@ -74,6 +75,44 @@ public class AuthService {
                 otp
         );
     }
+
+    //==========================Forgot Password================================
+    public void forgotPassword(String email){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if(!user.isVerified()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not verified");
+        }
+        otpService.validateResendAllowed(user);
+
+        String otp =  otpService.generateOtp(user);
+        userRepository.save(user);
+
+        emailService.sendPasswordResetOtp(user.getEmail(), user.getFirstName(), otp);
+
+    }
+
+    //=========================== Reset Password ===============================
+    public void resetPassword(ResetPasswordRequest request){
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        //validate otp
+        otpService.validateOtp(user, request.getOtp());
+
+        // encrypt new password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        //Clear otp after successful validation
+        otpService.clearOtp(user);
+
+        userRepository.save(user);
+
+
+    }
+
 
     public AuthResponse login(LoginRequest request) {
 
