@@ -10,12 +10,10 @@ import java.util.UUID;
 import com.fixmate.backend.dto.request.AddProviderServiceRequest;
 import com.fixmate.backend.dto.response.ProviderServiceCardResponse;
 import com.fixmate.backend.dto.response.PublicServiceCardResponse;
-import com.fixmate.backend.entity.Address;
-import com.fixmate.backend.entity.ProviderService;
-import com.fixmate.backend.entity.ServiceProvider;
-import com.fixmate.backend.entity.Services;
+import com.fixmate.backend.entity.*;
 import com.fixmate.backend.exception.ResourceNotFoundException;
 import com.fixmate.backend.mapper.ProviderMapper;
+import com.fixmate.backend.repository.DistrictRepository;
 import com.fixmate.backend.repository.ProviderServiceRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.ServiceRepository;
@@ -39,6 +37,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
     private final ServiceRepository serviceRepository;
     private final ProviderServiceRepository providerServiceRepository;
     private final ProviderMapper providerMapper;
+    private final DistrictRepository districtRepository;
 
     @Override
     public void addServiceToProvider(
@@ -81,6 +80,11 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
             );
         }
 
+        District district = districtRepository.findById(dto.getDistrictId())
+                .orElseThrow(() -> new ResourceNotFoundException("District not found"));
+
+
+
         // save PDF
         String pdfPath = saveQualificationPdf(qualificationPdf);
 
@@ -93,6 +97,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
         providerService.setQualificationDoc(pdfPath);
         providerService.setVerificationStatus(VerificationStatus.PENDING);
         providerService.setIsActive(true);
+        providerService.setDistrict(district);
 
         providerServiceRepository.save(providerService);
     }

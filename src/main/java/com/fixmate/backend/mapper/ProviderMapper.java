@@ -64,6 +64,9 @@ public interface ProviderMapper {
                 .verificationStatus(ps.getVerificationStatus())
                 .isActive(ps.getIsActive())
                 .qualificationDoc(ps.getQualificationDoc())
+                .district(
+                        ps.getDistrict() != null ? ps.getDistrict().getName() : null
+                )
                 .build();
     }
 

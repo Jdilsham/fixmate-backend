@@ -46,6 +46,12 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getAvgRating(id));
     }
 
+    @GetMapping("/my/reviewed-bookings")
+    public ResponseEntity<List<Long>> getMyReviewedBookings(Authentication auth) {
+        Long userId = getUserId(auth);
+        return ResponseEntity.ok(reviewService.getMyReviewedBookingIds(userId));
+    }
+
     private Long getUserId(Authentication auth){
         User user = (User) auth.getPrincipal();
         return user.getId();

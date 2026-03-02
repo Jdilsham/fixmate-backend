@@ -18,4 +18,7 @@ public class AddProviderServiceRequest {
     private Boolean fixedPriceAvailable;
 
     private BigDecimal hourlyRate;
+
+    @NotNull
+    private Long districtId;
 }
