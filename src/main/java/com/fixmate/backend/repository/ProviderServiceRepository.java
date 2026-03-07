@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.repository.query.Param;
+
 public interface ProviderServiceRepository extends JpaRepository<ProviderService, Long> {
     boolean existsByServiceProvider_ServiceProviderIdAndService_ServiceId(
             Long providerId,
@@ -112,5 +114,19 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
             VerificationStatus status
     );
 
+    @Query("""
+    SELECT ps
+    FROM ProviderService ps
+    JOIN FETCH ps.serviceProvider sp
+    JOIN FETCH sp.user u
+    JOIN FETCH ps.service s
+    LEFT JOIN FETCH ps.district d
+    WHERE s.serviceId = :serviceId
+      AND ps.verificationStatus = com.fixmate.backend.enums.VerificationStatus.APPROVED
+      AND ps.isActive = true
+      AND sp.isAvailable = true
+      AND sp.isVerified = true
+""")
+    List<ProviderService> findSmartBookingCandidates(@Param("serviceId") Long serviceId);
 
 }

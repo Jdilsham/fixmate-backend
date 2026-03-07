@@ -23,6 +23,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
+import com.fixmate.backend.dto.request.SmartBookingRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -193,4 +194,12 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
 
     }
 
+    @Override
+    @Transactional
+    public CustomerBookingResponse createSmartBooking(String email, SmartBookingRequest dto) {
+        throw new ResponseStatusException(
+                HttpStatus.NOT_IMPLEMENTED,
+                "Smart booking is not implemented yet"
+        );
+    }
 }
