@@ -3,6 +3,7 @@ package com.fixmate.backend.service;
 import com.fixmate.backend.dto.request.WantedPostRequest;
 import com.fixmate.backend.dto.response.WantedPostResponse;
 import com.fixmate.backend.entity.*;
+import com.fixmate.backend.enums.Role;
 import com.fixmate.backend.repository.*;
 import com.fixmate.backend.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +32,53 @@ public class WantedService {
     }
 
     @Transactional(readOnly = true)
-    public List<WantedPostResponse> getAllOpenPosts() {
-        return wantedPostRepository.findByStatusOrderByCreatedAtDesc("OPEN")
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    public List<WantedPostResponse> getAllOpenPosts(User user) {
+
+        List<WantedPost> posts =
+                wantedPostRepository.findByStatusOrderByCreatedAtDesc("OPEN");
+
+        // 👇 Determine provider BEFORE lambda
+        Long providerId = null;
+
+        if (user != null && user.getRole() == Role.SERVICE_PROVIDER) {
+
+            ServiceProvider provider = providerRepository
+                    .findByUserId(user.getId())
+                    .orElse(null);
+
+            if (provider != null) {
+                providerId = provider.getServiceProviderId();
+            }
+        }
+
+        // 👇 Make it effectively final
+        final Long finalProviderId = providerId;
+
+        return posts.stream()
+                .map(post -> {
+
+                    boolean applied = false;
+
+                    if (finalProviderId != null) {
+                        applied = wantedApplicationRepository
+                                .existsByWantedPost_IdAndServiceProvider_ServiceProviderId(
+                                        post.getId(),
+                                        finalProviderId
+                                );
+                    }
+
+                    return WantedPostResponse.builder()
+                            .id(post.getId())
+                            .profession(post.getProfession())
+                            .description(post.getDescription())
+                            .requiredCount(post.getRequiredCount())
+                            .location(post.getLocation())
+                            .currentJoined((long) post.getApplications().size())
+                            .status(post.getStatus())
+                            .applied(applied)
+                            .build();
+                })
+                .toList();
     }
 
     public void applyToPost(Long postId, User user) {
@@ -47,7 +90,7 @@ public class WantedService {
                 .orElseThrow(() -> new ResourceNotFoundException("Provider profile not found"));
 
         // Prevent duplicate applications
-        if (wantedApplicationRepository.existsByWantedPostIdAndServiceProviderServiceProviderId(postId, provider.getServiceProviderId())) {
+        if (wantedApplicationRepository.existsByWantedPost_IdAndServiceProvider_ServiceProviderId(postId, provider.getServiceProviderId())) {
             throw new IllegalStateException("You have already applied for this work");
         }
 

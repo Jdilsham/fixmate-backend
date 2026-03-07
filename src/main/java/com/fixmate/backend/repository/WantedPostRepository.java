@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface WantedPostRepository extends JpaRepository<WantedPost, Long> {
     List<WantedPost> findByStatusOrderByCreatedAtDesc(String status);
+
 }
 

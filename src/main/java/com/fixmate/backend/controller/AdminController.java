@@ -55,6 +55,11 @@ public class AdminController {
         return ResponseEntity.ok("Service provider approved");
     }
 
+    @GetMapping("/provider-services/pending")
+    public ResponseEntity<List<AdminPendingServiceResponse>> getPendingProviderServices() {
+        return ResponseEntity.ok(adminProviderServiceService.getPendingProviderServices());
+    }
+
     @PutMapping("/provider-services/{id}/verify")
     public ResponseEntity<String> verifyProviderService(
             @PathVariable Long id,
