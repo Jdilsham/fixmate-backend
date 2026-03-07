@@ -225,8 +225,52 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         }
 
         if (dto.getPricingType() == com.fixmate.backend.enums.PricingType.HOURLY) {
-            bestProviderService = availableCandidates.stream()
+
+            List<ProviderService> hourlyCandidates = availableCandidates.stream()
                     .filter(ps -> ps.getHourlyRate() != null)
+                    .toList();
+
+            if (hourlyCandidates.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "No hourly-rate providers are available for the selected time"
+                );
+            }
+
+            double nearestDistance = hourlyCandidates.stream()
+                    .mapToDouble(ps -> {
+                        Address a = getPrimaryAddress(ps.getServiceProvider().getUser());
+                        return a == null
+                                ? Double.MAX_VALUE
+                                : calculateDistanceKm(
+                                dto.getLatitude(),
+                                dto.getLongitude(),
+                                a.getLatitude(),
+                                a.getLongitude()
+                        );
+                    })
+                    .min()
+                    .orElse(Double.MAX_VALUE);
+
+            double distanceToleranceKm = 1.0;
+
+            List<ProviderService> nearestCandidates = hourlyCandidates.stream()
+                    .filter(ps -> {
+                        Address a = getPrimaryAddress(ps.getServiceProvider().getUser());
+                        double distance = a == null
+                                ? Double.MAX_VALUE
+                                : calculateDistanceKm(
+                                dto.getLatitude(),
+                                dto.getLongitude(),
+                                a.getLatitude(),
+                                a.getLongitude()
+                        );
+
+                        return distance <= nearestDistance + distanceToleranceKm;
+                    })
+                    .toList();
+
+            bestProviderService = nearestCandidates.stream()
                     .min((ps1, ps2) -> {
                         int rateCompare = ps1.getHourlyRate().compareTo(ps2.getHourlyRate());
 
@@ -261,7 +305,8 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
                             HttpStatus.CONFLICT,
                             "No hourly-rate providers are available for the selected time"
                     ));
-        } else {
+        }
+         else {
             bestProviderService = availableCandidates.stream()
                     .min((ps1, ps2) -> {
                         Address a1 = getPrimaryAddress(ps1.getServiceProvider().getUser());
