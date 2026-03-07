@@ -210,37 +210,88 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
 
         Instant scheduledAt = dto.getScheduledAt();
 
-        ProviderService bestProviderService = candidates.stream()
+        ProviderService bestProviderService;
+
+        List<ProviderService> availableCandidates = candidates.stream()
                 .filter(ps -> ps.getServiceProvider() != null)
                 .filter(ps -> !hasTimeConflict(ps.getServiceProvider(), scheduledAt))
-                .min((ps1, ps2) -> {
-                    Address a1 = getPrimaryAddress(ps1.getServiceProvider().getUser());
-                    Address a2 = getPrimaryAddress(ps2.getServiceProvider().getUser());
+                .toList();
 
-                    double d1 = a1 == null
-                            ? Double.MAX_VALUE
-                            : calculateDistanceKm(
-                            dto.getLatitude(),
-                            dto.getLongitude(),
-                            a1.getLatitude(),
-                            a1.getLongitude()
-                    );
+        if (availableCandidates.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No providers are available for the selected time"
+            );
+        }
 
-                    double d2 = a2 == null
-                            ? Double.MAX_VALUE
-                            : calculateDistanceKm(
-                            dto.getLatitude(),
-                            dto.getLongitude(),
-                            a2.getLatitude(),
-                            a2.getLongitude()
-                    );
+        if (dto.getPricingType() == com.fixmate.backend.enums.PricingType.HOURLY) {
+            bestProviderService = availableCandidates.stream()
+                    .filter(ps -> ps.getHourlyRate() != null)
+                    .min((ps1, ps2) -> {
+                        int rateCompare = ps1.getHourlyRate().compareTo(ps2.getHourlyRate());
 
-                    return Double.compare(d1, d2);
-                })
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "No providers are available for the selected time"
-                ));
+                        if (rateCompare != 0) {
+                            return rateCompare;
+                        }
+
+                        Address a1 = getPrimaryAddress(ps1.getServiceProvider().getUser());
+                        Address a2 = getPrimaryAddress(ps2.getServiceProvider().getUser());
+
+                        double d1 = a1 == null
+                                ? Double.MAX_VALUE
+                                : calculateDistanceKm(
+                                dto.getLatitude(),
+                                dto.getLongitude(),
+                                a1.getLatitude(),
+                                a1.getLongitude()
+                        );
+
+                        double d2 = a2 == null
+                                ? Double.MAX_VALUE
+                                : calculateDistanceKm(
+                                dto.getLatitude(),
+                                dto.getLongitude(),
+                                a2.getLatitude(),
+                                a2.getLongitude()
+                        );
+
+                        return Double.compare(d1, d2);
+                    })
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.CONFLICT,
+                            "No hourly-rate providers are available for the selected time"
+                    ));
+        } else {
+            bestProviderService = availableCandidates.stream()
+                    .min((ps1, ps2) -> {
+                        Address a1 = getPrimaryAddress(ps1.getServiceProvider().getUser());
+                        Address a2 = getPrimaryAddress(ps2.getServiceProvider().getUser());
+
+                        double d1 = a1 == null
+                                ? Double.MAX_VALUE
+                                : calculateDistanceKm(
+                                dto.getLatitude(),
+                                dto.getLongitude(),
+                                a1.getLatitude(),
+                                a1.getLongitude()
+                        );
+
+                        double d2 = a2 == null
+                                ? Double.MAX_VALUE
+                                : calculateDistanceKm(
+                                dto.getLatitude(),
+                                dto.getLongitude(),
+                                a2.getLatitude(),
+                                a2.getLongitude()
+                        );
+
+                        return Double.compare(d1, d2);
+                    })
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.CONFLICT,
+                            "No providers are available for the selected time"
+                    ));
+        }
 
         ServiceProvider provider = bestProviderService.getServiceProvider();
 
@@ -288,16 +339,24 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
 
         return CustomerBookingResponse.builder()
                 .bookingId(saved.getBookingId())
-                .status(saved.getStatus())
-                .providerName(
-                        provider.getUser().getFirstName() + " " + provider.getUser().getLastName()
-                )
                 .serviceName(bestProviderService.getService().getTitle())
+                .providerName(provider.getUser().getFirstName() + " " + provider.getUser().getLastName())
+                .customerName(customer.getFirstName() + " " + customer.getLastName())
+                .phone(phone)
+                .providerPhone(provider.getUser().getPhone())
+                .address(fullAddress)
+                .city(city)
+                .status(saved.getStatus())
+                .amount(saved.getTotalPrice())
                 .scheduledAt(
                         saved.getScheduledAt()
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDateTime()
                 )
+                .pricingType(saved.getPricingType().name())
+                .description(saved.getDescription())
+                .rejectionReason(saved.getRejectionReason())
+                .rejectedAt(saved.getRejectedAt())
                 .build();
     }
 

@@ -26,4 +26,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         WHERE r.user.id = :userId
     """)
     List<Long> findReviewedBookingIdsByUser(@Param("userId") Long userId);
+
+
 }
