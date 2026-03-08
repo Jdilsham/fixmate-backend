@@ -91,4 +91,16 @@ public class EmailService {
         );
     }
 
+    public void sendPasswordResetOtp(String toEmail, String name, String code) {
+        Context ctx = new Context();
+        ctx.setVariable("name", name);
+        ctx.setVariable("code", code);
+
+        sendHtmlEmail(
+                toEmail,
+                "FixMate – Password Reset Request",
+                "password-reset",
+                ctx
+        );
+    }
 }

@@ -27,6 +27,21 @@ public class AuthController {
                 "Signup successful. Please verify your email."
         );
     }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> ForgotPassword(
+            @RequestParam String email
+    ){
+        authService.forgotPassword(email);
+        return ResponseEntity.ok("Password reset OTP sent to your email");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request
+    ) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok("Password reset successful");
+    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
