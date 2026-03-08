@@ -20,8 +20,12 @@ public class WantedController {
 
     // 1. Get all advertisements (any authenticated user)
     @GetMapping
-    public ResponseEntity<List<WantedPostResponse>> getAllPosts() {
-        return ResponseEntity.ok(wantedService.getAllOpenPosts());
+    public ResponseEntity<List<WantedPostResponse>> getAllPosts(
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(
+                wantedService.getAllOpenPosts(user)
+        );
     }
 
     // 2. Publish an advertisement (Only Customers/Users)
@@ -42,4 +46,6 @@ public class WantedController {
         wantedService.applyToPost(id, user);
         return ResponseEntity.ok("Successfully signed up for work!");
     }
+
+
 }

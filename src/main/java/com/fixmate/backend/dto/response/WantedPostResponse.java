@@ -11,4 +11,5 @@ public class WantedPostResponse {
     private String location;
     private Long currentJoined;
     private String status;
+    private boolean applied;
 }

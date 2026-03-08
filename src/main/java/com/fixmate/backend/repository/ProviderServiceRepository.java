@@ -19,6 +19,17 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
 
     List<ProviderService> findByVerificationStatus(VerificationStatus status);
 
+    @Query("""
+        SELECT ps FROM ProviderService ps
+        JOIN FETCH ps.serviceProvider sp
+        JOIN FETCH sp.user
+        JOIN FETCH ps.service s
+        JOIN FETCH s.category
+        LEFT JOIN FETCH ps.district
+        WHERE ps.verificationStatus = :status
+    """)
+    List<ProviderService> findByVerificationStatusWithDetails(VerificationStatus status);
+
     List<ProviderService> findByServiceProvider_ServiceProviderId(Long serviceProviderId);
 
     List<ProviderService> findByVerificationStatusAndIsActive(
