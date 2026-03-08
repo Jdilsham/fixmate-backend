@@ -1,13 +1,11 @@
 package com.fixmate.backend.service;
 
 import com.fixmate.backend.dto.request.ServiceCategoryRequest;
-import com.fixmate.backend.dto.response.AdminDashboardStats;
-import com.fixmate.backend.dto.response.AdminPendingProvider;
-import com.fixmate.backend.dto.response.AdminUserView;
-import com.fixmate.backend.dto.response.ServiceCategoryResponse;
+import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.ServiceCategory;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.enums.Role;
 import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.repository.ServiceCategoryRepository;
@@ -16,6 +14,7 @@ import com.fixmate.backend.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -56,6 +55,21 @@ public class AdminService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
         );
+        User targetUser = userRepository.findById(userId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                        );
+        String currentAdminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+//        prevent self banning
+        if (targetUser.getEmail().equals(currentAdminEmail)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are Can't ban yourself");
+        }
+
+        if (targetUser.getRole() == Role.ADMIN){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are Can't ban other admins");
+        }
+
+
         user.setBanned(!user.isBanned());
         userRepository.save(user);
     }
@@ -113,8 +127,9 @@ public class AdminService {
         provider.setVerificationStatus(VerificationStatus.REJECTED);
         provider.setIsVerified(false);
         provider.setIsAvailable(false);
+        provider.setRejectionReason(reason);
 
-        // optional: log / store rejection reason later
+        serviceProviderRepository.save(provider);
     }
 
 //    get all categories to a list
@@ -126,6 +141,7 @@ public class AdminService {
                 )).toList();
     }
 
+//    admin can create categories
     public void createCategory(ServiceCategoryRequest request){
         if (serviceCategoryRepository.findByNameIgnoreCase(request.getName()).isPresent()){
             throw new ResponseStatusException(
@@ -139,6 +155,7 @@ public class AdminService {
         serviceCategoryRepository.save(category);
     }
 
+//    edit categories by id
     public void updateCategory(Long id,  ServiceCategoryRequest req) {
         ServiceCategory category = serviceCategoryRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found")
@@ -156,6 +173,7 @@ public class AdminService {
         serviceCategoryRepository.save(category);
     }
 
+//    delete categories by id
     public void deleteCategory(Long id){
         ServiceCategory category = serviceCategoryRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found")
@@ -170,4 +188,30 @@ public class AdminService {
 
         serviceCategoryRepository.delete(category);
     }
+
+    public AdminProviderDetailResponse getProviderDetails(Long providerId){
+        ServiceProvider provider = serviceProviderRepository.findById(providerId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Provider not found")
+        );
+
+        User user = provider.getUser();
+
+        return AdminProviderDetailResponse.builder()
+                .providerId(provider.getServiceProviderId())
+                .fullName(user.getFirstName() + " " + user.getLastName())
+                .email(user.getEmail()).phone(user.getPhone())
+                .skill(provider.getSkill())
+                .experience(provider.getExperience())
+                .licenceNumber(provider.getLicenseNumber())
+                .description(provider.getDescription())
+                .city(provider.getCity())
+                .profileImage(user.getProfilePic())
+                .workPdf(provider.getWorkPdfUrl())
+                .idFrontUrl(provider.getIdFrontUrl())
+                .idBackUrl(provider.getIdBackUrl())
+                .verificationStatus(provider.getVerificationStatus())
+                .isProfileComplete(provider.isProfileComplete())
+                .joinedAt(user.getCreatedAt()).build();
+    }
+
 }

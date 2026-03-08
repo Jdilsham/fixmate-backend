@@ -71,6 +71,11 @@ public class SecurityConfig {
                         // 🟢 CUSTOMER only
                         .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
 
+                        // Wanted: allow all authenticated users to view posts; method-level @PreAuthorize handles role checks
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/wanted").authenticated()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted").hasRole("CUSTOMER")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted/*/apply").hasRole("SERVICE_PROVIDER")
+
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/provider/**").hasAnyRole("SERVICE_PROVIDER", "CUSTOMER")
 
                         // 🔵 SERVICE PROVIDER only

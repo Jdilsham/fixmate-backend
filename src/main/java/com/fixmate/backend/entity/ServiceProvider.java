@@ -79,5 +79,8 @@ public class ServiceProvider {
         return idFrontUrl != null && idBackUrl != null && workPdfUrl != null && skill != null && !skill.isBlank() && description !=null && !description.isBlank() && experience != null && !experience.isBlank();
     }
 
+    @Column(name = "rejection_reason" , columnDefinition = "TEXT")
+    private String rejectionReason;
+
 
 }

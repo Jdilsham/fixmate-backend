@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.fixmate.backend.dto.request.SmartBookingRequest;
 
 @RestController
 @RequestMapping("api/customer")
@@ -26,6 +27,15 @@ public class CustomerBookingController {
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(customerBookingService.createBooking(authentication.getName(), dto));
+    }
+
+    @PostMapping("/bookings/smart")
+    public ResponseEntity<CustomerBookingResponse> createSmartBooking(
+            Authentication authentication,
+            @Valid @RequestBody SmartBookingRequest dto
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(customerBookingService.createSmartBooking(authentication.getName(), dto));
     }
 
 }
