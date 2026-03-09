@@ -67,6 +67,14 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
 
         ServiceProvider provider = providerService.getServiceProvider();
 
+        /* Prevent provider booking their own service */
+        if (provider.getUser() != null && provider.getUser().getId().equals(customer.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "You cannot book your own service"
+            );
+        }
+
         if (!Boolean.TRUE.equals(provider.getIsAvailable())) {
             throw new ResponseStatusException(CONFLICT, "Service Provider not available");
         }

@@ -48,7 +48,7 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))   // ✅ ADD THIS LINE
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
 
 
@@ -65,27 +65,32 @@ public class SecurityConfig {
                                 "/api/v1/service-providers/**"
                         ).permitAll()
 
-                        // 🔴 ADMIN only
+                        // ADMIN only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // 🟢 CUSTOMER only
+                        // Allow booking creation for customer + provider
+                        .requestMatchers(HttpMethod.POST, "/api/customer/bookings")
+                        .hasAnyRole("CUSTOMER", "SERVICE_PROVIDER")
+
+
+                        // CUSTOMER only
                         .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
 
-                        // Wanted: allow all authenticated users to view posts; method-level @PreAuthorize handles role checks
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/wanted").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted").hasRole("CUSTOMER")
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted/*/apply").hasRole("SERVICE_PROVIDER")
+
 
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/provider/**").hasAnyRole("SERVICE_PROVIDER", "CUSTOMER")
 
-                        // 🔵 SERVICE PROVIDER only
+                        // SERVICE PROVIDER only
                         .requestMatchers("/api/provider/**").hasRole("SERVICE_PROVIDER")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted/*/apply").hasRole("SERVICE_PROVIDER")
 
-                        // 🟣 USER (customer + provider)
+                        // USER (customer + provider)
                         .requestMatchers("/api/user/**")
                         .hasAnyRole("CUSTOMER", "SERVICE_PROVIDER")
 
-                        // 🔐 Any other request needs login
+                        // Any other request needs login
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
