@@ -74,7 +74,7 @@ public class SecurityConfig {
 
 
                         // CUSTOMER only
-                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER","ADMIN")
 
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/wanted").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted").hasRole("CUSTOMER")
@@ -88,7 +88,7 @@ public class SecurityConfig {
 
                         // USER (customer + provider)
                         .requestMatchers("/api/user/**")
-                        .hasAnyRole("CUSTOMER", "SERVICE_PROVIDER")
+                        .hasAnyRole("CUSTOMER", "SERVICE_PROVIDER","ADMIN")
 
                         // Any other request needs login
                         .anyRequest().authenticated()
