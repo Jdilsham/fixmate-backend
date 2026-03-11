@@ -152,5 +152,15 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
 """)
     List<Long> findBookedProviderServiceIds(@Param("providerId") Long providerId);
 
+    @Query("""
+    SELECT ps FROM ProviderService ps
+    JOIN FETCH ps.serviceProvider sp
+    JOIN FETCH sp.user u
+    JOIN FETCH ps.service s
+    JOIN FETCH s.category c
+    LEFT JOIN FETCH ps.district d
+    WHERE ps.id = :id
+""")
+    Optional<ProviderService> findByIdWithAdminDetails(@Param("id") Long id);
 
 }

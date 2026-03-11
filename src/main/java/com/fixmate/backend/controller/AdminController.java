@@ -116,6 +116,12 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/provider-services/{id}")
+    public ResponseEntity<AdminProviderServiceDetailResponse> getProviderServiceDetails(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(adminProviderServiceService.getProviderServiceDetails(id));
+    }
 }
 
 

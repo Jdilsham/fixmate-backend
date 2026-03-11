@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/auth/google").permitAll()
                         .requestMatchers("/files/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/payments/webhook/**").permitAll()
 
 
