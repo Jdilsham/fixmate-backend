@@ -22,4 +22,5 @@ public interface ProviderServiceService {
 
     void toggleActive(Long providerServiceId, Long userId);
 
+    void deleteProviderService(Long providerServiceId, Long userId);
 }

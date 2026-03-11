@@ -174,5 +174,21 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
         providerService.setIsActive(!providerService.getIsActive());
     }
 
+    @Override
+    public void deleteProviderService(Long providerServiceId, Long userId) {
+
+        ProviderService providerService = providerServiceRepository
+                .findById(providerServiceId)
+                .orElseThrow(() -> new RuntimeException("Service not found"));
+
+        Long ownerUserId = providerService.getServiceProvider().getUser().getId();
+
+        if (!ownerUserId.equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to delete this service");
+        }
+
+        providerServiceRepository.delete(providerService);
+    }
+
 }
 

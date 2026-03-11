@@ -340,5 +340,18 @@ public class ProviderController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/service/{providerServiceId}")
+    public ResponseEntity<Void> deleteProviderService(
+            @PathVariable Long providerServiceId,
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
 
+        providerServiceService.deleteProviderService(
+                providerServiceId,
+                user.getId()
+        );
+
+        return ResponseEntity.ok().build();
+    }
 }
