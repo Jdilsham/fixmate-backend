@@ -36,20 +36,24 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
     }
 
     @Override
-    public void confirmBooking(Long bookingId, Long serviceProviderId, Long providerServiceId){
-        Booking booking = bookingRepository.findProviderBookingById
-                        (bookingId, providerServiceId, serviceProviderId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking notFound."));
+    public void confirmBooking(Long bookingId, Long serviceProviderId, Long providerServiceId) {
+        Booking booking = bookingRepository.findProviderBookingForConfirm(bookingId, serviceProviderId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Booking not found."
+                ));
 
-        if(booking.getStatus() != BookingStatus.PENDING){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending bookings can be confirmed.");
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Only pending bookings can be confirmed."
+            );
         }
-
 
         booking.setStatus(BookingStatus.ACCEPTED);
 
-
-        notificationService.notifyCustomer(booking.getUser(), "Your booking has been CONFIRMED by the service provider.");
+        notificationService.notifyCustomer(
+                booking.getUser(),
+                "Your booking has been CONFIRMED by the service provider."
+        );
     }
 
     @Override
@@ -190,18 +194,22 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
             );
         }
 
-        // Ensure provider finalized job
+        if (booking.getStatus() != BookingStatus.IN_PROGRESS) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Job must be finalized by provider before payment"
+            );
+        }
+
         if (booking.getTotalPrice() == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Booking not finalized yet"
+                    "Provider has not finalized the amount yet"
             );
         }
 
         // Complete booking
         booking.setStatus(BookingStatus.COMPLETED);
-
-
     }
 
     @Override

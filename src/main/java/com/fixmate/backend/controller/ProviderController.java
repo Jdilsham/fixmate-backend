@@ -45,6 +45,9 @@ public class ProviderController {
         return ((User) authentication.getPrincipal()).getId();
     }
 
+    private Long getServiceProviderId(Authentication authentication) {
+        return providerService.getServiceProviderIdByUserId(getUserId(authentication));
+    }
 
     @GetMapping("/profile")
     public ProviderProfileDTO profile(Authentication auth) {
@@ -207,7 +210,7 @@ public class ProviderController {
     ) {
         bookingService.confirmBooking(
                 bookingId,
-                getUserId(auth),
+                getServiceProviderId(auth),
                 providerServiceId
         );
         return ResponseEntity.ok().build();
@@ -243,7 +246,7 @@ public class ProviderController {
     ) {
         providerBookingService.startJob(
                 bookingId,
-                getUserId(auth),
+                getServiceProviderId(auth),
                 providerServiceId
         );
         return ResponseEntity.ok().build();
@@ -258,7 +261,7 @@ public class ProviderController {
     ) {
         providerBookingService.finalizeBooking(
                 bookingId,
-                getUserId(auth),
+                getServiceProviderId(auth),
                 providerServiceId,
                 request
         );

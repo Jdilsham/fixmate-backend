@@ -16,11 +16,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // 🔹 Provider booking list
     List<Booking> findByProviderService_ServiceProvider_ServiceProviderId(Long serviceProviderId);
 
-//    List<Booking> findByServiceProvider_ServiceProviderIdAndStatus(
-//            Long serviceProviderId,
-//            BookingStatus status
-//    );
-
     @Query("""
         SELECT b FROM Booking b
         WHERE b.bookingId = :bookingId
@@ -34,6 +29,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                     @Param("providerServiceId") Long providerServiceId,
                     @Param("serviceProviderId") Long serviceProviderId
     );
+
+    @Query("""
+        SELECT b FROM Booking b
+        WHERE b.bookingId = :bookingId
+          AND b.serviceProvider.serviceProviderId = :serviceProviderId
+    """)
+        Optional<Booking> findProviderBookingForConfirm(
+                @Param("bookingId") Long bookingId,
+                @Param("serviceProviderId") Long serviceProviderId
+        );
 
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
 
@@ -129,12 +134,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // Counts by status
     long countByUserIdAndStatus(Long userId, BookingStatus status);
 
-    @Query("""
-    SELECT COUNT(b)
-    FROM Booking b
-    WHERE b.user.id = :userId
-      AND b.status IN :statuses
-""")
+        @Query("""
+        SELECT COUNT(b)
+        FROM Booking b
+        WHERE b.user.id = :userId
+          AND b.status IN :statuses
+    """)
     long countByCustomerAndStatuses(
             @Param("userId") Long userId,
             @Param("statuses") List<BookingStatus> statuses

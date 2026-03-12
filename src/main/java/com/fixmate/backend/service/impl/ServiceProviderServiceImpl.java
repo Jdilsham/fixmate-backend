@@ -104,6 +104,21 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         return provider;
     }
 
+    @Override
+    public Long getServiceProviderIdByUserId(Long userId) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        return provider.getServiceProviderId();
+    }
+
 
     @Override
     public ProviderProfileDTO getProfile(Long userId) {
