@@ -5,11 +5,13 @@ pipeline{
 		timestamps()
 		disableConcurrentBuilds()
 		buildDiscarder(logRotator(numToKeepStr: '20'))
+		skipDefaultCheckout(true)
 	}
 
 	parameters {
         string(
             name: 'IMAGE_TAG',
+            defaultValue: 'latest',
             description: 'Docker image tag to deploy (from GitHub Actions)'
         )
     }
