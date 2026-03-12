@@ -119,3 +119,18 @@ spec:
             failureThreshold: 6
 
 
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
+          args:
+            - "--private-ip"
+            - "--port=5432"
+            - "fixmate:asia-south1:fixmate-postgres"
+          securityContext:
+            runAsNonRoot: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
