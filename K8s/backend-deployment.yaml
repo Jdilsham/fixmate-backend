@@ -26,10 +26,10 @@ spec:
 
           resources:
             requests:
-              cpu: "200m"
+              cpu: "100m"
               memory: "256Mi"
             limits:
-              cpu: "400m"
+              cpu: "200m"
               memory: "512Mi"
 
           env:
@@ -145,11 +145,18 @@ spec:
             failureThreshold: 6
 
         - name: cloud-sql-proxy
-          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.21.1
           args:
             - "--private-ip"
             - "--port=5432"
             - "fixmate:asia-south1:fixmate-postgres"
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/key.json
+          volumeMounts:
+            - name: gcp-storage-key
+              mountPath: /var/secrets/google
+              readOnly: true
           securityContext:
             runAsNonRoot: true
           resources:
