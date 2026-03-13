@@ -1,12 +1,7 @@
 package com.fixmate.backend.service.impl;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
 
+import java.util.List;
 import com.fixmate.backend.dto.request.AddProviderServiceRequest;
 import com.fixmate.backend.dto.response.ProviderServiceCardResponse;
 import com.fixmate.backend.dto.response.PublicServiceCardResponse;
@@ -17,6 +12,7 @@ import com.fixmate.backend.repository.DistrictRepository;
 import com.fixmate.backend.repository.ProviderServiceRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.ServiceRepository;
+import com.fixmate.backend.service.FileStorageService;
 import com.fixmate.backend.service.ProviderServiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -38,6 +34,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
     private final ProviderServiceRepository providerServiceRepository;
     private final ProviderMapper providerMapper;
     private final DistrictRepository districtRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public void addServiceToProvider(
@@ -86,7 +83,7 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
 
 
         // save PDF
-        String pdfPath = saveQualificationPdf(qualificationPdf);
+        String pdfPath = fileStorageService.upload(qualificationPdf, "provider-services");
 
         ProviderService providerService = new ProviderService();
         providerService.setServiceProvider(provider);
@@ -102,30 +99,6 @@ public class ProviderServiceServiceImpl implements ProviderServiceService {
         providerServiceRepository.save(providerService);
     }
 
-    private String saveQualificationPdf(MultipartFile file) {
-
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Qualification PDF is required");
-        }
-
-        if (!"application/pdf".equals(file.getContentType())) {
-            throw new IllegalArgumentException("Only PDF files are allowed");
-        }
-
-        try {
-            String uploadDir = "uploads/provider-services/";
-            Files.createDirectories(Paths.get(uploadDir));
-
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, fileName);
-
-            Files.copy(file.getInputStream(), filePath);
-
-            return filePath.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store qualification PDF", e);
-        }
-    }
 
     @Override
     @Transactional(readOnly = true)

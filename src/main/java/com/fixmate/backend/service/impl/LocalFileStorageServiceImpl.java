@@ -13,9 +13,9 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
     private final GcsStorageService gcsStorageService;
 
     @Override
-    public String upload(MultipartFile file) {
+    public String upload(MultipartFile file, String folder) {
         try {
-            return gcsStorageService.uploadFile(file, "pdfs");
+            return gcsStorageService.uploadFile(file, folder);
         } catch (Exception e) {
             throw new RuntimeException("File upload failed", e);
         }

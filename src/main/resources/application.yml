@@ -5,7 +5,7 @@ spring:
     password: fixmate
   cloud:
     gcp:
-      project-id: ${GCP_PROJECT_ID}
+      project-id: ${GCP_PROJECT_ID:fixmate-490017}
 
   jpa:
     hibernate:
@@ -90,4 +90,4 @@ logging:
 
 gcp:
   bucket:
-    name: ${GCP_BUCKET_NAME}
+    name: ${GCP_BUCKET_NAME:fixmate-files-490017}

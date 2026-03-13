@@ -6,6 +6,7 @@ import com.fixmate.backend.exception.InvalidPasswordException;
 import com.fixmate.backend.exception.ResourceNotFoundException;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.repository.UserRepository;
+import com.fixmate.backend.service.FileStorageService;
 import com.fixmate.backend.service.UserService;
 import com.fixmate.backend.util.FileStorageUtil;
 import lombok.RequiredArgsConstructor;
@@ -34,19 +35,16 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final FileStorageUtil fileStorageUtil;
+    private final FileStorageService fileStorageService;
     private final PasswordEncoder passwordEncoder;
-    //upload profile pic
+
     @Override
     public String uploadProfileImage(Long userId, MultipartFile file) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String imageUrl = fileStorageUtil.storeProfileImage(
-                file,
-                user.getId()
-        );
+        String imageUrl = fileStorageService.upload(file, "profile-pics");
 
         user.setProfilePic(imageUrl);
         userRepository.save(user);
@@ -77,7 +75,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    // ================= HELPERS ======================
 
     //ensure user exists
     private User getUserByEmail(String email) {
