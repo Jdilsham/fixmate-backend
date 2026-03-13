@@ -105,6 +105,27 @@ spec:
                   name: backend-config
                   key: SERVER_PORT
 
+            # GCS configuration
+            - name: GCP_PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: GCP_PROJECT_ID
+
+            - name: GCP_BUCKET_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: GCP_BUCKET_NAME
+
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/key.json
+
+          volumeMounts:
+            - name: gcp-storage-key
+              mountPath: /var/secrets/google
+              readOnly: true
+
           readinessProbe:
             httpGet:
               path: /healthz/ready
@@ -123,7 +144,6 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 6
 
-
         - name: cloud-sql-proxy
           image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
           args:
@@ -139,3 +159,8 @@ spec:
             limits:
               cpu: "200m"
               memory: "256Mi"
+
+      volumes:
+        - name: gcp-storage-key
+          secret:
+            secretName: gcp-storage-key
