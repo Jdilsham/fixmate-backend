@@ -3,6 +3,10 @@ spring:
     activate:
       on-profile: k8s
 
+  cloud:
+    gcp:
+      project-id: ${GCP_PROJECT_ID}
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -54,3 +58,6 @@ management:
           server:
             requests: true
 
+gcp:
+  bucket:
+  name: ${GCP_BUCKET_NAME}
