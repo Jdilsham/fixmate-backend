@@ -149,7 +149,7 @@ spec:
           args:
             - "--private-ip"
             - "--port=5432"
-            - "fixmate:asia-south1:fixmate-postgres"
+            - "fixmate-490017:asia-south1:fixmate-postgres"
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /var/secrets/google/key.json
