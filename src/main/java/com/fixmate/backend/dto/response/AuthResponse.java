@@ -9,7 +9,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AuthResponse {
     private String token;
+    private String role;
     private String tokenType = "Bearer";
 
-    public AuthResponse(String token) { this.token = token; }
+    public AuthResponse(String token, String role) {
+        this.token = token;
+        this.role = role;
+    }
 }

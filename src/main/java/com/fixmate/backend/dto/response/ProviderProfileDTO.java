@@ -13,12 +13,18 @@ public class ProviderProfileDTO {
     private String fullName;
     private String description;
     private String skill;
+    private String experience;
     private BigDecimal rating;
     private Boolean isVerified;
+    private String verificationStatus;
     private Boolean isAvailable;
     private String profileImage;
     private String city;
+    private String phone;
+    private String idFrontUrl;
+    private String idBackUrl;
+    private String workPdfUrl;
 
-    private List<ServiceResponseDTO> services;
+    private List<ProviderServiceCardResponse> services;
     private Boolean isOwner;
 }

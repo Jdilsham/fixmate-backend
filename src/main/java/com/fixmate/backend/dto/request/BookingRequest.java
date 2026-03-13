@@ -1,5 +1,6 @@
 package com.fixmate.backend.dto.request;
 
+import com.fixmate.backend.enums.PricingType;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -11,23 +12,23 @@ import java.time.LocalDateTime;
 @Data
 public class BookingRequest {
     @NotNull
-    private Long serviceId;
-
-    @NotNull
-    private Long providerId;
-
+    private Long providerServiceId;
     @NotNull
     @Future(message = "Booking time must be in the future")
     private Instant scheduledAt;
 
     private String description;
 
+    @NotNull
+    private PricingType pricingType;
+
     //optional snapshot fallback enabled
-    private String address;
+    private String addressLine1;
+    private String addressLine2;
+    private String province;
+
     private String city;
     private String phone;
     private BigDecimal latitude;
     private BigDecimal longitude;
-
-
 }

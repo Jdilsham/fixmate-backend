@@ -2,107 +2,216 @@ package com.fixmate.backend.service;
 
 import com.fixmate.backend.config.JwtUtil;
 import com.fixmate.backend.dto.request.LoginRequest;
+import com.fixmate.backend.dto.request.ResetPasswordRequest;
 import com.fixmate.backend.dto.request.SignupRequest;
-import com.fixmate.backend.enums.Role;
+import com.fixmate.backend.dto.response.AuthResponse;
 import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.entity.User;
+import com.fixmate.backend.enums.Role;
 import com.fixmate.backend.repository.ServiceProviderRepository;
 import com.fixmate.backend.repository.UserRepository;
+import com.fixmate.backend.service.impl.EmailService;
+import com.fixmate.backend.service.impl.OtpService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 
-
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-    private final UserRepository repo;
-    private final PasswordEncoder encoder;
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final AuthenticationManager authManager;
+    private final AuthenticationManager authenticationManager;
     private final ServiceProviderRepository serviceProviderRepository;
     private final GoogleAuthService googleAuthService;
+    private final EmailService emailService;
+    private final OtpService otpService;
 
-    public AuthService(
-            UserRepository repo,
-            PasswordEncoder encoder,
-            JwtUtil jwt,
-            AuthenticationManager am,
-            ServiceProviderRepository serviceProviderRepository,
-            GoogleAuthService googleAuthService
-    ) {
-        this.repo = repo;
-        this.encoder = encoder;
-        this.jwtUtil = jwt;
-        this.authManager = am;
-        this.serviceProviderRepository = serviceProviderRepository;
-        this.googleAuthService = googleAuthService;
-    }
+    public void signup(SignupRequest request) {
 
-
-    public void signup(SignupRequest r){
-
-        if (repo.existsByEmail(r.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Email already exists"
+            );
         }
 
         User user = new User(
-                r.getFirstName(),
-                r.getLastName(),
-                r.getEmail(),
-                r.getPhone(),
-                encoder.encode(r.getPassword()),
-                r.getRole()
+                request.getFirstName(),
+                request.getLastName(),
+                request.getEmail(),
+                request.getPhone(),
+                passwordEncoder.encode(request.getPassword()),
+                request.getRole()
         );
 
-        // 1️⃣ Save user FIRST
-        User savedUser = repo.save(user);
 
-        // 2️⃣ If SERVICE_PROVIDER → create service_provider row
+        user.setVerified(false);
+
+        String otp = otpService.generateOtp(user);
+        User savedUser = userRepository.save(user);
+
+        // Create service provider profile if needed
         if (savedUser.getRole() == Role.SERVICE_PROVIDER) {
 
-            ServiceProvider sp = new ServiceProvider();
-            sp.setUser(savedUser);
-            sp.setIsVerified(false);   // must be approved by admin
-            sp.setIsAvailable(false);  // cannot work yet
+            ServiceProvider provider = new ServiceProvider();
+            provider.setUser(savedUser);
+            provider.setIsVerified(false);     // must be approved by admin
+            provider.setIsAvailable(false);   // cannot work yet
 
-            serviceProviderRepository.save(sp);
+            serviceProviderRepository.save(provider);
         }
+
+        emailService.sendVerificationCode(
+                savedUser.getEmail(),
+                otp
+        );
+    }
+
+    //==========================Forgot Password================================
+    public void forgotPassword(String email){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if(!user.isVerified()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not verified");
+        }
+        otpService.validateResendAllowed(user);
+
+        String otp =  otpService.generateOtp(user);
+        userRepository.save(user);
+
+        emailService.sendPasswordResetOtp(user.getEmail(), user.getFirstName(), otp);
+
+    }
+
+    //=========================== Reset Password ===============================
+    public void resetPassword(ResetPasswordRequest request){
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        //validate otp
+        otpService.validateOtp(user, request.getOtp());
+
+        // encrypt new password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        //Clear otp after successful validation
+        otpService.clearOtp(user);
+
+        userRepository.save(user);
+
+
     }
 
 
-    public String login(LoginRequest r){
+    public AuthResponse login(LoginRequest request) {
 
-        repo.findByEmail(r.getEmail()).ifPresent(user -> {
-            if (user.isBanned()) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Your account has been banned.");
-            }
-        });
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(user -> {
+                    if (user.isBanned()) {
+                        throw new ResponseStatusException(
+                                HttpStatus.FORBIDDEN,
+                                "Your account has been banned."
+                        );
+                    }
+                });
 
-
-        authManager.authenticate(
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        r.getEmail(),
-                        r.getPassword()
+                        request.getEmail(),
+                        request.getPassword()
                 )
         );
 
-        User user = repo.findByEmail(r.getEmail())
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found")
-                );
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "User not found"
+                ));
 
-        return jwtUtil.generateToken(
+        if (!user.isVerified()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Please verify your email"
+            );
+        }
+
+        String token = jwtUtil.generateToken(
                 user.getEmail(),
                 user.getRole().name()
         );
 
+        return new AuthResponse(
+                token,
+                user.getRole().name()
+        );
     }
 
+
+    // ================= VERIFY USER =================
+    public void verifyUser(String email, String code) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        if (user.isVerified()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "User already verified"
+            );
+        }
+
+        otpService.validateOtp(user, code);
+
+        user.setVerified(true);
+        otpService.clearOtp(user);
+        userRepository.save(user);
+
+        emailService.sendWelcomeEmail(
+                user.getEmail(),
+                user.getFirstName()
+        );
+    }
+
+    // ================= RESEND OTP =================
+    public void resendOtp(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        if (user.isVerified()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "User already verified"
+            );
+        }
+
+        otpService.validateResendAllowed(user);
+
+        String otp = otpService.generateOtp(user);
+        userRepository.save(user);
+
+        emailService.sendVerificationCode(user.getEmail(), otp);
+    }
+
+
+    //  GOOGLE LOGIN
     public String googleLogin(String idToken) {
 
         var payload = googleAuthService.verifyToken(idToken);
@@ -111,16 +220,22 @@ public class AuthService {
         String firstName = (String) payload.get("given_name");
         String lastName = (String) payload.get("family_name");
 
-        User user = repo.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    User u = new User();
-                    u.setEmail(email);
-                    u.setFirstName(firstName);
-                    u.setLastName(lastName);
-                    u.setPassword("GOOGLE_AUTH");
-                    u.setRole(Role.CUSTOMER);   // ✅ FIXED
-                    u.setBanned(false);
-                    return repo.save(u);
+                    User newUser = new User();
+                    newUser.setEmail(email);
+                    newUser.setFirstName(firstName);
+                    newUser.setLastName(lastName);
+                    newUser.setPassword("GOOGLE_AUTH");
+                    newUser.setRole(Role.CUSTOMER);
+                    newUser.setBanned(false);
+
+
+                    User saved =  userRepository.save(newUser);
+
+                    emailService.sendWelcomeEmail(saved.getEmail(), saved.getFirstName());
+
+                    return saved;
                 });
 
         if (user.isBanned()) {
@@ -135,6 +250,5 @@ public class AuthService {
                 user.getRole().name()
         );
     }
-
 
 }

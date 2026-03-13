@@ -1,24 +1,24 @@
 package com.fixmate.backend.service.impl;
 
+import com.fixmate.backend.dto.request.AddressRequest;
 import com.fixmate.backend.dto.request.ProfileUpdateReq;
-import com.fixmate.backend.dto.response.ProviderBookingResponse;
-import com.fixmate.backend.dto.response.EarningSummaryDTO;
-import com.fixmate.backend.dto.response.ProviderProfileDTO;
-import com.fixmate.backend.entity.Booking;
-import com.fixmate.backend.entity.Payment;
-import com.fixmate.backend.entity.ServiceProvider;
-import com.fixmate.backend.entity.Services;
-import com.fixmate.backend.exception.ResourceNotFoundException;
+import com.fixmate.backend.dto.request.ProviderProfessionalInfoRequest;
+import com.fixmate.backend.dto.response.*;
+import com.fixmate.backend.entity.*;
+import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.mapper.ProviderMapper;
+import com.fixmate.backend.repository.AddressRepository;
 import com.fixmate.backend.repository.BookingRepository;
+import com.fixmate.backend.repository.ProviderServiceRepository;
 import com.fixmate.backend.repository.ServiceProviderRepository;
-import com.fixmate.backend.repository.ServiceRepository;
+import com.fixmate.backend.service.FileStorageService;
 import com.fixmate.backend.service.ServiceProviderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.ZoneId;
 
@@ -34,7 +34,26 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final BookingRepository bookingRepository;
     private final ProviderMapper providerMapper;
-    private final ServiceRepository serviceRepository;
+    private final FileStorageService fileStorageService;
+    private final AddressRepository addressRepository;
+    private final ProviderServiceRepository providerServiceRepository;
+
+
+    private boolean isActivationComplete(ServiceProvider provider) {
+
+        boolean hasAddress = addressRepository
+                .existsByUserId(provider.getUser().getId());
+
+        return provider.getIdFrontUrl() != null
+                && provider.getIdBackUrl() != null
+                && provider.getWorkPdfUrl() != null
+                && provider.getSkill() != null && !provider.getSkill().isBlank()
+                && provider.getExperience() != null && !provider.getExperience().isBlank()
+                && provider.getDescription() != null && !provider.getDescription().isBlank()
+                && hasAddress;
+    }
+
+
 
     @Override
     public void requestVerification(Long userId) {
@@ -48,15 +67,19 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         )
                 );
 
+        if (!isActivationComplete(provider)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Please complete all required details before requesting verification"
+            );
+        }
 
+        // move to admin review
+        provider.setVerificationStatus(VerificationStatus.PENDING);
         provider.setIsVerified(false);
-
-
-        System.out.println(
-                "Verification requested for provider ID: " +
-                        provider.getServiceProviderId()
-        );
+        provider.setIsAvailable(false);
     }
+
 
 
     @Override
@@ -79,6 +102,21 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         }
 
         return provider;
+    }
+
+    @Override
+    public Long getServiceProviderIdByUserId(Long userId) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        return provider.getServiceProviderId();
     }
 
 
@@ -125,19 +163,245 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         )
                 );
 
-        provider.setSkill(req.getSkill());
-        provider.setExperience(req.getExperience());
-        provider.setProfileImage(req.getProfileImageUrl());
+        User user = provider.getUser();
 
-        provider.setDescription(req.getDescription());
-        provider.setCity(req.getCity());
-        provider.setRating(req.getRating());
-       // provider.setIsVerified(false);
+        user.setFirstName(req.getFirstName());
+        user.setLastName(req.getLastName());
+        user.setPhone(req.getPhone());
+    }
+
+    @Override
+    public void updateProfilePicture(Long userId, MultipartFile profilePic) {
+
+        if (profilePic == null || profilePic.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Profile picture is required"
+            );
+        }
+
+        if (profilePic.getContentType() == null ||
+                !profilePic.getContentType().startsWith("image/")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only image files are allowed"
+            );
+        }
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        User user = provider.getUser();
+
+        String imageUrl = fileStorageService.upload(profilePic, "profile-pics");
+
+        user.setProfilePic(imageUrl);
+    }
+
+
+    @Override
+    @Transactional
+    public AddressResponse addProviderAddress(Long userId, AddressRequest request) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        if (addressRepository.findByUserId(userId).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Address already exists. Use update."
+            );
+        }
+
+        Address address = new Address();
+        address.setUser(provider.getUser());
+        address.setAddressLine1(request.getAddressLine1());
+        address.setAddressLine2(request.getAddressLine2());
+        address.setProvince(request.getProvince());
+        address.setCity(request.getCity());
+        address.setLatitude(request.getLatitude());
+        address.setLongitude(request.getLongitude());
+
+        Address saved = addressRepository.save(address);
+
+        return mapToResponse(saved);
+    }
+
+    @Transactional
+    public AddressResponse updateProviderAddress(Long userId, AddressRequest request) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        Address address = addressRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Address not found. Create it first."
+                        )
+                );
+
+        address.setAddressLine1(request.getAddressLine1());
+        address.setAddressLine2(request.getAddressLine2());
+        address.setProvince(request.getProvince());
+        address.setCity(request.getCity());
+        address.setLatitude(request.getLatitude());
+        address.setLongitude(request.getLongitude());
+
+        Address saved = addressRepository.save(address);
+
+        return mapToResponse(saved);
+    }
+
+    private AddressResponse mapToResponse(Address address) {
+        return AddressResponse.builder()
+                .id(address.getAddressId())
+                .addressLine1(address.getAddressLine1())
+                .addressLine2(address.getAddressLine2())
+                .province(address.getProvince())
+                .city(address.getCity())
+                .latitude(address.getLatitude())
+                .longitude(address.getLongitude())
+                .build();
+    }
+
+
+    public AddressResponse getProviderAddress(Long userId) {
+
+        return addressRepository.findByUserId(userId)
+                .map(this::mapToResponse)
+                .orElse(null); // important: no address yet
+    }
+
+    @Override
+    public void uploadVerificationPdf(Long userId, MultipartFile pdf) {
+
+        if (pdf == null || pdf.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Verification PDF is required"
+            );
+        }
+
+        if (!"application/pdf".equalsIgnoreCase(pdf.getContentType())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only PDF files are allowed"
+            );
+        }
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Service provider profile not found"
+                ));
+
+        String pdfUrl = fileStorageService.upload(pdf, "pdfs");
+        provider.setWorkPdfUrl(pdfUrl);
 
 
 
+        //re-verification if already approved
+        if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
+            provider.setVerificationStatus(VerificationStatus.PENDING);
+            provider.setIsVerified(false);
+            provider.setIsAvailable(false);
+        }
+    }
+
+
+    @Override
+    public void uploadIdFront(Long userId, MultipartFile file) {
+
+        validateIdFile(file);
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Service provider profile not found"
+                ));
+
+        String url = fileStorageService.upload(file, "verification-files");
+        provider.setIdFrontUrl(url);
+
+
+
+        //re-verification logic
+        if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
+            provider.setVerificationStatus(VerificationStatus.PENDING);
+            provider.setIsVerified(false);
+            provider.setIsAvailable(false);
+        }
+    }
+
+    @Override
+    public void uploadIdBack(Long userId, MultipartFile file) {
+
+        validateIdFile(file);
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Service provider profile not found"
+                ));
+
+        String url = fileStorageService.upload(file, "verification-files");
+        provider.setIdBackUrl(url);
+
+
+
+        //re-verification logic
+        if (provider.getVerificationStatus() == VerificationStatus.APPROVED) {
+            provider.setVerificationStatus(VerificationStatus.PENDING);
+            provider.setIsVerified(false);
+            provider.setIsAvailable(false);
+        }
 
     }
+
+    @Override
+    public void updateProfessionalInfo(
+            Long userId,
+            ProviderProfessionalInfoRequest request
+    ) {
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        provider.setSkill(request.getSkill());
+        provider.setExperience(request.getExperience());
+        provider.setDescription(request.getDescription());
+
+        // IMPORTANT: do NOT change verification status here
+    }
+
+
 
     @Override
     public List<ProviderBookingResponse> getBookings(Long userId) {
@@ -146,7 +410,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         ServiceProvider provider = getVerifiedProviderByUserId(userId);
 
         return bookingRepository
-                .findByServiceProvider_ServiceProviderId(
+                .findByProviderService_ServiceProvider_ServiceProviderId(
                         provider.getServiceProviderId()
                 )
                 .stream()
@@ -199,30 +463,6 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         provider.setDescription(description);
     }
 
-    @Override
-    public void addServiceToProvider(Long userId, Long serviceId) {
-
-        // Resolve provider from logged-in user
-        ServiceProvider provider = serviceProviderRepository
-                .findByUserId(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Service provider not found"));
-
-        //  Fetch the SERVICE using ServiceRepository (IMPORTANT FIX)
-        Services service = serviceRepository
-                .findById(serviceId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Service not found"));
-
-        // Prevent duplicate service linking (best practice)
-        if (provider.getServices().contains(service)) {
-            return;
-        }
-
-        //  Add service to provider
-        provider.getServices().add(service);
-    }
-
 
     private ProviderBookingResponse mapToBookingDetail(Booking booking) {
 
@@ -231,7 +471,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         dto.setBookingId(booking.getBookingId());
         dto.setCustomerName(booking.getUser().getFirstName());
         dto.setCustomerPhone(booking.getUser().getPhone());
-        dto.setServiceTitle(booking.getService().getTitle());
+        dto.setServiceTitle(booking.getProviderService().getService().getTitle());
         dto.setDescription(booking.getDescription());
         dto.setScheduledAt(
                 booking.getScheduledAt()
@@ -252,7 +492,6 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         ? payment.getPaymentMethod().name()
                         : "N/A"
         );
-
 //        dto.setAddress(
 //                booking.getAddresses().stream()
 //                        .findFirst()
@@ -262,4 +501,28 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
 
         return dto;
     }
+
+    private void validateIdFile(MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "ID file is required"
+            );
+        }
+
+        if (file.getContentType() == null ||
+                !(file.getContentType().startsWith("image/")
+                        || file.getContentType().equals("application/pdf"))) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only image or PDF files are allowed"
+            );
+        }
+    }
+
+
 }
+
+
+

@@ -1,5 +1,6 @@
 package com.fixmate.backend.entity;
 
+import com.fixmate.backend.enums.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,13 +30,14 @@ public class ServiceProvider {
     private String licenseNumber;
 
     @Column(name = "is_available")
-    private Boolean isAvailable = true;
+    private Boolean isAvailable = false;
 
     @Column(name = "is_verified")
     private Boolean isVerified = false;
 
-    @Column(name = "profile_image")
-    private String profileImage;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status")
+    private VerificationStatus verificationStatus = VerificationStatus.NOT_SUBMITTED;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -49,23 +51,36 @@ public class ServiceProvider {
     @Column(name = "longitude", precision = 10, scale = 7)
     private BigDecimal longitude;
 
-
+    @Column(name = "work_pdf_url")
+    private String workPdfUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProviderService> providerServices = new HashSet<>();
+
+    @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Booking> bookings = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "service_provider_service",
-            joinColumns = @JoinColumn(name = "service_provider_id"),
-            inverseJoinColumns = @JoinColumn(name = "service_id")
-    )
-    private Set<Services> services = new HashSet<>();
 
     @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Review> reviews = new HashSet<>();
+
+    @Column(name = "id_front_url")
+    private String idFrontUrl;
+
+    @Column(name = "id_back_url")
+    private String idBackUrl;
+
+
+    public boolean isProfileComplete(){
+        return idFrontUrl != null && idBackUrl != null && workPdfUrl != null && skill != null && !skill.isBlank() && description !=null && !description.isBlank() && experience != null && !experience.isBlank();
+    }
+
+    @Column(name = "rejection_reason" , columnDefinition = "TEXT")
+    private String rejectionReason;
+
+
 }

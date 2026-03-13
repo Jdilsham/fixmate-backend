@@ -1,24 +1,19 @@
 package com.fixmate.backend.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-
-import java.math.BigDecimal;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class ProfileUpdateReq {
 
     @NotBlank
-    private String skill;
+    private String firstName;
 
     @NotBlank
-    private String experience;
+    private String lastName;
 
-    private String profileImageUrl;
-
-    private String address;
-    private String city;
-    private String description;
-    private BigDecimal rating;
+    private String phone;
 
 }

@@ -2,6 +2,7 @@ package com.fixmate.backend.repository;
 
 import com.fixmate.backend.dto.response.AdminPendingProvider;
 import com.fixmate.backend.entity.ServiceProvider;
+import com.fixmate.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
@@ -11,7 +12,7 @@ import java.util.List;
 public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, Long> {
     List<ServiceProvider> findByIsVerifiedFalse();
 
-    Optional<ServiceProvider> findByUserId(Long userId);
+    Optional<ServiceProvider> findByUserId(User userId);
 
     Optional<ServiceProvider> findByUserEmail(String email);
 
@@ -20,26 +21,28 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     Optional<ServiceProvider> findByServiceProviderIdAndIsVerifiedTrue(Long id);
 
     @Query("""
-        SELECT new com.fixmate.backend.dto.response.AdminPendingProvider(
-            sp.serviceProviderId,
-            u.firstName,
-            u.lastName,
-            u.email,
-            u.phone,
-            sp.skill,
-            sp.experience,
-            sp.licenseNumber,
-            sp.profileImage,
-            sp.isVerified,
-            u.createdAt
-        )
-        FROM ServiceProvider sp
-        JOIN sp.user u
-        WHERE sp.isVerified = false
-    """)
+    SELECT new com.fixmate.backend.dto.response.AdminPendingProvider(
+        sp.serviceProviderId,
+        u.firstName,
+        u.lastName,
+        u.email,
+        u.phone,
+        sp.skill,
+        sp.experience,
+        sp.licenseNumber,
+        u.profilePic,
+        sp.workPdfUrl,
+        sp.verificationStatus,
+        u.createdAt
+    )
+    FROM ServiceProvider sp
+    JOIN sp.user u
+    WHERE sp.verificationStatus = com.fixmate.backend.enums.VerificationStatus.PENDING
+""")
     List<AdminPendingProvider> findPendingProvidersForAdmin();
 
     List<ServiceProvider> findByIsVerifiedTrueAndIsAvailableTrue();
 
+    Optional<ServiceProvider> findByUserId(Long userId);
 
 }

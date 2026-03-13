@@ -1,0 +1,167 @@
+package com.fixmate.backend.service.impl;
+
+
+import java.util.List;
+import com.fixmate.backend.dto.request.AddProviderServiceRequest;
+import com.fixmate.backend.dto.response.ProviderServiceCardResponse;
+import com.fixmate.backend.dto.response.PublicServiceCardResponse;
+import com.fixmate.backend.entity.*;
+import com.fixmate.backend.exception.ResourceNotFoundException;
+import com.fixmate.backend.mapper.ProviderMapper;
+import com.fixmate.backend.repository.DistrictRepository;
+import com.fixmate.backend.repository.ProviderServiceRepository;
+import com.fixmate.backend.repository.ServiceProviderRepository;
+import com.fixmate.backend.repository.ServiceRepository;
+import com.fixmate.backend.service.FileStorageService;
+import com.fixmate.backend.service.ProviderServiceService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import com.fixmate.backend.enums.VerificationStatus;
+import com.fixmate.backend.exception.BadRequestException;
+
+
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ProviderServiceServiceImpl implements ProviderServiceService {
+
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final ServiceRepository serviceRepository;
+    private final ProviderServiceRepository providerServiceRepository;
+    private final ProviderMapper providerMapper;
+    private final DistrictRepository districtRepository;
+    private final FileStorageService fileStorageService;
+
+    @Override
+    public void addServiceToProvider(
+            Long userId,
+            AddProviderServiceRequest dto,
+            MultipartFile qualificationPdf
+    ) {
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Service provider not found")
+                );
+
+        if (!Boolean.TRUE.equals(provider.getIsVerified())) {
+            throw new BadRequestException(
+                    "Provider account is not approved yet"
+            );
+        }
+
+        Services service = serviceRepository
+                .findById(dto.getServiceId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Service not found")
+                );
+
+        boolean exists = providerServiceRepository
+                .existsByServiceProvider_ServiceProviderIdAndService_ServiceId(
+                        provider.getServiceProviderId(),
+                        service.getServiceId()
+                );
+
+        if (exists) {
+            throw new BadRequestException("Service already exists");
+        }
+
+        // pricing validation
+        if (dto.getHourlyRate() == null && !dto.getFixedPriceAvailable()) {
+            throw new BadRequestException(
+                    "Either hourly rate or fixed price availability must be provided"
+            );
+        }
+
+        District district = districtRepository.findById(dto.getDistrictId())
+                .orElseThrow(() -> new ResourceNotFoundException("District not found"));
+
+
+
+        // save PDF
+        String pdfPath = fileStorageService.upload(qualificationPdf, "provider-services");
+
+        ProviderService providerService = new ProviderService();
+        providerService.setServiceProvider(provider);
+        providerService.setService(service);
+        providerService.setDescription(dto.getDescription());
+        providerService.setIsFixedPrice(dto.getFixedPriceAvailable());
+        providerService.setHourlyRate(dto.getHourlyRate());
+        providerService.setQualificationDoc(pdfPath);
+        providerService.setVerificationStatus(VerificationStatus.PENDING);
+        providerService.setIsActive(true);
+        providerService.setDistrict(district);
+
+        providerServiceRepository.save(providerService);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PublicServiceCardResponse> getApprovedServices() {
+
+        return providerServiceRepository
+                .findPublicApprovedServices(VerificationStatus.APPROVED);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProviderServiceCardResponse> getProviderServices(Long userId) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Provider not found")
+                );
+
+        List<ProviderService> services =
+                providerServiceRepository
+                        .findByServiceProvider_ServiceProviderId(
+                                provider.getServiceProviderId()
+                        );
+
+        return services.stream()
+                .map(providerMapper::toProviderServiceDTO)
+                .toList();
+    }
+
+    @Override
+    @jakarta.transaction.Transactional
+    public void toggleActive(Long providerServiceId, Long userId) {
+
+        ProviderService providerService = providerServiceRepository
+                .findById(providerServiceId)
+                .orElseThrow(() -> new RuntimeException("Service not found"));
+
+        Long ownerUserId =
+                providerService.getServiceProvider().getUser().getId();
+
+        if (!ownerUserId.equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to modify this service");
+        }
+
+        providerService.setIsActive(!providerService.getIsActive());
+    }
+
+    @Override
+    public void deleteProviderService(Long providerServiceId, Long userId) {
+
+        ProviderService providerService = providerServiceRepository
+                .findById(providerServiceId)
+                .orElseThrow(() -> new RuntimeException("Service not found"));
+
+        Long ownerUserId = providerService.getServiceProvider().getUser().getId();
+
+        if (!ownerUserId.equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to delete this service");
+        }
+
+        providerServiceRepository.delete(providerService);
+    }
+
+}
+

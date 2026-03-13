@@ -1,15 +1,28 @@
 package com.fixmate.backend.controller;
 
-import com.fixmate.backend.dto.request.ProfileUpdateReq;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fixmate.backend.dto.request.*;
 import com.fixmate.backend.dto.response.*;
 import com.fixmate.backend.entity.User;
-import com.fixmate.backend.service.CustomUserDetailsService;
+import com.fixmate.backend.mapper.BookingMapper;
+import com.fixmate.backend.repository.DistrictRepository;
+import com.fixmate.backend.repository.ServiceRepository;
 import com.fixmate.backend.service.ProviderBookingService;
+import com.fixmate.backend.service.ProviderServiceService;
 import com.fixmate.backend.service.ServiceProviderService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import com.fixmate.backend.dto.response.ProviderDashboardSummaryDTO;
+import com.fixmate.backend.service.ProviderDashboardService;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +34,20 @@ public class ProviderController {
 
     private final ServiceProviderService providerService;
     private final ProviderBookingService bookingService;
+    private final ProviderServiceService providerServiceService;
+    private final BookingMapper bookingMapper;
+    private final ServiceRepository serviceRepository;
+    private final ProviderBookingService providerBookingService;
+    private final ProviderDashboardService providerDashboardService;
+    private final DistrictRepository districtRepository;
+
+    private Long getUserId(Authentication authentication) {
+        return ((User) authentication.getPrincipal()).getId();
+    }
+
+    private Long getServiceProviderId(Authentication authentication) {
+        return providerService.getServiceProviderIdByUserId(getUserId(authentication));
+    }
 
     @GetMapping("/profile")
     public ProviderProfileDTO profile(Authentication auth) {
@@ -42,14 +69,112 @@ public class ProviderController {
         return providerService.getProfileById(id, currentUserId);
     }
 
+    @GetMapping("/dashboard/summary")
+    @PreAuthorize("hasRole('SERVICE_PROVIDER')")
+    public ProviderDashboardSummaryDTO dashboardSummary(Authentication auth) {
+        return providerDashboardService.getSummary(getUserId(auth));
+    }
 
     @PutMapping("/profile")
     public void updateProfile(
             Authentication auth,
-            @RequestBody ProfileUpdateReq req
+            @Valid @RequestBody ProfileUpdateReq req
     ) {
         providerService.updateProfile(getUserId(auth), req);
     }
+
+    /**
+     * @deprecated Use POST /api/user/profile/image instead.
+     * Profile images are now handled at User level.
+     */
+    @Deprecated
+    @PutMapping(
+            value = "/profile/picture",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public void updateProfilePicture(
+            Authentication auth,
+            @RequestParam(value = "profilePic", required = false) MultipartFile profilePic
+    ) {
+        if (profilePic == null || profilePic.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Profile picture file is required"
+            );
+        }
+
+        providerService.updateProfilePicture(getUserId(auth), profilePic);
+    }
+
+    @GetMapping("/address")
+    public AddressResponse getProviderAddress(Authentication auth) {
+        return providerService.getProviderAddress(getUserId(auth));
+    }
+
+    @PostMapping("/address")
+    public AddressResponse createAddress(
+            Authentication auth,
+            @RequestBody AddressRequest request
+    ) {
+        Long userId = getUserId(auth);
+        return providerService.addProviderAddress(userId, request);
+    }
+
+    @PutMapping("/address")
+    public AddressResponse updateAddress(
+            Authentication auth,
+            @RequestBody AddressRequest request
+    ) {
+        Long userId = getUserId(auth);
+        return providerService.updateProviderAddress(userId, request);
+    }
+
+    @PutMapping(value = "/verification/pdf",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    ) public void uploadVerificationPdf(
+
+            Authentication auth,
+            @RequestParam("pdf") MultipartFile pdf
+    ) {
+
+        providerService.uploadVerificationPdf(getUserId(auth), pdf);
+
+    }
+
+    @PutMapping(
+            value = "/verification/id-front",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<Void> uploadIdFront(
+            Authentication auth,
+            @RequestParam("file") MultipartFile file
+    ) {
+        providerService.uploadIdFront(getUserId(auth), file);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(
+            value = "/verification/id-back",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<Void> uploadIdBack(
+            Authentication auth,
+            @RequestParam("file") MultipartFile file
+    ) {
+        providerService.uploadIdBack(getUserId(auth), file);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/professional-info")
+    public ResponseEntity<Void> updateProfessionalInfo(
+            Authentication auth,
+            @Valid @RequestBody ProviderProfessionalInfoRequest request
+    ) {
+        providerService.updateProfessionalInfo(getUserId(auth), request);
+        return ResponseEntity.ok().build();
+    }
+
+
 
     @PatchMapping("/availability")
     public Map<String, Boolean> toggleAvailability(Authentication authentication) {
@@ -66,19 +191,89 @@ public class ProviderController {
         providerService.requestVerification(getUserId(auth));
     }
 
-    @GetMapping("/bookings")
-    public List<ProviderBookingResponse> bookings(Authentication auth) {
-        return providerService.getBookings(getUserId(auth));
+
+    @GetMapping("/{serviceProviderId}/bookings")
+    public ResponseEntity<List<ProviderBookingResponse>> getProviderBookings(
+            @PathVariable Long serviceProviderId
+    ) {
+        return ResponseEntity.ok(
+                providerBookingService.getProviderBookingResponses(serviceProviderId)
+        );
     }
 
-    @PostMapping("/bookings/{id}/confirm")
-    public void confirmBooking(@PathVariable("id") Long bookingId, Authentication auth) {
-        bookingService.confirmBookings(getUserId(auth), bookingId);
+
+    @PostMapping("/bookings/{bookingId}/confirm")
+    public ResponseEntity<Void> confirmBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            Authentication auth
+    ) {
+        bookingService.confirmBooking(
+                bookingId,
+                getServiceProviderId(auth),
+                providerServiceId
+        );
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/bookings/{id}/cancel")
-    public void cancelBooking(@PathVariable("id") Long bookingId, @RequestParam String reason, Authentication auth) {
-        bookingService.cancelBookings(getUserId(auth), bookingId, reason);
+
+    @PostMapping("/bookings/{bookingId}/reject")
+    @PreAuthorize("hasRole('SERVICE_PROVIDER')")
+    public ResponseEntity<?> rejectBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            @RequestBody Map<String, String> body,
+            Authentication auth
+    ) {
+        providerBookingService.rejectBooking(
+                bookingId,
+                getUserId(auth),
+                providerServiceId,
+                body.get("reason")
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+    @PostMapping("/bookings/{bookingId}/start")
+    public ResponseEntity<Void> startJob(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            Authentication auth
+    ) {
+        providerBookingService.startJob(
+                bookingId,
+                getServiceProviderId(auth),
+                providerServiceId
+        );
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/bookings/{bookingId}/finalize")
+    public ResponseEntity<Void> finalizeBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long providerServiceId,
+            @RequestBody FinalizeBookingRequest request,
+            Authentication auth
+    ) {
+        providerBookingService.finalizeBooking(
+                bookingId,
+                getServiceProviderId(auth),
+                providerServiceId,
+                request
+        );
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/districts")
+    public List<DistrictResponse> getAllDistricts() {
+        return districtRepository.findAll()
+                .stream()
+                .map(d -> new DistrictResponse(d.getId(), d.getName()))
+                .toList();
     }
 
     @GetMapping("/earnings")
@@ -86,21 +281,80 @@ public class ProviderController {
         return providerService.getEarnings(getUserId(auth));
     }
 
-    @PostMapping("/services/{serviceId}")
-    public void addServiceToProfile(
-            @PathVariable Long serviceId,
+    @PostMapping(value = "/services", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> addServiceToProvider(
+            @RequestPart("data") String data,
+            @RequestPart("qualificationPdf") MultipartFile qualificationPdf,
             Authentication authentication
-    ) {
+    ) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        AddProviderServiceRequest dto =
+                objectMapper.readValue(data, AddProviderServiceRequest.class);
+
         User user = (User) authentication.getPrincipal();
 
-        providerService.addServiceToProvider(
+        providerServiceService.addServiceToProvider(
                 user.getId(),
-                serviceId
+                dto,
+                qualificationPdf
         );
 
+        return ResponseEntity.ok("Service added successfully");
     }
 
-    private Long getUserId(Authentication auth) {
-        return ((User) auth.getPrincipal()).getId();
+    @GetMapping("/services")
+    public ResponseEntity<List<ProviderServiceCardResponse>> getProviderServices(
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
+
+        System.out.println("JWT USER ID = " + user.getId());
+
+        return ResponseEntity.ok(
+                providerServiceService.getProviderServices(user.getId())
+        );
+    }
+
+    @GetMapping("/services/categories")
+    public List<ServiceCategoryResponse> getAllServiceCategories() {
+        return serviceRepository.findAll()
+                .stream()
+                .map(service -> new ServiceCategoryResponse(
+                        service.getServiceId(),
+                        service.getTitle()
+                ))
+                .toList();
+    }
+
+    @PatchMapping("/service/{providerServiceId}/active")
+    public ResponseEntity<Void> toggleServiceActive(
+            @PathVariable Long providerServiceId,
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
+
+        providerServiceService.toggleActive(
+                providerServiceId,
+                user.getId()
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/service/{providerServiceId}")
+    public ResponseEntity<Void> deleteProviderService(
+            @PathVariable Long providerServiceId,
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
+
+        providerServiceService.deleteProviderService(
+                providerServiceId,
+                user.getId()
+        );
+
+        return ResponseEntity.ok().build();
     }
 }

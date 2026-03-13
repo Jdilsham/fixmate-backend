@@ -4,6 +4,7 @@ import com.fixmate.backend.repository.UserRepository;
 import com.fixmate.backend.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -47,30 +48,50 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))   // ✅ ADD THIS LINE
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
 
-                        // ✅ Public endpoints
+
                         .requestMatchers("/healthz/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/auth/google").permitAll()
+                        .requestMatchers("/files/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/payments/webhook/**").permitAll()
+
 
                         .requestMatchers(
                                 org.springframework.http.HttpMethod.GET,
                                 "/api/v1/service-providers/**"
                         ).permitAll()
 
-                        // 🔴 ADMIN only
+                        // ADMIN only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // 🟢 CUSTOMER only
-                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                        // Allow booking creation for customer + provider
+                        .requestMatchers(HttpMethod.POST, "/api/customer/bookings")
+                        .hasAnyRole("CUSTOMER", "SERVICE_PROVIDER")
 
-                        // 🔵 SERVICE PROVIDER only
+
+                        // CUSTOMER only
+                        .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER","ADMIN")
+
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/wanted").authenticated()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted").hasRole("CUSTOMER")
+
+
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/provider/**").hasAnyRole("SERVICE_PROVIDER", "CUSTOMER")
+
+                        // SERVICE PROVIDER only
                         .requestMatchers("/api/provider/**").hasRole("SERVICE_PROVIDER")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted/*/apply").hasRole("SERVICE_PROVIDER")
 
-                        // 🔐 Any other request needs login
+                        // USER (customer + provider)
+                        .requestMatchers("/api/user/**")
+                        .hasAnyRole("CUSTOMER", "SERVICE_PROVIDER","ADMIN")
+
+                        // Any other request needs login
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

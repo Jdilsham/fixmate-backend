@@ -1,6 +1,7 @@
 package com.fixmate.backend.entity;
 
 import com.fixmate.backend.enums.BookingStatus;
+import com.fixmate.backend.enums.PricingType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +33,9 @@ public class Booking {
     @Column(name = "scheduled_at")
     private Instant scheduledAt;
 
+    @Column(name = "started_at")
+    private Instant startedAt;
+
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
@@ -39,9 +44,6 @@ public class Booking {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "cancel_reason", length = 255)
-    private String cancelReason;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -55,8 +57,8 @@ public class Booking {
     private ServiceProvider serviceProvider;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_id")
-    private Services service;
+    @JoinColumn(name = "provider_service_id", nullable = false)
+    private ProviderService providerService;
 
     @OneToOne(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Review review;
@@ -65,6 +67,15 @@ public class Booking {
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private BookingContactInfo contactInfo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pricing_type", nullable = false)
+    private PricingType pricingType;
+
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
+    @Column(name = "rejected_at")
+    private LocalDateTime rejectedAt;
 
 
    /* @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,19 +1,21 @@
 package com.fixmate.backend.controller;
 
-import com.fixmate.backend.dto.request.BookingRequest;
-import com.fixmate.backend.dto.request.ChangePasswordRequest;
 import com.fixmate.backend.dto.request.CustomerUpdateReq;
 import com.fixmate.backend.dto.response.CustomerBookingResponse;
 import com.fixmate.backend.dto.response.CustomerProfileResponse;
-import com.fixmate.backend.entity.User;
+import com.fixmate.backend.entity.Booking;
+import com.fixmate.backend.service.CustomerBookingService;
 import com.fixmate.backend.service.CustomerService;
+import com.fixmate.backend.service.ProviderBookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.fixmate.backend.dto.response.CustomerDashboardSummaryDTO;
+import com.fixmate.backend.service.CustomerDashboardService;
 
+import java.util.List;
 
 
 @RestController
@@ -21,6 +23,10 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;
+    private final ProviderBookingService providerBookingService;
+    private final CustomerBookingService customerBookingService;
+    private final CustomerDashboardService customerDashboardService;
+
 
     @GetMapping("/me")
     public ResponseEntity<CustomerProfileResponse> getProfile(Authentication auth) {
@@ -36,13 +42,43 @@ public class CustomerController {
 
     }
 
-    @PutMapping("/change-password")
-    public ResponseEntity<String> changePassword(
-            Authentication authentication,
-            @Valid @RequestBody ChangePasswordRequest request
-    ){
-        User user = (User) authentication.getPrincipal();
-        customerService.changePassword(user.getId(), request);
-        return ResponseEntity.ok("Password changed successfully");
+    @GetMapping("/bookings")
+    public ResponseEntity<List<CustomerBookingResponse>> getMyBookings(
+            Authentication auth
+    ) {
+        String email = auth.getName();
+
+        List<Booking> bookings =
+                customerBookingService.getMyBookingsByEmail(email);
+
+        List<CustomerBookingResponse> response =
+                bookings.stream()
+                        .map(CustomerBookingResponse::from)
+                        .toList();
+
+        return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/dashboard/summary")
+    public ResponseEntity<CustomerDashboardSummaryDTO> getCustomerDashboardSummary(
+            Authentication auth
+    ) {
+        return ResponseEntity.ok(
+                customerDashboardService.getSummary(auth.getName())
+        );
+    }
+
+    @PostMapping("/bookings/{bookingId}/mark-paid")
+    public ResponseEntity<Void> markBookingPaid(
+            @PathVariable Long bookingId,
+            Authentication auth
+    ) {
+        providerBookingService.markAsPaid(
+                bookingId,
+                auth.getName()
+        );
+        return ResponseEntity.ok().build();
+    }
+
+
 }
