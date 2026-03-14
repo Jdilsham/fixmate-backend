@@ -87,7 +87,12 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
                 bookingRepository.findPotentialOverlaps(
                         provider.getServiceProviderId(),
                         startBoundary,
-                        endTime
+                        endTime,
+                        List.of(
+                                BookingStatus.PENDING,
+                                BookingStatus.ACCEPTED,
+                                BookingStatus.IN_PROGRESS
+                        )
                 );
 
         if (!conflicts.isEmpty()) {
@@ -459,11 +464,17 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         Instant endTime = scheduledAt.plusSeconds(BOOKING_DURATION_SECONDS);
         Instant startBoundary = startTime.minusSeconds(BOOKING_DURATION_SECONDS);
 
-        List<Booking> conflicts = bookingRepository.findPotentialOverlaps(
-                provider.getServiceProviderId(),
-                startBoundary,
-                endTime
-        );
+        List<Booking> conflicts =
+                bookingRepository.findPotentialOverlaps(
+                        provider.getServiceProviderId(),
+                        startBoundary,
+                        endTime,
+                        List.of(
+                                BookingStatus.PENDING,
+                                BookingStatus.ACCEPTED,
+                                BookingStatus.IN_PROGRESS
+                        )
+                );
 
         return !conflicts.isEmpty();
     }

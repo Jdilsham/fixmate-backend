@@ -43,21 +43,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     @Query("""
-        SELECT b
-        FROM Booking b
-        WHERE b.providerService.serviceProvider.serviceProviderId = :providerId
-          AND b.status IN (
-            com.fixmate.backend.enums.BookingStatus.PENDING,
-            com.fixmate.backend.enums.BookingStatus.ACCEPTED,
-            com.fixmate.backend.enums.BookingStatus.IN_PROGRESS
-          )
-          AND b.scheduledAt < :endTime
-          AND b.scheduledAt > :startBoundary
-    """)
+    SELECT b
+    FROM Booking b
+    WHERE b.providerService.serviceProvider.serviceProviderId = :providerId
+      AND b.status IN :statuses
+      AND b.scheduledAt < :endTime
+      AND b.scheduledAt > :startBoundary
+""")
     List<Booking> findPotentialOverlaps(
             @Param("providerId") Long providerId,
             @Param("startBoundary") Instant startBoundary,
-            @Param("endTime") Instant endTime
+            @Param("endTime") Instant endTime,
+            @Param("statuses") List<BookingStatus> statuses
     );
 
     @Query("""
