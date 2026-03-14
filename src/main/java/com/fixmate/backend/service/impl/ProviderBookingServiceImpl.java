@@ -29,6 +29,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
     private final BookingRepository bookingRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     @Override
     public List<Booking> getProviderBookings(Long serviceProviderId){
@@ -46,9 +47,18 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Only pending bookings can be confirmed."
             );
+
         }
 
         booking.setStatus(BookingStatus.ACCEPTED);
+
+        // Email notification
+        emailService.sendBookingAcceptedEmail(
+                booking.getUser().getEmail(),
+                booking.getUser().getFirstName(),
+                booking.getProviderService().getService().getTitle(),
+                booking.getBookingId().toString()
+        );
 
         notificationService.notifyCustomer(
                 booking.getUser(),
@@ -88,6 +98,14 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         notificationService.notifyCustomer(
                 booking.getUser(),
                 "Your booking has been rejected. Reason: " + reason
+        );
+
+        // Email notification
+        emailService.sendBookingRejectedEmail(
+                booking.getUser().getEmail(),
+                booking.getUser().getFirstName(),
+                booking.getProviderService().getService().getTitle(),
+                reason
         );
     }
 
@@ -210,6 +228,14 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
         // Complete booking
         booking.setStatus(BookingStatus.COMPLETED);
+
+        // Email notification
+        emailService.sendServiceCompletedEmail(
+                booking.getUser().getEmail(),
+                booking.getUser().getFirstName(),
+                booking.getProviderService().getService().getTitle(),
+                booking.getBookingId().toString()
+        );
     }
 
     @Override
