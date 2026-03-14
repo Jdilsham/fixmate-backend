@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: fixmate-backend
-          image: janithad/fixmate-backend
+          image: asia-south1-docker.pkg.dev/fixmate-490017/fixmate-repo/fixmate-backend:latest
           ports:
             - containerPort: 8081
 
@@ -125,6 +125,15 @@ spec:
             - name: gcp-storage-key
               mountPath: /var/secrets/google
               readOnly: true
+
+          startupProbe:
+            httpGet:
+              path: /healthz/ready
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 24
 
           readinessProbe:
             httpGet:
