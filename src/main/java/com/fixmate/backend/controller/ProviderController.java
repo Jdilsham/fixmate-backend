@@ -227,16 +227,13 @@ public class ProviderController {
     ) {
         providerBookingService.rejectBooking(
                 bookingId,
-                getUserId(auth),
+                getServiceProviderId(auth),
                 providerServiceId,
                 body.get("reason")
         );
 
         return ResponseEntity.ok().build();
     }
-
-
-
 
     @PostMapping("/bookings/{bookingId}/start")
     public ResponseEntity<Void> startJob(
