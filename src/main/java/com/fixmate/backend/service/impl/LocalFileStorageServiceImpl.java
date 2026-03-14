@@ -17,7 +17,8 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
         try {
             return gcsStorageService.uploadFile(file, folder);
         } catch (Exception e) {
-            throw new RuntimeException("File upload failed", e);
+            e.printStackTrace();
+            throw new RuntimeException("File upload failed: " + e.getMessage(), e);
         }
     }
 }
