@@ -105,8 +105,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-                "http://34.8.161.27", // FRONTEND IP
-                "http://localhost:5173" )); // local dev
+                "https://fixmate.works", // FRONTEND IP
+                "http://localhost:5173",
+                "https://www.fixmate.works")); // local dev
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

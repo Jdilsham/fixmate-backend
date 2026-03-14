@@ -5,9 +5,12 @@ metadata:
   namespace: fixmate
   annotations:
     kubernetes.io/ingress.class: "gce"
+    networking.gke.io/managed-certificates: "fixmate-cert"
+#    networking.gke.io/v1beta1.FrontendConfig: "fixmate-frontend-config"
 spec:
   rules:
-    - http:
+    - host: fixmate.works
+      http:
         paths:
           - path: /api
             pathType: Prefix
