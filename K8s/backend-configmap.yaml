@@ -4,7 +4,7 @@ metadata:
   name: backend-config
   namespace: fixmate
 data:
-  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres.fixmate.svc.cluster.local:5432/fixmatedb" this for k8s
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres.fixmate.svc.cluster.local:5432/fixmatedb"
 #  SPRING_DATASOURCE_URL: "jdbc:postgresql://127.0.0.1:5432/fixmate?sslmode=disable" #CloudSQL
   SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
   SPRING_JPA_HIBERNATE_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
