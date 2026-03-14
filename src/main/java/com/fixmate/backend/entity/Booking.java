@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -40,6 +42,8 @@ public class Booking {
     private Instant createdAt = Instant.now();
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "status", columnDefinition = "booking_status_enum")
     private BookingStatus status;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -68,7 +72,8 @@ public class Booking {
     private BookingContactInfo contactInfo;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "pricing_type", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "pricing_type", columnDefinition = "pricing_type_enum", nullable = false)
     private PricingType pricingType;
 
     @Column(name = "rejection_reason", length = 500)

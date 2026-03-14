@@ -16,7 +16,7 @@ data:
 
   SERVER_PORT: "8081"
 
-  GCP_BUCKET_NAME: "fixmate-files-bucket"
+  GCP_BUCKET_NAME: "fixmate-files-490017"
   GCP_PROJECT_ID: "fixmate-490017"
 
 
