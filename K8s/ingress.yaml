@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fixmate-ingress
+  namespace: fixmate
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    networking.gke.io/managed-certificates: "fixmate-cert"
+#    networking.gke.io/v1beta1.FrontendConfig: "fixmate-frontend-config"
+spec:
+  rules:
+    - host: fixmate.works
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: fixmate-backend
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fixmate-frontend-service
+                port:
+                  number: 80
