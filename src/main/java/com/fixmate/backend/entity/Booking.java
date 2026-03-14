@@ -7,14 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+
 
 @Entity
 @Table(name = "booking")
@@ -42,8 +39,6 @@ public class Booking {
     private Instant createdAt = Instant.now();
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "status", columnDefinition = "booking_status_enum")
     private BookingStatus status;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -72,8 +67,7 @@ public class Booking {
     private BookingContactInfo contactInfo;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "pricing_type", columnDefinition = "pricing_type_enum", nullable = false)
+    @Column(name = "pricing_type", nullable = false)
     private PricingType pricingType;
 
     @Column(name = "rejection_reason", length = 500)
@@ -81,10 +75,5 @@ public class Booking {
 
     @Column(name = "rejected_at")
     private LocalDateTime rejectedAt;
-
-
-   /* @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Address> addresses =  new HashSet<>();
-*/
 
 }
