@@ -59,6 +59,11 @@ public class SecurityConfig {
                         .requestMatchers("/files/**").permitAll()
                         .requestMatchers("/api/payments/webhook/**").permitAll()
 
+                        // Public: browse services & providers (no login needed)
+                        .requestMatchers(HttpMethod.GET, "/api/user/services").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/user/service/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/provider/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/rating/**").permitAll()
 
                         .requestMatchers(
                                 org.springframework.http.HttpMethod.GET,
@@ -68,21 +73,16 @@ public class SecurityConfig {
                         // ADMIN only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Allow booking creation for customer + provider
-                        .requestMatchers(HttpMethod.POST, "/api/customer/bookings")
-                        .hasAnyRole("CUSTOMER", "SERVICE_PROVIDER")
-
-
-                        // CUSTOMER only
-                        .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER","ADMIN")
+                        // CUSTOMER only (Providers can also be customers and use customer features)
+                        .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER", "SERVICE_PROVIDER", "ADMIN")
 
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/wanted").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted").hasRole("CUSTOMER")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted").hasAnyRole("CUSTOMER", "SERVICE_PROVIDER")
 
+                        // Provider GET endpoints (browsing profiles, bookings) — allow all authenticated roles
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/provider/**").hasAnyRole("SERVICE_PROVIDER", "CUSTOMER", "ADMIN")
 
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/provider/**").hasAnyRole("SERVICE_PROVIDER", "CUSTOMER")
-
-                        // SERVICE PROVIDER only
+                        // Provider action endpoints (booking management, profile updates, etc.)
                         .requestMatchers("/api/provider/**").hasRole("SERVICE_PROVIDER")
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/wanted/*/apply").hasRole("SERVICE_PROVIDER")
 
@@ -105,7 +105,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://34.47.217.188", // FRONTEND IP
-                "http://localhost:5173" )); // local dev
+                "http://localhost:5173", // local dev (web frontend)
+                "http://localhost:8082" )); // local dev (mobile expo web)
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

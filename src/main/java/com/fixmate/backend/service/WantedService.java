@@ -76,6 +76,8 @@ public class WantedService {
                             .currentJoined((long) post.getApplications().size())
                             .status(post.getStatus())
                             .applied(applied)
+                            .customerName(post.getUser() != null ? post.getUser().getFirstName() + " " + post.getUser().getLastName() : "Unknown")
+                            .createdAt(post.getCreatedAt())
                             .build();
                 })
                 .toList();
@@ -107,6 +109,8 @@ public class WantedService {
                 .location(post.getLocation())
                 .currentJoined((long) post.getApplications().size())
                 .status(post.getStatus())
+                .customerName(post.getUser() != null ? post.getUser().getFirstName() + " " + post.getUser().getLastName() : "Unknown")
+                .createdAt(post.getCreatedAt())
                 .build();
     }
 }

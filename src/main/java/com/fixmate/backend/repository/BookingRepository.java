@@ -68,9 +68,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         AND b.scheduledAt < :dayEnd
     """)
         List<Instant> findBookedSlotsForDay(
-                Long providerServiceId,
-                Instant dayStart,
-                Instant dayEnd
+                @Param("providerServiceId") Long providerServiceId,
+                @Param("dayStart") Instant dayStart,
+                @Param("dayEnd") Instant dayEnd
         );
 
     @Query("""

@@ -12,4 +12,6 @@ public class WantedPostResponse {
     private Long currentJoined;
     private String status;
     private boolean applied;
+    private String customerName;
+    private java.time.Instant createdAt;
 }
