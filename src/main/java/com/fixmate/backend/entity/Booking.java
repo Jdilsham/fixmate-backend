@@ -7,12 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "booking")
@@ -40,8 +39,6 @@ public class Booking {
     private Instant createdAt = Instant.now();
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "status", columnDefinition = "booking_status_enum")
     private BookingStatus status;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -51,7 +48,7 @@ public class Booking {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,15 +59,15 @@ public class Booking {
     @JoinColumn(name = "provider_service_id", nullable = false)
     private ProviderService providerService;
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
     private Review review;
 
+    // SNAPSHOT RELATION
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private BookingContactInfo contactInfo;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "pricing_type", nullable = false, columnDefinition = "pricing_type_enum")
+    @Column(name = "pricing_type", nullable = false)
     private PricingType pricingType;
 
     @Column(name = "rejection_reason", length = 500)
@@ -78,4 +75,5 @@ public class Booking {
 
     @Column(name = "rejected_at")
     private LocalDateTime rejectedAt;
+
 }
