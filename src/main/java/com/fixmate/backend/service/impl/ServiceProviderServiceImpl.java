@@ -104,6 +104,21 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         return provider;
     }
 
+    @Override
+    public Long getServiceProviderIdByUserId(Long userId) {
+
+        ServiceProvider provider = serviceProviderRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Service provider profile not found"
+                        )
+                );
+
+        return provider.getServiceProviderId();
+    }
+
 
     @Override
     public ProviderProfileDTO getProfile(Long userId) {
@@ -184,7 +199,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
 
         User user = provider.getUser();
 
-        String imageUrl = fileStorageService.upload(profilePic);
+        String imageUrl = fileStorageService.upload(profilePic, "profile-pics");
 
         user.setProfilePic(imageUrl);
     }
@@ -300,7 +315,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         "Service provider profile not found"
                 ));
 
-        String pdfUrl = fileStorageService.upload(pdf);
+        String pdfUrl = fileStorageService.upload(pdf, "pdfs");
         provider.setWorkPdfUrl(pdfUrl);
 
 
@@ -326,7 +341,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         "Service provider profile not found"
                 ));
 
-        String url = fileStorageService.upload(file);
+        String url = fileStorageService.upload(file, "verification-files");
         provider.setIdFrontUrl(url);
 
 
@@ -351,7 +366,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
                         "Service provider profile not found"
                 ));
 
-        String url = fileStorageService.upload(file);
+        String url = fileStorageService.upload(file, "verification-files");
         provider.setIdBackUrl(url);
 
 

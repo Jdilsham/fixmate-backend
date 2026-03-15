@@ -140,4 +140,27 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
 """)
     List<ProviderService> findSmartBookingCandidates(@Param("serviceId") Long serviceId);
 
+    @Query("""
+    SELECT ps.id
+    FROM ProviderService ps
+    WHERE ps.serviceProvider.serviceProviderId = :providerId
+      AND EXISTS (
+          SELECT 1
+          FROM Booking b
+          WHERE b.providerService.id = ps.id
+      )
+""")
+    List<Long> findBookedProviderServiceIds(@Param("providerId") Long providerId);
+
+    @Query("""
+    SELECT ps FROM ProviderService ps
+    JOIN FETCH ps.serviceProvider sp
+    JOIN FETCH sp.user u
+    JOIN FETCH ps.service s
+    JOIN FETCH s.category c
+    LEFT JOIN FETCH ps.district d
+    WHERE ps.id = :id
+""")
+    Optional<ProviderService> findByIdWithAdminDetails(@Param("id") Long id);
+
 }

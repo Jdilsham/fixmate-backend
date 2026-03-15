@@ -27,6 +27,9 @@ import com.fixmate.backend.service.ProviderDashboardService;
 import java.util.List;
 import java.util.Map;
 
+import com.fixmate.backend.service.ProviderDashboardPdfService;
+import org.springframework.http.HttpHeaders;
+
 @RestController
 @RequestMapping("/api/provider")
 @RequiredArgsConstructor
@@ -35,16 +38,20 @@ public class ProviderController {
     private final ServiceProviderService providerService;
     private final ProviderBookingService bookingService;
     private final ProviderServiceService providerServiceService;
-    private final BookingMapper bookingMapper;
     private final ServiceRepository serviceRepository;
     private final ProviderBookingService providerBookingService;
     private final ProviderDashboardService providerDashboardService;
     private final DistrictRepository districtRepository;
+    private final ProviderDashboardPdfService providerDashboardPdfService;
+
 
     private Long getUserId(Authentication authentication) {
         return ((User) authentication.getPrincipal()).getId();
     }
 
+    private Long getServiceProviderId(Authentication authentication) {
+        return providerService.getServiceProviderIdByUserId(getUserId(authentication));
+    }
 
     @GetMapping("/profile")
     public ProviderProfileDTO profile(Authentication auth) {
@@ -207,7 +214,7 @@ public class ProviderController {
     ) {
         bookingService.confirmBooking(
                 bookingId,
-                getUserId(auth),
+                getServiceProviderId(auth),
                 providerServiceId
         );
         return ResponseEntity.ok().build();
@@ -224,16 +231,13 @@ public class ProviderController {
     ) {
         providerBookingService.rejectBooking(
                 bookingId,
-                getUserId(auth),
+                getServiceProviderId(auth),
                 providerServiceId,
                 body.get("reason")
         );
 
         return ResponseEntity.ok().build();
     }
-
-
-
 
     @PostMapping("/bookings/{bookingId}/start")
     public ResponseEntity<Void> startJob(
@@ -243,7 +247,7 @@ public class ProviderController {
     ) {
         providerBookingService.startJob(
                 bookingId,
-                getUserId(auth),
+                getServiceProviderId(auth),
                 providerServiceId
         );
         return ResponseEntity.ok().build();
@@ -258,7 +262,7 @@ public class ProviderController {
     ) {
         providerBookingService.finalizeBooking(
                 bookingId,
-                getUserId(auth),
+                getServiceProviderId(auth),
                 providerServiceId,
                 request
         );
@@ -340,5 +344,37 @@ public class ProviderController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/service/{providerServiceId}")
+    public ResponseEntity<Void> deleteProviderService(
+            @PathVariable Long providerServiceId,
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
 
+        providerServiceService.deleteProviderService(
+                providerServiceId,
+                user.getId()
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/dashboard/export")
+    @PreAuthorize("hasRole('SERVICE_PROVIDER')")
+    public ResponseEntity<byte[]> exportDashboardPdf(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+
+        byte[] pdf = providerDashboardPdfService.generateProviderDashboardPdf(user.getId());
+
+        String filename = "provider-dashboard-report.pdf";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header(HttpHeaders.EXPIRES, "0")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdf.length)
+                .body(pdf);
+    }
 }

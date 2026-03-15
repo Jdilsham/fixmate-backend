@@ -32,6 +32,7 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final ProviderServiceRepository providerServiceRepository;
+    private final EmailService emailService;
 
 
 
@@ -169,6 +170,34 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         booking.setContactInfo(contactInfo);
 
         Booking saved = bookingRepository.save(booking);
+
+        // Send booking confirmation email
+        emailService.sendBookingConfirmationEmail(
+                customer.getEmail(),
+                customer.getFirstName(),
+                providerService.getService().getTitle(),
+                saved.getBookingId().toString(),
+                saved.getScheduledAt()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(),
+                provider.getUser().getFirstName() + " " + provider.getUser().getLastName(),
+                provider.getUser().getPhone(),
+                fullAddress.toString()
+        );
+
+        /* Provider notification email */
+        emailService.sendProviderNewBookingEmail(
+                provider.getUser().getEmail(),
+                provider.getUser().getFirstName(),
+                customer.getFirstName() + " " + customer.getLastName(),
+                providerService.getService().getTitle(),
+                saved.getBookingId().toString(),
+                saved.getScheduledAt()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(),
+                fullAddress.toString(),
+                phone
+        );
 
         return CustomerBookingResponse.builder()
                 .bookingId(saved.getBookingId())
@@ -389,6 +418,35 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         booking.setContactInfo(contactInfo);
 
         Booking saved = bookingRepository.save(booking);
+
+        // Send smart booking confirmation email
+        emailService.sendBookingConfirmationEmail(
+                customer.getEmail(),
+                customer.getFirstName(),
+                bestProviderService.getService().getTitle(),
+                saved.getBookingId().toString(),
+                saved.getScheduledAt()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(),
+                provider.getUser().getFirstName() + " " + provider.getUser().getLastName(),
+                provider.getUser().getPhone(),
+                fullAddress
+        );
+
+        /* Provider notification */
+        emailService.sendProviderNewBookingEmail(
+                provider.getUser().getEmail(),
+                provider.getUser().getFirstName(),
+                customer.getFirstName() + " " + customer.getLastName(),
+                bestProviderService.getService().getTitle(),
+                saved.getBookingId().toString(),
+                saved.getScheduledAt()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(),
+                fullAddress,
+                phone
+        );
+
 
         return CustomerBookingResponse.builder()
                 .bookingId(saved.getBookingId())

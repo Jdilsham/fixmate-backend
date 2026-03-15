@@ -5,8 +5,10 @@ metadata:
   namespace: fixmate
   labels:
     app: fixmate-backend
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: fixmate-backend
   ports:

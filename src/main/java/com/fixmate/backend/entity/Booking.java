@@ -11,8 +11,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+
 
 @Entity
 @Table(name = "booking")
@@ -76,10 +75,5 @@ public class Booking {
 
     @Column(name = "rejected_at")
     private LocalDateTime rejectedAt;
-
-
-   /* @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Address> addresses =  new HashSet<>();
-*/
 
 }

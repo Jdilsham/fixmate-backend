@@ -4,7 +4,12 @@ metadata:
   name: fixmate-backend
   namespace: fixmate
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: fixmate-backend
@@ -15,17 +20,17 @@ spec:
     spec:
       containers:
         - name: fixmate-backend
-          image: janithad/fixmate-backend
+          image: asia-south1-docker.pkg.dev/fixmate-490017/fixmate-repo/fixmate-backend:latest
           ports:
             - containerPort: 8081
 
           resources:
             requests:
-              cpu: "200m"
-              memory: "256Mi"
-            limits:
-              cpu: "400m"
+              cpu: "250m"
               memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1024Mi"
 
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -100,6 +105,36 @@ spec:
                   name: backend-config
                   key: SERVER_PORT
 
+            # GCS configuration
+            - name: GCP_PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: GCP_PROJECT_ID
+
+            - name: GCP_BUCKET_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: GCP_BUCKET_NAME
+
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/key.json
+
+          volumeMounts:
+            - name: gcp-storage-key
+              mountPath: /var/secrets/google
+              readOnly: true
+
+          startupProbe:
+            httpGet:
+              path: /healthz/ready
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 24
+
           readinessProbe:
             httpGet:
               path: /healthz/ready
@@ -118,4 +153,7 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 6
 
-
+      volumes:
+        - name: gcp-storage-key
+          secret:
+            secretName: gcp-storage-key

@@ -39,9 +39,6 @@ public class CustomerServiceImpl  implements CustomerService {
     }
 
 
-
-
-//===============================HELPERS========================================
     //Ensure user exists
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)

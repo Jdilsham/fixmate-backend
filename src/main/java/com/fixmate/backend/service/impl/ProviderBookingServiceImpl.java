@@ -29,6 +29,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
     private final BookingRepository bookingRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     @Override
     public List<Booking> getProviderBookings(Long serviceProviderId){
@@ -36,20 +37,33 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
     }
 
     @Override
-    public void confirmBooking(Long bookingId, Long serviceProviderId, Long providerServiceId){
-        Booking booking = bookingRepository.findProviderBookingById
-                        (bookingId, providerServiceId, serviceProviderId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking notFound."));
+    public void confirmBooking(Long bookingId, Long serviceProviderId, Long providerServiceId) {
+        Booking booking = bookingRepository.findProviderBookingForConfirm(bookingId, serviceProviderId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Booking not found."
+                ));
 
-        if(booking.getStatus() != BookingStatus.PENDING){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending bookings can be confirmed.");
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Only pending bookings can be confirmed."
+            );
+
         }
-
 
         booking.setStatus(BookingStatus.ACCEPTED);
 
+        // Email notification
+        emailService.sendBookingAcceptedEmail(
+                booking.getUser().getEmail(),
+                booking.getUser().getFirstName(),
+                booking.getProviderService().getService().getTitle(),
+                booking.getBookingId().toString()
+        );
 
-        notificationService.notifyCustomer(booking.getUser(), "Your booking has been CONFIRMED by the service provider.");
+        notificationService.notifyCustomer(
+                booking.getUser(),
+                "Your booking has been CONFIRMED by the service provider."
+        );
     }
 
     @Override
@@ -65,8 +79,8 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
             );
         }
 
-        Booking booking = bookingRepository.findProviderBookingById(
-                bookingId, providerServiceId, serviceProviderId
+        Booking booking = bookingRepository.findProviderBookingForConfirm(
+                bookingId, serviceProviderId
         ).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Booking not found."
         ));
@@ -84,6 +98,14 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         notificationService.notifyCustomer(
                 booking.getUser(),
                 "Your booking has been rejected. Reason: " + reason
+        );
+
+        // Email notification
+        emailService.sendBookingRejectedEmail(
+                booking.getUser().getEmail(),
+                booking.getUser().getFirstName(),
+                booking.getProviderService().getService().getTitle(),
+                reason
         );
     }
 
@@ -190,18 +212,30 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
             );
         }
 
-        // Ensure provider finalized job
+        if (booking.getStatus() != BookingStatus.IN_PROGRESS) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Job must be finalized by provider before payment"
+            );
+        }
+
         if (booking.getTotalPrice() == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Booking not finalized yet"
+                    "Provider has not finalized the amount yet"
             );
         }
 
         // Complete booking
         booking.setStatus(BookingStatus.COMPLETED);
 
-
+        // Email notification
+        emailService.sendServiceCompletedEmail(
+                booking.getUser().getEmail(),
+                booking.getUser().getFirstName(),
+                booking.getProviderService().getService().getTitle(),
+                booking.getBookingId().toString()
+        );
     }
 
     @Override

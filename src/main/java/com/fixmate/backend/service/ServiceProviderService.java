@@ -27,6 +27,8 @@ public interface ServiceProviderService {
 
     ServiceProvider getVerifiedProviderByUserId(Long userId);
 
+    Long getServiceProviderIdByUserId(Long userId);
+
     boolean toggleAvailability(String email);
 
     AddressResponse getProviderAddress(Long userId);
@@ -44,5 +46,4 @@ public interface ServiceProviderService {
     void uploadIdBack(Long userId, MultipartFile file);
 
     void updateProfessionalInfo(Long userId, ProviderProfessionalInfoRequest request);
-
 }

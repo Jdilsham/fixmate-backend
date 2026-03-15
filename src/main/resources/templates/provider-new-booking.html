@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body style="margin:0;background:#f4f6f9;font-family:Arial,sans-serif;">
+
+<table width="100%" style="padding:30px 0;">
+    <tr>
+        <td align="center">
+
+            <table width="600" style="background:white;border-radius:8px;overflow:hidden">
+
+                <tr>
+                    <td style="background:#2563eb;color:white;text-align:center;padding:25px">
+                        <h2>FixMate</h2>
+                        <p>You have a new booking request</p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:30px">
+
+                        <p>Hello <b th:text="${providerName}">Provider</b>,</p>
+
+                        <p>A customer has requested your service.</p>
+
+                        <hr>
+
+                        <p><b>Booking ID:</b> <span th:text="${bookingId}"></span></p>
+
+                        <p><b>Service:</b> <span th:text="${serviceTitle}"></span></p>
+
+                        <p><b>Customer:</b> <span th:text="${customerName}"></span></p>
+
+                        <p><b>Customer Phone:</b> <span th:text="${customerPhone}"></span></p>
+
+                        <p><b>Date & Time:</b> <span th:text="${scheduledTime}"></span></p>
+
+                        <p><b>Location:</b> <span th:text="${address}"></span></p>
+
+                        <br>
+
+                        <p>Please log in to your FixMate dashboard to accept or reject this booking.</p>
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="background:#f5f5f5;padding:20px;text-align:center;font-size:12px;color:#777">
+                        © 2026 FixMate
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
