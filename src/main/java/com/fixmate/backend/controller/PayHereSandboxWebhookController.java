@@ -24,7 +24,7 @@ public class PayHereSandboxWebhookController {
             @RequestParam("status_code") String statusCode
     ) {
 
-        System.out.println("🔥 PAYHERE WEBHOOK RECEIVED");
+        System.out.println("PAYHERE WEBHOOK RECEIVED");
         System.out.println("Order ID = " + orderId);
         System.out.println("Status Code = " + statusCode);
 
@@ -32,17 +32,21 @@ public class PayHereSandboxWebhookController {
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
         if ("2".equals(statusCode)) {
-            // ✅ SUCCESS
+            //SUCCESS
             payment.setStatus(PaymentStatus.PAID);
             payment.setPaidAt(Instant.now());
+
+            Booking booking = payment.getBooking();
+            booking.setStatus(BookingStatus.COMPLETED);
+
             paymentRepository.save(payment);
-            System.out.println("✅ Payment SUCCESS → PAID");
+            System.out.println("Payment SUCCESS → PAID, booking COMPLETED");
 
         } else {
-            // ❌ FAILED / DECLINED / CANCELLED
+            // FAILED / DECLINED / CANCELLED
             payment.setStatus(PaymentStatus.REQUESTED);
             paymentRepository.save(payment);
-            System.out.println("❌ Payment FAILED → reverted to REQUESTED");
+            System.out.println("Payment FAILED → reverted to REQUESTED");
         }
 
         return ResponseEntity.ok("OK");
