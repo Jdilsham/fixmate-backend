@@ -9,6 +9,7 @@ import com.fixmate.backend.enums.PricingType;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.service.ProviderBookingService;
 import com.fixmate.backend.service.NotificationService;
+import com.fixmate.backend.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,11 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
 
     private final BookingRepository bookingRepository;
     private final NotificationService notificationService;
+<<<<<<< Updated upstream
     private final EmailService emailService;
+=======
+    private final WebSocketService webSocketService;
+>>>>>>> Stashed changes
 
     @Override
     public List<Booking> getProviderBookings(Long serviceProviderId){
@@ -64,6 +69,8 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                 booking.getUser(),
                 "Your booking has been CONFIRMED by the service provider."
         );
+
+        webSocketService.sendRefreshSignal("booking-updates");
     }
 
     @Override
@@ -100,6 +107,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                 "Your booking has been rejected. Reason: " + reason
         );
 
+<<<<<<< Updated upstream
         // Email notification
         emailService.sendBookingRejectedEmail(
                 booking.getUser().getEmail(),
@@ -107,6 +115,9 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                 booking.getProviderService().getService().getTitle(),
                 reason
         );
+=======
+        webSocketService.sendRefreshSignal("booking-updates");
+>>>>>>> Stashed changes
     }
 
 
@@ -133,6 +144,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                 booking.getUser(),
                 "Service provider has started your job"
         );
+        webSocketService.sendRefreshSignal("booking-updates");
     }
 
     @Override
@@ -195,6 +207,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                 booking.getUser(),
                 "Job completed. Please proceed with payment."
         );
+        webSocketService.sendRefreshSignal("booking-updates");
     }
 
     @Override
@@ -229,6 +242,7 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
         // Complete booking
         booking.setStatus(BookingStatus.COMPLETED);
 
+<<<<<<< Updated upstream
         // Email notification
         emailService.sendServiceCompletedEmail(
                 booking.getUser().getEmail(),
@@ -236,6 +250,9 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
                 booking.getProviderService().getService().getTitle(),
                 booking.getBookingId().toString()
         );
+=======
+        webSocketService.sendRefreshSignal("booking-updates");
+>>>>>>> Stashed changes
     }
 
     @Override
