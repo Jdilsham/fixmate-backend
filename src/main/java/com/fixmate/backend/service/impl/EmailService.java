@@ -1,5 +1,6 @@
 package com.fixmate.backend.service.impl;
 
+import com.fixmate.backend.dto.request.ContactRequest;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
