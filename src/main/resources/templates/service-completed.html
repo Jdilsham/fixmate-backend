@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body style="margin:0;background:#f4f6f9;font-family:Arial,sans-serif;">
+
+<table width="100%" style="padding:30px 0;">
+    <tr>
+        <td align="center">
+
+            <table width="600" style="background:white;border-radius:8px;overflow:hidden">
+
+                <!-- HEADER -->
+                <tr>
+                    <td style="background:#10b981;color:white;text-align:center;padding:25px">
+                        <h2>FixMate</h2>
+                        <p>Your service has been completed</p>
+                    </td>
+                </tr>
+
+                <!-- BODY -->
+                <tr>
+                    <td style="padding:30px">
+
+                        <p>Hello <b th:text="${name}">Customer</b>,</p>
+
+                        <p>Your service has been successfully completed.</p>
+
+                        <hr>
+
+                        <p><b>Service:</b> <span th:text="${serviceTitle}"></span></p>
+
+                        <p><b>Booking ID:</b> <span th:text="${bookingId}"></span></p>
+
+                        <br>
+
+                        <p>We would love to hear about your experience.</p>
+
+                        <p>Please consider leaving a review for the provider.</p>
+
+                        <br>
+
+                        <div style="text-align:center">
+
+                            <a href="#"
+                               style="
+background:#2563eb;
+color:white;
+padding:12px 22px;
+text-decoration:none;
+border-radius:6px;
+font-weight:bold;
+">
+                                Leave a Review ⭐
+                            </a>
+
+                        </div>
+
+                    </td>
+                </tr>
+
+                <!-- FOOTER -->
+                <tr>
+                    <td style="background:#f5f5f5;padding:20px;text-align:center;font-size:12px;color:#777">
+                        © 2026 FixMate
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
