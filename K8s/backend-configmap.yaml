@@ -19,8 +19,8 @@ data:
   GCP_BUCKET_NAME: "fixmate-files-490017"
   GCP_PROJECT_ID: "fixmate-490017"
 
-  APP_FRONTEND_BASE_URL: "http://34.93.187.3"
-  APP_BACKEND_BASE_URL: "http://34.93.187.3"
+  APP_FRONTEND_BASE_URL: "https://fixmate.works"
+  APP_BACKEND_BASE_URL: "https://fixmate.works"
   PAYHERE_CHECKOUT_URL: "https://sandbox.payhere.lk/pay/checkout"
   PAYHERE_MERCHANT_ID: "1233735"
 
