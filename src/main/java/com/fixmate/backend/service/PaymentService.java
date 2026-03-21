@@ -20,8 +20,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.catalina.manager.StatusTransformer.formatSeconds;
-
 @Service
 public class PaymentService {
 
@@ -30,6 +28,15 @@ public class PaymentService {
 
     @Value("${payhere.merchant-secret}")
     private String merchantSecret;
+
+    @Value("${payhere.checkout-url}")
+    private String checkoutUrl;
+
+    @Value("${app.frontend-base-url}")
+    private String frontendBaseUrl;
+
+    @Value("${app.backend-base-url}")
+    private String backendBaseUrl;
 
 
     private final PaymentRepository paymentRepository;
@@ -305,11 +312,9 @@ public class PaymentService {
         fields.put("last_name", customerUser.getLastName());
         fields.put("email", customerUser.getEmail());
         fields.put("phone", customerUser.getPhone());
-        fields.put("return_url", "http://localhost:5173/payment-success");
-        fields.put("cancel_url", "http://localhost:5173/payment-cancel");
-        fields.put(
-                "notify_url",
-                "https://metallic-kayce-nonautonomously.ngrok-free.dev/api/payments/webhook/payhere-sandbox"
+        fields.put("return_url", frontendBaseUrl + "/payment-success");
+        fields.put("cancel_url", frontendBaseUrl + "/payment-cancel");
+        fields.put("notify_url", backendBaseUrl + "/api/payments/webhook/payhere"
         );
 
         Booking booking = payment.getBooking();
@@ -333,7 +338,7 @@ public class PaymentService {
         fields.put("hash", hash);
 
         PayHereSandboxResponse response = new PayHereSandboxResponse();
-        response.setCheckoutUrl("https://sandbox.payhere.lk/pay/checkout");
+        response.setCheckoutUrl(checkoutUrl);
         response.setFields(fields);
 
         return response;

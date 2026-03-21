@@ -118,6 +118,30 @@ spec:
                   name: backend-config
                   key: GCP_BUCKET_NAME
 
+            - name: PAYHERE_MERCHANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: PAYHERE_MERCHANT_ID
+
+            - name: APP_FRONTEND_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: APP_FRONTEND_BASE_URL
+
+            - name: APP_BACKEND_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: APP_BACKEND_BASE_URL
+
+            - name: PAYHERE_CHECKOUT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: PAYHERE_CHECKOUT_URL
+
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /var/secrets/google/key.json
 
