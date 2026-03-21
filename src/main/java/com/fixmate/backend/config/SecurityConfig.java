@@ -59,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/files/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/payments/webhook/**").permitAll()
+                        .requestMatchers("/api/v1/contact/send").permitAll()
 
 
                         .requestMatchers(

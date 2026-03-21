@@ -1,5 +1,6 @@
 package com.fixmate.backend.service.impl;
 
+import com.fixmate.backend.dto.request.ContactRequest;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -235,6 +236,31 @@ public class EmailService {
                 "service-completed",
                 ctx
         );
+    }
+
+    public void sendContactInquiryEmail(ContactRequest request) {
+
+        try {
+            Context context = new Context();
+            context.setVariable("name", request.getName());
+            context.setVariable("email", request.getEmail());
+            context.setVariable("phone", request.getPhone());
+            context.setVariable("message", request.getMessage());
+
+            String htmlContent = templateEngine.process("contact-inquiry", context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+            helper.setTo("app.fixmate@gmail.com");
+            helper.setSubject("New Contact Inquiry - FixMate");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send contact inquiry email", e);
+        }
     }
 
 }

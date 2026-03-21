@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>FixMate Contact Inquiry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            margin-bottom: 10px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        .message-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #3498db;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: gray;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2 class="header">New Contact Inquiry</h2>
+
+    <div class="info-row">
+        <span class="label">Name:</span>
+        <span th:text="${name}"></span>
+    </div>
+
+    <div class="info-row">
+        <span class="label">Email:</span>
+        <span th:text="${email}"></span>
+    </div>
+
+    <div class="info-row">
+        <span class="label">Phone:</span>
+        <span th:text="${phone}"></span>
+    </div>
+
+    <div class="message-box">
+        <div class="label">Message:</div>
+        <p th:text="${message}"></p>
+    </div>
+
+    <div class="footer">
+        This email was generated automatically from the FixMate website contact form.
+    </div>
+
+</div>
+
+</body>
+</html>
