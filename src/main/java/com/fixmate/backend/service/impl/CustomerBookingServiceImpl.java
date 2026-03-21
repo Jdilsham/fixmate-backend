@@ -7,6 +7,7 @@ import com.fixmate.backend.enums.BookingStatus;
 import com.fixmate.backend.exception.ResourceNotFoundException;
 import com.fixmate.backend.repository.*;
 import com.fixmate.backend.service.CustomerBookingService;
+import com.fixmate.backend.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,8 +33,12 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final ProviderServiceRepository providerServiceRepository;
+<<<<<<< Updated upstream
     private final EmailService emailService;
 
+=======
+    private final WebSocketService webSocketService;
+>>>>>>> Stashed changes
 
 
     @Override
@@ -170,6 +175,7 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
         booking.setContactInfo(contactInfo);
 
         Booking saved = bookingRepository.save(booking);
+        webSocketService.sendRefreshSignal("booking-updates");
 
         // Send booking confirmation email
         emailService.sendBookingConfirmationEmail(
@@ -203,6 +209,8 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
                 .bookingId(saved.getBookingId())
                 .status(saved.getStatus())
                 .build();
+
+
     }
 
 
@@ -419,6 +427,7 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
 
         Booking saved = bookingRepository.save(booking);
 
+<<<<<<< Updated upstream
         // Send smart booking confirmation email
         emailService.sendBookingConfirmationEmail(
                 customer.getEmail(),
@@ -447,6 +456,9 @@ public class CustomerBookingServiceImpl implements CustomerBookingService {
                 phone
         );
 
+=======
+        webSocketService.sendRefreshSignal("booking-updates");
+>>>>>>> Stashed changes
 
         return CustomerBookingResponse.builder()
                 .bookingId(saved.getBookingId())

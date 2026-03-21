@@ -7,6 +7,7 @@ import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.exception.ResourceNotFoundException;
 import com.fixmate.backend.repository.ProviderServiceRepository;
 import com.fixmate.backend.service.AdminProviderServiceService;
+import com.fixmate.backend.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class AdminProviderServiceServiceImpl
         implements AdminProviderServiceService {
 
     private final ProviderServiceRepository providerServiceRepository;
+    private final WebSocketService webSocketService;
 
     @Override
     public void verifyProviderService(
@@ -42,6 +44,7 @@ public class AdminProviderServiceServiceImpl
         }
 
         providerService.setVerificationStatus(status);
+        webSocketService.sendRefreshSignal("provider-updates");
     }
 
     @Override
@@ -60,7 +63,7 @@ public class AdminProviderServiceServiceImpl
                 .providerServiceId(ps.getId())
                 .providerName(
                         ps.getServiceProvider().getUser().getFirstName() + " " +
-                        ps.getServiceProvider().getUser().getLastName()
+                                ps.getServiceProvider().getUser().getLastName()
                 )
                 .providerEmail(ps.getServiceProvider().getUser().getEmail())
                 .serviceTitle(ps.getService().getTitle())
@@ -101,4 +104,5 @@ public class AdminProviderServiceServiceImpl
                 .build();
     }
 }
+
 
