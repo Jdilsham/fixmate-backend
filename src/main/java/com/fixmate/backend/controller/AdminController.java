@@ -2,7 +2,6 @@ package com.fixmate.backend.controller;
 
 import com.fixmate.backend.dto.request.ServiceCategoryRequest;
 import com.fixmate.backend.dto.response.*;
-import com.fixmate.backend.entity.ServiceProvider;
 import com.fixmate.backend.enums.VerificationStatus;
 import com.fixmate.backend.service.AdminProviderServiceService;
 import com.fixmate.backend.service.AdminService;
@@ -11,8 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import com.fixmate.backend.service.AdminDashboardPdfService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 
 @RestController
 @RequestMapping("/api/admin")
@@ -21,7 +23,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AdminProviderServiceService adminProviderServiceService;
-
+    private final AdminDashboardPdfService adminDashboardPdfService;
 
 
     @GetMapping("/stats")
@@ -69,16 +71,6 @@ public class AdminController {
         return ResponseEntity.ok("Provider service verification updated");
     }
 
-//    @PutMapping("/providers/{providerId}/reject")
-//    public ResponseEntity<Void> rejectProvider(
-//            @PathVariable Long providerId,
-//            @RequestParam(required = false) String reason
-//    ) {
-//        adminService.rejectProvider(providerId, reason);
-//        return ResponseEntity.ok().build();
-//    }
-
-
 //   admin category endpoints
     @GetMapping("/categories")
     public ResponseEntity<List<ServiceCategoryResponse>> getAllCategories(){
@@ -122,6 +114,23 @@ public class AdminController {
     ) {
         return ResponseEntity.ok(adminProviderServiceService.getProviderServiceDetails(id));
     }
+
+    @GetMapping("/dashboard/export")
+    public ResponseEntity<byte[]> exportAdminDashboardPdf() {
+        byte[] pdf = adminDashboardPdfService.generateAdminDashboardPdf();
+
+        String filename = "admin-dashboard-report.pdf";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header(HttpHeaders.EXPIRES, "0")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdf.length)
+                .body(pdf);
+    }
+
 }
 
 

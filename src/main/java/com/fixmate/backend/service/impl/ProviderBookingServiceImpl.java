@@ -79,8 +79,8 @@ public class ProviderBookingServiceImpl implements ProviderBookingService {
             );
         }
 
-        Booking booking = bookingRepository.findProviderBookingById(
-                bookingId, providerServiceId, serviceProviderId
+        Booking booking = bookingRepository.findProviderBookingForConfirm(
+                bookingId, serviceProviderId
         ).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Booking not found."
         ));

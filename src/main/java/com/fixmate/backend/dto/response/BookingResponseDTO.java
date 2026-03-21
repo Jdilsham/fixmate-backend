@@ -13,7 +13,7 @@ public class BookingResponseDTO {
     private BigDecimal totalPrice;
     private Instant createdAt;
     private String status;
-    private String cancelReason;
+    private String rejectionReason;
     private String description;
     private UserSummaryDTO user;
 }
