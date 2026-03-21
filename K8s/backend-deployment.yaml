@@ -142,6 +142,12 @@ spec:
                   name: backend-config
                   key: PAYHERE_CHECKOUT_URL
 
+            - name: PAYHERE_MERCHANT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: PAYHERE_MERCHANT_SECRET
+
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /var/secrets/google/key.json
 

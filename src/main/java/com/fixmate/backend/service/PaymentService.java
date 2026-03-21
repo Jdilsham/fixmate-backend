@@ -314,7 +314,7 @@ public class PaymentService {
         fields.put("phone", customerUser.getPhone());
         fields.put("return_url", frontendBaseUrl + "/payment-success");
         fields.put("cancel_url", frontendBaseUrl + "/payment-cancel");
-        fields.put("notify_url", backendBaseUrl + "/api/payments/webhook/payhere"
+        fields.put("notify_url", backendBaseUrl + "/api/payments/webhook/payhere-sandbox"
         );
 
         Booking booking = payment.getBooking();
