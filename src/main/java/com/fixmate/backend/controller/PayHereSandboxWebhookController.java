@@ -2,10 +2,13 @@ package com.fixmate.backend.controller;
 
 import com.fixmate.backend.entity.Booking;
 import com.fixmate.backend.entity.Payment;
+import com.fixmate.backend.entity.ServiceProvider;
+import com.fixmate.backend.entity.User;
 import com.fixmate.backend.enums.BookingStatus;
 import com.fixmate.backend.enums.PaymentStatus;
 import com.fixmate.backend.repository.BookingRepository;
 import com.fixmate.backend.repository.PaymentRepository;
+import com.fixmate.backend.service.impl.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,7 @@ public class PayHereSandboxWebhookController {
 
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
+    private final EmailService emailService;
 
     @PostMapping("/payhere-sandbox")
     @Transactional
@@ -41,6 +45,18 @@ public class PayHereSandboxWebhookController {
 
             paymentRepository.save(payment);
             bookingRepository.save(booking);
+
+            //  Send email to provider
+            ServiceProvider provider =  booking.getServiceProvider();
+            User customer = booking.getUser();
+
+            emailService.sendPaymentReceivedEmail(
+                    provider.getUser().getEmail(),
+                    provider.getUser().getFirstName(),
+                    customer.getFirstName(),
+                    payment.getAmount().doubleValue(),
+                    booking.getBookingId().toString()
+            );
 
         } else {
             payment.setStatus(PaymentStatus.REQUESTED);
