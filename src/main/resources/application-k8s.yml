@@ -3,6 +3,10 @@ spring:
     activate:
       on-profile: k8s
 
+  cloud:
+    gcp:
+      project-id: ${GCP_PROJECT_ID}
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -32,6 +36,15 @@ jwt:
   secret: ${JWT_SECRET}
   expirationMs: ${JWT_EXPIRATION_MS:86400000}
 
+app:
+  frontend-base-url: ${APP_FRONTEND_BASE_URL}
+  backend-base-url: ${APP_BACKEND_BASE_URL}
+
+payhere:
+  merchant-id: ${PAYHERE_MERCHANT_ID}
+  merchant-secret: ${PAYHERE_MERCHANT_SECRET}
+  checkout-url: ${PAYHERE_CHECKOUT_URL}
+
 management:
   endpoints:
     web:
@@ -54,3 +67,6 @@ management:
           server:
             requests: true
 
+gcp:
+  bucket:
+    name: ${GCP_BUCKET_NAME}

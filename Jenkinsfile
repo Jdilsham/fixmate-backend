@@ -45,7 +45,7 @@ pipeline{
 						echo Authenticating to Google Cloud...
                         gcloud auth activate-service-account --key-file=${GCLOUD_KEY}
                         gcloud config set project ${GCP_PROJECT}
-                        gcloud container clusters get-credentials ${GKE_CLUSTER} --zone ${GKE_ZONE} --project ${GCP_PROJECT}
+                        gcloud container clusters get-credentials ${GKE_CLUSTER} --region ${GKE_ZONE} --project ${GCP_PROJECT}
                     """
 
 				}

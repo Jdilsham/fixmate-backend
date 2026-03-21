@@ -3,7 +3,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/fixmatedb?stringtype=unspecified
     username: fixmate
     password: fixmate
-
+  cloud:
+    gcp:
+      project-id: ${GCP_PROJECT_ID:fixmate-490017}
 
   jpa:
     hibernate:
@@ -17,8 +19,6 @@ spring:
   jackson:
     serialization:
       INDENT_OUTPUT: true
-
-
 
   mail:
     host: smtp.gmail.com
@@ -67,6 +67,8 @@ google:
   client-id: 734171544044-2imsllssiq2ibnm2m055uql6n699ejks.apps.googleusercontent.com
 
 app:
+  frontend-base-url: http://localhost:5173
+  backend-base-url: http://localhost:8081
   upload:
     profile-pics-dir: uploads/profile-pics
     max-file-size: 5242880 # 5MB
@@ -85,3 +87,7 @@ logging:
     org.springframework.web: DEBUG
     com.fixmate.backend: DEBUG
 
+
+gcp:
+  bucket:
+    name: ${GCP_BUCKET_NAME:fixmate-files-490017} #

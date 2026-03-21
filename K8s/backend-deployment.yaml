@@ -20,17 +20,17 @@ spec:
     spec:
       containers:
         - name: fixmate-backend
-          image: janithad/fixmate-backend
+          image: asia-south1-docker.pkg.dev/fixmate-490017/fixmate-repo/fixmate-backend:latest
           ports:
             - containerPort: 8081
 
           resources:
             requests:
-              cpu: "200m"
-              memory: "256Mi"
-            limits:
-              cpu: "400m"
+              cpu: "250m"
               memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1024Mi"
 
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -105,6 +105,66 @@ spec:
                   name: backend-config
                   key: SERVER_PORT
 
+            # GCS configuration
+            - name: GCP_PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: GCP_PROJECT_ID
+
+            - name: GCP_BUCKET_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: GCP_BUCKET_NAME
+
+            - name: PAYHERE_MERCHANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: PAYHERE_MERCHANT_ID
+
+            - name: APP_FRONTEND_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: APP_FRONTEND_BASE_URL
+
+            - name: APP_BACKEND_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: APP_BACKEND_BASE_URL
+
+            - name: PAYHERE_CHECKOUT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: PAYHERE_CHECKOUT_URL
+
+            - name: PAYHERE_MERCHANT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: PAYHERE_MERCHANT_SECRET
+
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/key.json
+
+          volumeMounts:
+            - name: gcp-storage-key
+              mountPath: /var/secrets/google
+              readOnly: true
+
+          startupProbe:
+            httpGet:
+              path: /healthz/ready
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 24
+
           readinessProbe:
             httpGet:
               path: /healthz/ready
@@ -123,19 +183,7 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 6
 
-
-        - name: cloud-sql-proxy
-          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
-          args:
-            - "--private-ip"
-            - "--port=5432"
-            - "fixmate:asia-south1:fixmate-postgres"
-          securityContext:
-            runAsNonRoot: true
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "200m"
-              memory: "256Mi"
+      volumes:
+        - name: gcp-storage-key
+          secret:
+            secretName: gcp-storage-key
