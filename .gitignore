@@ -4,3 +4,5 @@
 
 # Uploaded user files (VERY IMPORTANT)
 uploads/
+config.bat
+node_modules
