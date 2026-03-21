@@ -20,8 +20,6 @@ spring:
     serialization:
       INDENT_OUTPUT: true
 
-
-
   mail:
     host: smtp.gmail.com
     port: 587
@@ -69,6 +67,8 @@ google:
   client-id: 734171544044-2imsllssiq2ibnm2m055uql6n699ejks.apps.googleusercontent.com
 
 app:
+  frontend-base-url: http://localhost:5173
+  backend-base-url: http://localhost:8081
   upload:
     profile-pics-dir: uploads/profile-pics
     max-file-size: 5242880 # 5MB
