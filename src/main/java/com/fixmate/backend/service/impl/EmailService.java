@@ -263,4 +263,32 @@ public class EmailService {
         }
     }
 
+    // Send email to provider when payment is received
+    public void sendPaymentReceivedEmail(
+            String providerEmail,
+            String providerName,
+            String customerName,
+            Double amount,
+            String bookingId
+    ) {
+
+        Context ctx = new Context();
+        ctx.setVariable("providerName", providerName);
+        ctx.setVariable("customerName", customerName);
+        ctx.setVariable("amount", amount);
+        ctx.setVariable("bookingId", bookingId);
+
+        ctx.setVariable(
+                "bookingLink",
+                "https://fixmate.app/provider/bookings/" + bookingId
+        );
+
+        sendHtmlEmail(
+                providerEmail,
+                "FixMate - Payment Received 💰",
+                "payment-received",
+                ctx
+        );
+    }
+
 }
