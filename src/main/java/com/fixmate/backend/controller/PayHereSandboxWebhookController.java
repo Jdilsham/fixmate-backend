@@ -35,6 +35,11 @@ public class PayHereSandboxWebhookController {
         Payment payment = paymentRepository.findByTransactionRef(orderId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
+        // Prevent duplicate processing
+        if (payment.getStatus() == PaymentStatus.CONFIRMED) {
+            return ResponseEntity.ok("Already processed");
+        }
+
         if ("2".equals(statusCode)) {
 
             payment.setStatus(PaymentStatus.CONFIRMED);
